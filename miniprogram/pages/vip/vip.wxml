@@ -1,0 +1,149 @@
+<view class="container">
+  <view class="page-title">💎 会员中心</view>
+
+  <!-- Hero Banner -->
+  <view class="vip-hero vip-hero-{{premium.tier}}">
+    <view class="vip-hero-left">
+      <view class="vip-hero-icon">{{premium.tier==='premium'?'👑':premium.tier==='pro'?'⭐':'🌱'}}</view>
+      <view class="vip-hero-name">{{premium.tier_info ? premium.tier_info.name : '免费版'}}会员</view>
+      <view class="vip-hero-sub" wx:if="{{premium.tier!=='free'}}">到期时间：{{premium.expires_at}} · 剩余{{vipDaysLeft}}天</view>
+      <view class="vip-hero-sub" wx:if="{{premium.tier==='free'}}">升级解锁全部高级功能，开启专业睡眠管理</view>
+      <view class="vip-badge-row" wx:if="{{premium.tier!=='free'}}">
+        <text class="vip-badge">{{premium.tier==='premium'?'全部功能已解锁':'专业版功能已解锁'}}</text>
+      </view>
+    </view>
+    <view class="vip-hero-right" wx:if="{{premium.tier==='free'}}">
+      <view class="vip-hero-from">起</view>
+      <view class="vip-hero-price">¥29<text class="vip-hero-unit">/月</text></view>
+      <view class="btn btn-primary btn-sm" style="margin-top:12rpx" bindtap="scrollToPlans">立即升级</view>
+    </view>
+  </view>
+
+  <!-- Billing Toggle -->
+  <view class="billing-row" id="plans">
+    <view class="billing-toggle">
+      <view class="bill-btn {{vipBilling==='monthly'?'bill-on':''}}" data-type="monthly" bindtap="setBilling">月付</view>
+      <view class="bill-btn {{vipBilling==='yearly'?'bill-on':''}}" data-type="yearly" bindtap="setBilling">年付 <text class="save-tag">省35%</text></view>
+    </view>
+  </view>
+
+  <!-- Pricing Cards -->
+  <view class="pricing-grid">
+    <!-- Free -->
+    <view class="pricing-card {{premium.tier==='free'?'pc-active':''}}">
+      <view class="pc-icon">🌱</view>
+      <view class="pc-name">免费版</view>
+      <view class="pc-price">¥0<text class="pc-period">/永久</text></view>
+      <view class="pc-features">
+        <view wx:for="{{tierFeatures.free}}" wx:key="*this" class="pc-feat">✓ {{item}}</view>
+        <view wx:for="{{tierFeatures.freeMissing}}" wx:key="*this" class="pc-feat pc-disabled">✗ {{item}}</view>
+      </view>
+      <view class="btn btn-secondary btn-sm pc-btn" wx:if="{{premium.tier==='free'}}">当前方案</view>
+    </view>
+
+    <!-- Pro -->
+    <view class="pricing-card {{premium.tier==='pro'?'pc-active':''}} pc-recommended" wx:if="{{premium.tier!=='premium'}}">
+      <view class="pc-badge">🔥 推荐</view>
+      <view class="pc-icon">⭐</view>
+      <view class="pc-name">专业版</view>
+      <view class="pc-price">¥{{vipBilling==='yearly'?'16':'29'}}<text class="pc-period">/月</text></view>
+      <view class="pc-bill" wx:if="{{vipBilling==='yearly'}}">年付¥199/年</view>
+      <view class="pc-features">
+        <view wx:for="{{tierFeatures.pro}}" wx:key="*this" class="pc-feat">✓ {{item}}</view>
+        <view class="pc-feat pc-disabled">✗ 家庭共享</view>
+      </view>
+      <view class="btn btn-primary pc-btn" data-plan="{{vipBilling==='yearly'?'pro_yearly':'pro_monthly'}}" bindtap="createPayOrder">
+        {{payLoading?'处理中...':premium.tier==='pro'?'续费专业版':'升级专业版'}}
+      </view>
+    </view>
+
+    <!-- Premium -->
+    <view class="pricing-card {{premium.tier==='premium'?'pc-active':''}}">
+      <view class="pc-icon">👑</view>
+      <view class="pc-name">尊享版</view>
+      <view class="pc-price">¥{{vipBilling==='yearly'?'33':'59'}}<text class="pc-period">/月</text></view>
+      <view class="pc-bill" wx:if="{{vipBilling==='yearly'}}">年付¥399/年</view>
+      <view class="pc-features">
+        <view wx:for="{{tierFeatures.premium}}" wx:key="*this" class="pc-feat">✓ {{item}}</view>
+      </view>
+      <view class="btn btn-primary pc-btn" data-plan="{{vipBilling==='yearly'?'premium_yearly':'premium_monthly'}}" bindtap="createPayOrder">
+        {{payLoading?'处理中...':premium.tier==='premium'?'续费尊享版':'升级尊享版'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- Feature Comparison Table -->
+  <view class="card" style="margin-top:20rpx">
+    <view class="section-title">📋 完整功能对比</view>
+    <view class="vip-table">
+      <view class="vt-row vt-hd">
+        <view class="vt-cell vt-name">功能</view>
+        <view class="vt-cell">免费</view>
+        <view class="vt-cell">专业</view>
+        <view class="vt-cell">尊享</view>
+      </view>
+      <view class="vt-row" wx:for="{{vipCompareRows}}" wx:key="name">
+        <view class="vt-cell vt-name">{{item.name}}</view>
+        <view class="vt-cell">{{item.free}}</view>
+        <view class="vt-cell {{item.highlight?'vt-hl':''}}">{{item.pro}}</view>
+        <view class="vt-cell {{item.highlight?'vt-hl':''}}">{{item.premium}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Member Perks -->
+  <view class="card" wx:if="{{premium.tier!=='free'}}">
+    <view class="section-title">🎁 会员专属</view>
+    <view class="perks-grid">
+      <view class="perk-card" wx:for="{{vipPerks}}" wx:key="title">
+        <view class="perk-icon">{{item.icon}}</view>
+        <view class="perk-title">{{item.title}}</view>
+        <view class="perk-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Referral -->
+  <view class="card">
+    <view class="section-title">
+      邀请好友得奖励
+      <text class="btn btn-secondary btn-sm" style="float:right" bindtap="loadReferral">查看</text>
+    </view>
+    <view wx:if="{{referralCode}}" class="referral-info">
+      你的邀请码：<text class="ref-code">{{referralCode}}</text> · 已邀请 {{referralCount}} 人 · 奖励 ¥{{referralReward}}
+    </view>
+    <view wx:else style="text-align:center;color:var(--tx3);padding:12rpx">点击"查看"加载邀请码</view>
+  </view>
+
+  <!-- Order History -->
+  <view class="card">
+    <view class="section-title">
+      📄 订单记录
+      <text class="btn btn-secondary btn-sm" style="float:right" bindtap="loadPayOrders">刷新</text>
+    </view>
+    <view wx:if="{{payOrders.length===0}}" style="text-align:center;color:var(--tx3);padding:20rpx">暂无订单</view>
+    <view wx:for="{{payOrders}}" wx:key="id" class="order-row">
+      <text>{{item.order_no}} · {{item.tier}}</text>
+      <text>¥{{item.amount_yuan}} <text class="order-status order-{{item.status}}">{{item.status==='paid'?'已付':item.status==='refunded'?'退款':'待付'}}</text></text>
+    </view>
+  </view>
+</view>
+
+<!-- Payment Modal -->
+<view class="modal-pay" wx:if="{{payOrder}}" catchtap="closePayModal">
+  <view class="modal-pay-card" catchtap="">
+    <view class="pay-modal-icon">💳</view>
+    <view class="pay-modal-title">{{payOrder.plan_name}}</view>
+    <view class="pay-modal-price">¥{{payOrder.amount_yuan}}</view>
+    <view class="pay-modal-no">订单号: {{payOrder.order_no}}</view>
+    <view class="pay-methods">
+      <view class="pay-method {{payMethod==='wechat'?'pm-on':''}}" data-method="wechat" bindtap="setPayMethod">💬 微信</view>
+      <view class="pay-method {{payMethod==='alipay'?'pm-on':''}}" data-method="alipay" bindtap="setPayMethod">🔵 支付宝</view>
+    </view>
+    <view class="pay-notice">🔒 模拟支付环境</view>
+    <view class="btn btn-primary pay-confirm-btn" bindtap="confirmPay">
+      {{payLoading?'支付中...':'确认支付 ¥'+payOrder.amount_yuan}}
+    </view>
+    <view class="btn btn-secondary btn-sm pay-cancel" bindtap="closePayModal">取消</view>
+  </view>
+</view>

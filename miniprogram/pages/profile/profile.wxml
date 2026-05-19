@@ -1,0 +1,38 @@
+<view class="container">
+  <view class="page-title">我的</view>
+  <view class="card" wx:if="{{userInfo}}">
+    <view class="user-row">
+      <view class="avatar">☺</view>
+      <view><view class="uname">{{userInfo.nickname || userInfo.username}}</view><view class="pts">🏆 {{points}} 积分</view></view>
+    </view>
+  </view>
+
+  <!-- Premium Status -->
+  <view class="card">
+    <view class="section-title">💎 会员状态</view>
+    <view class="user-row" wx:if="{{premium.tier}}">
+      <text style="font-size:56rpx">{{premium.tier==='premium'?'👑':premium.tier==='pro'?'⭐':'🌱'}}</text>
+      <view><view class="uname">{{premium.tier_info ? premium.tier_info.name : '免费版'}}</view><view wx:if="{{premium.tier!='free'}}" style="font-size:22rpx;color:var(--tx3)">到期: {{premium.expires_at}}</view></view>
+    </view>
+    <view wx:if="{{premium.tier=='free'}}" style="margin-top:16rpx">
+      <view style="font-weight:600;font-size:26rpx;margin-bottom:12rpx">选择套餐</view>
+      <view style="display:flex;gap:12rpx;flex-wrap:wrap;margin-bottom:16rpx">
+        <view wx:for="{{payPlans}}" wx:key="id" class="plan-btn {{selectedPlan===item.id?'on':''}}" data-id="{{item.id}}" bindtap="selectPlan">
+          <view>{{item.name}}</view><view style="font-size:22rpx;color:var(--tx3)">¥{{item.amount_yuan}}/{{item.days}}天</view>
+        </view>
+      </view>
+      <button class="btn btn-primary btn-sm" bindtap="createOrder" loading="{{payLoading}}">立即支付</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">功能</view>
+    <view class="menu-item" bindtap="goVip">💎 会员中心</view>
+    <view class="menu-item" bindtap="goGame">🎮 游戏中心</view>
+    <view class="menu-item" bindtap="goStore">🛒 助眠商城</view>
+    <view class="menu-item" bindtap="goCommunity">🌐 睡眠社区</view>
+    <view class="menu-item" bindtap="goKnowledge">📚 睡眠知识库</view>
+    <view class="menu-item" bindtap="goBadges">🏆 成就徽章</view>
+  </view>
+  <button class="btn btn-danger" style="margin-top:48rpx;width:100%" bindtap="logout">退出登录</button>
+</view>

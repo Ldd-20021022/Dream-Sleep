@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="page-title">睡眠分析</view>
+
+  <view class="period-bar">
+    <button wx:for="{{[{d:7,l:'7天'},{d:14,l:'14天'},{d:30,l:'30天'}]}}" wx:key="d"
+            class="btn btn-sm {{period===item.d?'btn-primary':'btn-secondary'}}"
+            data-days="{{item.d}}" bindtap="changePeriod">{{item.l}}</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-state">加载中...</view>
+
+  <block wx:if="{{!loading&&stats}}">
+    <view class="grid-2">
+      <view class="card stat-card">
+        <view class="stat-label">平均时长</view>
+        <view class="stat-value">{{stats.avg_duration||0}}<text class="unit">h</text></view>
+      </view>
+      <view class="card stat-card">
+        <view class="stat-label">平均评分</view>
+        <view class="stat-value score">{{stats.avg_score||0}}<text class="unit">分</text></view>
+      </view>
+      <view class="card stat-card">
+        <view class="stat-label">睡眠效率</view>
+        <view class="stat-value">{{stats.avg_efficiency||0}}<text class="unit">%</text></view>
+      </view>
+      <view class="card stat-card">
+        <view class="stat-label">连续达标</view>
+        <view class="stat-value streak">{{stats.streak_days||0}}<text class="unit">天</text></view>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{stats.sleep_debt}}">
+      <view class="section-title">睡眠债</view>
+      <view class="debt-row">
+        <text>累计缺觉: {{stats.sleep_debt.total_debt||0}}h</text>
+        <text>缺觉天数: {{stats.sleep_debt.days_in_debt||0}}天</text>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{stats.records&&stats.records.length>0}}">
+      <view class="section-title">近期记录</view>
+      <view wx:for="{{stats.records}}" wx:key="id" wx:for-item="r" class="rec-row">
+        <text class="rec-date">{{r.diary_date}}</text>
+        <text class="rec-dur">{{r.duration_hours}}h</text>
+        <text class="rec-score" style="color:{{r.score>=80?'#2ecc71':r.score>=60?'#f39c12':'#e74c3c'}}">{{r.score}}分</text>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{!loading&&!stats}}" class="card">
+    <view class="empty-state">暂无睡眠数据，开始记录你的睡眠吧</view>
+  </view>
+</view>

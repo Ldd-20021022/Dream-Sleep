@@ -1,0 +1,16 @@
+<view class="container"><view class="page-title">睡眠商城</view>
+  <!-- Cart -->
+  <view class="card" wx:if="{{cart.length>0}}">
+    <view class="section-title">🛒 购物车 ({{cart.length}}件) 合计 ¥{{cartTotal}}<button class="btn btn-primary btn-sm" style="float:right" bindtap="createOrder">下单</button></view>
+    <view wx:for="{{cart}}" wx:key="id" class="cart-item"><text>{{item.product.name}} x{{item.quantity}} ¥{{item.product.price_yuan}}</text><button class="btn btn-danger btn-sm" data-id="{{item.id}}" bindtap="removeFromCart">删</button></view>
+  </view>
+  <!-- Products -->
+  <view class="card"><view class="section-title">全部商品</view>
+    <view wx:for="{{products}}" wx:key="id" class="product-item" data-id="{{item.id}}" bindtap="viewProduct">
+      <view class="product-info"><view class="product-name">{{item.name}}</view><view class="product-desc">{{item.desc}}</view><view class="product-meta">{{item.category}} · 已售{{item.sales}}</view></view>
+      <view style="text-align:right"><view class="product-price">¥{{item.price_yuan}}</view><button class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="addToCart">+</button></view>
+    </view>
+  </view>
+  <!-- Detail Modal -->
+  <view wx:if="{{viewing}}" class="modal" bindtap="closeView"><view class="modal-box" catchtap=""><view class="product-name">{{viewing.name}}</view><view class="product-desc">{{viewing.desc}}</view><view class="product-price">¥{{viewing.price_yuan}}</view><button class="btn btn-primary" data-id="{{viewing.id}}" bindtap="addToCart">加入购物车</button><button class="btn btn-secondary" style="margin-top:12rpx" bindtap="closeView">关闭</button></view></view>
+</view>

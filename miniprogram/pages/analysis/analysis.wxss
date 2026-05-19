@@ -1,0 +1,13 @@
+.period-bar { display: flex; gap: 16rpx; margin-bottom: 24rpx; }
+.stat-card { text-align: center; }
+.stat-label { font-size: 24rpx; color: var(--tx3); margin-bottom: 8rpx; }
+.stat-value { font-size: 56rpx; font-weight: 700; }
+.stat-value.score { color: var(--teal); }
+.stat-value.streak { color: var(--warn); }
+.unit { font-size: 28rpx; font-weight: 400; color: var(--tx2); }
+.debt-row { display: flex; justify-content: space-between; font-size: 28rpx; color: var(--tx2); }
+.rec-row { display: flex; align-items: center; padding: 16rpx 0; border-bottom: 1rpx solid var(--bd); font-size: 26rpx; }
+.rec-row:last-child { border-bottom: none; }
+.rec-date { width: 180rpx; color: var(--tx3); }
+.rec-dur { flex: 1; }
+.rec-score { font-weight: 600; }

@@ -1,0 +1,15 @@
+<view class="container"><view class="page-title">智能闹钟</view>
+  <view class="card"><view class="section-title">闹钟设置</view>
+    <view class="form-group"><text class="label">目标起床时间</text><input class="input" type="time" value="{{alarm.target_time}}" data-field="target_time" bindinput="setField"/></view>
+    <view class="form-group"><text class="label">唤醒窗口 (分钟)</text><slider min="10" max="60" value="{{alarm.wake_window}}" data-field="wake_window" bindchange="setField" activeColor="#6c63ff" show-value/></view>
+    <view class="form-group"><text class="label">唤醒方式</text>
+      <view class="method-row"><view wx:for="{{['light','sound','vibration']}}" wx:key="*this" class="method-btn {{alarm.smart_method===item?'on':''}}" bindtap="setFieldTap" data-field="smart_method" data-val="{{item}}">{{item==='light'?'光照':item==='sound'?'声音':'震动'}}</view></view>
+    </view>
+    <button class="btn btn-primary" bindtap="saveAlarm">保存闹钟</button>
+  </view>
+  <view class="card"><view class="section-title">最佳睡眠时间<button class="btn btn-secondary btn-sm" style="float:right" bindtap="getSmartAlarm" loading="{{loading}}">计算</button></view>
+    <view wx:if="{{suggestions.length>0}}">
+      <view wx:for="{{suggestions}}" wx:key="cycles" class="sug-item"><view>{{item.cycles}}周期 {{item.duration_h}}h</view><view style="font-weight:700;font-size:28rpx">{{item.time}}</view><view class="badge">{{item.quality==='excellent'?'最佳':'良好'}}</view></view>
+    </view>
+  </view>
+</view>

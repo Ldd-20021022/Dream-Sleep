@@ -1,0 +1,82 @@
+<view class="container">
+  <view class="page-title">睡眠记录</view>
+
+  <!-- New Record Form -->
+  <view class="card">
+    <view class="section-title">新增记录</view>
+
+    <view class="form-group">
+      <text class="label">日期</text>
+      <picker mode="date" value="{{diaryDate}}" bindchange="onDateChange">
+        <view class="input">{{diaryDate||'选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <text class="label">入睡时间</text>
+      <view class="time-row">
+        <picker range="{{[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]}}" value="{{bedHour}}" bindchange="onBedHourChange">
+          <view class="input time-input">{{bedHour}}时</view>
+        </picker>
+        <picker range="{{[0,5,10,15,20,25,30,35,40,45,50,55]}}" value="{{bedMin}}" bindchange="onBedMinChange">
+          <view class="input time-input">{{bedMin}}分</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="label">起床时间</text>
+      <view class="time-row">
+        <picker range="{{[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]}}" value="{{wakeHour}}" bindchange="onWakeHourChange">
+          <view class="input time-input">{{wakeHour}}时</view>
+        </picker>
+        <picker range="{{[0,5,10,15,20,25,30,35,40,45,50,55]}}" value="{{wakeMin}}" bindchange="onWakeMinChange">
+          <view class="input time-input">{{wakeMin}}分</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="label">睡眠感受</text>
+      <slider min="1" max="5" value="{{quality}}" bindchange="onQualityChange" activeColor="#6c63ff" block-size="20" show-value/>
+      <view style="text-align:center;font-size:32rpx;margin-top:8rpx">{{qualityStars}}</view>
+    </view>
+
+    <view class="form-group">
+      <text class="label">睡眠标签</text>
+      <view class="tag-row">
+        <view wx:for="{{['做梦','失眠','早醒','夜醒','深睡','浅睡','午休','熬夜']}}" wx:key="*this"
+              class="tag-btn {{tags.indexOf(item)>-1?'on':''}}" data-tag="{{item}}" bindtap="toggleTag">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="label">备注</text>
+      <textarea class="input" value="{{notes}}" bindinput="onNotesInput" placeholder="记录今晚的感受..." maxlength="200"/>
+    </view>
+
+    <button class="btn btn-primary" style="width:100%;padding:24rpx" bindtap="submitRecord" loading="{{submitting}}">
+      {{submitting?'保存中...':'保存记录'}}
+    </button>
+    <!-- Voice Diary -->
+    <view style="margin-top:24rpx;padding-top:24rpx;border-top:1rpx solid var(--bd)">
+      <view class="section-title">🎤 语音日记 (AI解析)</view>
+      <textarea class="input" value="{{voiceText}}" bindinput="onVoiceInput" placeholder="粘贴语音转文字内容，AI自动解析填入表单..."/>
+      <button class="btn btn-secondary btn-sm" style="margin-top:16rpx" bindtap="voiceToDiary" loading="{{voiceLoading}}">{{voiceLoading?'AI解析中...':'🤖 AI解析并填入表单'}}</button>
+    </view>
+  </view>
+
+  <!-- History -->
+  <view class="card">
+    <view class="section-title">历史记录</view>
+    <view wx:if="{{records.length===0}}" class="empty-state">暂无记录</view>
+    <view wx:for="{{records}}" wx:key="id" class="rec-item">
+      <view class="rec-left">
+        <text class="rec-date">{{item.diary_date}}</text>
+        <text class="rec-dur">{{item.duration_hours}}h</text>
+        <text class="rec-score" style="color:{{item.score>=80?'#2ecc71':item.score>=60?'#f39c12':'#e74c3c'}}">{{item.score}}分</text>
+      </view>
+      <button class="btn btn-danger" style="font-size:22rpx;padding:8rpx 16rpx" data-id="{{item.id}}" bindtap="deleteRecord">删除</button>
+    </view>
+  </view>
+</view>

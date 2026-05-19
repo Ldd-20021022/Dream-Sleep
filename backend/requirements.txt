@@ -1,0 +1,9 @@
+fastapi>=0.95.0,<0.100
+uvicorn>=0.22.0
+sqlalchemy>=1.4.0,<2.0
+pymysql>=1.1.0
+python-jose[cryptography]>=3.3.0
+bcrypt>=4.0.0
+openai>=1.0.0
+pydantic>=1.9.0,<2.0
+python-multipart>=0.0.5

@@ -1,0 +1,42 @@
+<view class="container">
+  <view class="page-title">睡眠知识库</view>
+
+  <!-- Article Detail -->
+  <block wx:if="{{viewingArticle}}">
+    <view class="card">
+      <view class="article-title">{{viewingArticle.title}}</view>
+      <view class="article-meta"><span class="badge">{{viewingArticle.category}}</span></view>
+      <view class="article-content">{{viewingArticle.content}}</view>
+      <view class="article-tags" wx:if="{{viewingArticle.tags}}">
+        <text wx:for="{{viewingArticle.tags}}" wx:key="*this" class="tag">{{item}}</text>
+      </view>
+      <button class="btn btn-secondary btn-sm" style="margin-top:24rpx" bindtap="backToList">← 返回列表</button>
+    </view>
+  </block>
+
+  <!-- Article List -->
+  <block wx:else>
+    <scroll-view class="cat-bar" scroll-x>
+      <button wx:for="{{categories}}" wx:key="*this"
+              class="btn btn-sm {{activeCat===item?'btn-primary':'btn-secondary'}}"
+              style="margin-right:12rpx;flex-shrink:0"
+              data-cat="{{item}}" bindtap="selectCat">{{item}}</button>
+      <button class="btn btn-sm {{!activeCat?'btn-primary':'btn-secondary'}}"
+              style="flex-shrink:0" bindtap="selectCat">全部</button>
+    </scroll-view>
+
+    <view wx:for="{{articles}}" wx:key="id" class="card article-card"
+          data-id="{{item.id}}" bindtap="viewArticle">
+      <view class="article-title">{{item.title}}</view>
+      <view class="article-summary">{{item.summary}}</view>
+      <view class="article-meta">
+        <span class="badge">{{item.category}}</span>
+        <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="t" class="tag">{{t}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{articles.length===0}}" class="card">
+      <view class="empty-state">暂无文章</view>
+    </view>
+  </block>
+</view>

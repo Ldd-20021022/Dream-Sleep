@@ -1,0 +1,153 @@
+/* Hero Banner */
+.vip-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+  background: linear-gradient(135deg, #1a1a3e 0%, #16213e 100%);
+  border: 1rpx solid var(--bd);
+}
+.vip-hero-pro {
+  background: linear-gradient(135deg, #1a1a4e 0%, #1a2a4e 100%);
+  border-color: rgba(108,99,255,0.3);
+}
+.vip-hero-premium {
+  background: linear-gradient(135deg, #2a1a3e 0%, #1a1a3e 100%);
+  border-color: rgba(255,215,0,0.3);
+}
+.vip-hero-left { flex: 1; }
+.vip-hero-icon { font-size: 64rpx; margin-bottom: 8rpx; }
+.vip-hero-name { font-size: 28rpx; font-weight: 700; margin-bottom: 4rpx; }
+.vip-hero-sub { font-size: 22rpx; color: var(--tx3); }
+.vip-hero-right { text-align: center; }
+.vip-hero-from { font-size: 24rpx; color: var(--tx3); }
+.vip-hero-price { font-size: 48rpx; font-weight: 700; }
+.vip-hero-unit { font-size: 24rpx; font-weight: 400; }
+.vip-badge-row { margin-top: 12rpx; }
+.vip-badge {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 6rpx 24rpx;
+  background: rgba(108,99,255,0.15);
+  border-radius: 24rpx;
+  color: var(--ac);
+}
+
+/* Billing Toggle */
+.billing-row { display: flex; justify-content: center; margin-bottom: 20rpx; }
+.billing-toggle { display: flex; gap: 8rpx; background: rgba(255,255,255,0.05); border-radius: 16rpx; padding: 6rpx; }
+.bill-btn { padding: 12rpx 32rpx; border-radius: 12rpx; font-size: 26rpx; color: var(--tx2); }
+.bill-on { background: var(--ac); color: #fff; font-weight: 600; }
+.save-tag { font-size: 20rpx; color: var(--suc); background: rgba(46,204,113,0.15); padding: 2rpx 8rpx; border-radius: 6rpx; }
+
+/* Pricing Cards */
+.pricing-grid { display: flex; gap: 16rpx; margin-bottom: 24rpx; }
+.pricing-card {
+  flex: 1;
+  background: var(--card);
+  border-radius: 20rpx;
+  padding: 28rpx 20rpx;
+  text-align: center;
+  border: 2rpx solid var(--bd);
+  position: relative;
+}
+.pc-active { border-color: var(--ac); box-shadow: 0 0 24rpx rgba(108,99,255,0.15); }
+.pc-recommended { border-color: rgba(255,165,0,0.3); }
+.pc-badge {
+  position: absolute;
+  top: -16rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: #fff;
+  font-size: 22rpx;
+  padding: 6rpx 24rpx;
+  border-radius: 24rpx;
+  font-weight: 600;
+}
+.pc-icon { font-size: 48rpx; margin-bottom: 8rpx; }
+.pc-name { font-size: 26rpx; font-weight: 700; margin-bottom: 8rpx; }
+.pc-price { font-size: 40rpx; font-weight: 700; margin-bottom: 4rpx; }
+.pc-period { font-size: 22rpx; font-weight: 400; color: var(--tx3); }
+.pc-bill { font-size: 20rpx; color: var(--tx3); margin-bottom: 12rpx; }
+.pc-features { margin: 16rpx 0; text-align: left; }
+.pc-feat { font-size: 22rpx; padding: 4rpx 0; color: var(--tx1); }
+.pc-disabled { color: var(--tx3); text-decoration: line-through; }
+.pc-btn { width: 100%; margin-top: 8rpx; }
+
+/* Feature Comparison Table */
+.vip-table { font-size: 22rpx; }
+.vt-row { display: flex; padding: 12rpx 0; border-bottom: 1rpx solid var(--bd); }
+.vt-hd { font-weight: 700; color: var(--ac); border-bottom: 2rpx solid var(--bd); }
+.vt-cell { flex: 1; text-align: center; }
+.vt-name { flex: 1.5; text-align: left; padding-left: 8rpx; }
+.vt-hl { color: var(--ac); font-weight: 600; }
+
+/* Member Perks */
+.perks-grid { display: flex; gap: 16rpx; flex-wrap: wrap; }
+.perk-card {
+  flex: 1;
+  min-width: 160rpx;
+  text-align: center;
+  padding: 20rpx 16rpx;
+  background: rgba(108,99,255,0.05);
+  border-radius: 16rpx;
+}
+.perk-icon { font-size: 40rpx; margin-bottom: 8rpx; }
+.perk-title { font-weight: 600; font-size: 24rpx; margin-bottom: 4rpx; }
+.perk-desc { font-size: 20rpx; color: var(--tx3); }
+
+/* Referral */
+.referral-info { font-size: 24rpx; padding: 8rpx 0; }
+.ref-code { font-size: 32rpx; color: var(--ac); font-weight: 700; }
+
+/* Order History */
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--bd);
+  font-size: 24rpx;
+}
+.order-status { font-size: 22rpx; }
+.order-paid { color: var(--suc); }
+.order-refunded { color: var(--err); }
+.order-pending { color: var(--warn); }
+
+/* Payment Modal */
+.modal-pay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-pay-card {
+  background: var(--card);
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  width: 600rpx;
+  max-width: 90vw;
+  text-align: center;
+}
+.pay-modal-icon { font-size: 64rpx; }
+.pay-modal-title { font-size: 28rpx; font-weight: 700; margin: 8rpx 0; }
+.pay-modal-price { font-size: 48rpx; font-weight: 700; margin: 8rpx 0; }
+.pay-modal-no { font-size: 22rpx; color: var(--tx3); margin-bottom: 24rpx; }
+.pay-methods { display: flex; gap: 16rpx; justify-content: center; margin-bottom: 20rpx; }
+.pay-method { padding: 16rpx 32rpx; border-radius: 16rpx; border: 2rpx solid var(--bd); font-size: 26rpx; }
+.pm-on { border-color: var(--ac); background: rgba(108,99,255,0.1); }
+.pay-notice {
+  background: rgba(14,201,166,0.08);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-bottom: 20rpx;
+  font-size: 22rpx;
+  color: var(--tx2);
+}
+.pay-confirm-btn { width: 100%; padding: 20rpx; font-size: 28rpx; }
+.pay-cancel { width: 100%; margin-top: 8rpx; }

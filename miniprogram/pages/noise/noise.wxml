@@ -1,0 +1,51 @@
+<view class="container">
+  <view class="page-title">白噪音</view>
+
+  <view class="card">
+    <view class="section-title">音景场景</view>
+    <view class="scene-grid">
+      <view wx:for="{{scenes}}" wx:key="id"
+            class="scene-btn {{activeScene===item.id?'on':''}}"
+            data-id="{{item.id}}" bindtap="selectScene">
+        <view class="scene-icon">{{item.icon}}</view>
+        <view class="scene-name">{{item.name}}</view>
+        <view class="scene-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">控制</view>
+    <view class="ctrl-row">
+      <text class="ctrl-label">总音量</text>
+      <slider min="0" max="100" value="{{masterVol}}" bindchange="onVolumeChange" activeColor="#6c63ff" block-size="20" style="flex:1"/>
+      <text class="ctrl-val">{{masterVol}}%</text>
+    </view>
+    <view class="ctrl-row" style="margin-top:24rpx">
+      <text class="ctrl-label">定时关闭</text>
+      <picker range="{{['不限时','15分钟','30分钟','45分钟','60分钟','90分钟']}}" range-key="label" value="{{timerMin}}" bindchange="onTimerChange">
+        <view class="input">{{timerMin===0?'不限时':timerMin+'分钟'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <button class="btn {{isPlaying?'btn-danger':'btn-primary'}}" style="width:100%;padding:28rpx" bindtap="{{isPlaying?'stopNoise':'startNoise'}}">
+    {{isPlaying?'■ 停止':'▶ 开始播放'}}
+  </button>
+
+  <!-- Sleep Stories -->
+  <view class="card" style="margin-top:24rpx">
+    <view class="section-title">📖 睡眠故事 & 冥想</view>
+    <view wx:for="{{stories}}" wx:key="id" class="story-item">
+      <view class="story-info">
+        <view class="story-title">{{item.title}}<span wx:if="{{item.is_premium}}" class="badge" style="margin-left:8rpx;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span></view>
+        <view class="story-meta">{{item.description}} · {{item.duration_minutes}}分钟 · {{item.narrator}}讲述</view>
+      </view>
+      <button wx:if="{{item.accessible}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="playStory">▶</button>
+      <button wx:else class="btn btn-secondary btn-sm" disabled>🔒</button>
+    </view>
+  </view>
+  <view class="card tip-card" style="margin-top:24rpx">
+    <text>💡 完整白噪音合成引擎（13种算法 + 可视化）请使用网页版。</text>
+  </view>
+</view>

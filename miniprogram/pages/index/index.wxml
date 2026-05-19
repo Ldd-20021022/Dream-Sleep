@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="page-title">睡眠概览</view>
+
+  <!-- Stats Cards -->
+  <view class="grid-2">
+    <view class="card" style="text-align:center">
+      <view class="stat-label">昨晚睡眠</view>
+      <view class="stat-value">{{lastDuration}}</view>
+      <view class="stat-sub" wx:if="{{lastRecord}}">{{lastRecord.diary_date}}</view>
+    </view>
+    <view class="card" style="text-align:center">
+      <view class="stat-label">睡眠评分</view>
+      <view class="stat-value score">{{lastScore}}</view>
+      <view class="stat-sub">{{scoreLabel}}</view>
+    </view>
+    <view class="card" style="text-align:center">
+      <view class="stat-label">连续达标</view>
+      <view class="stat-value streak">{{stats.streak_days || 0}}<text class="unit">天</text></view>
+    </view>
+    <view class="card" style="text-align:center">
+      <view class="stat-label">本周平均</view>
+      <view class="stat-value">{{stats.avg_duration || 0}}<text class="unit">h</text></view>
+    </view>
+  </view>
+
+  <!-- Quick Actions -->
+  <view class="card">
+    <view class="section-title">快捷操作</view>
+    <view class="grid-2">
+      <view class="qbtn" bindtap="goRecord">
+        <text class="qic">✎</text>
+        <text class="qlb">记录睡眠</text>
+      </view>
+      <view class="qbtn" bindtap="goNoise">
+        <text class="qic">♫</text>
+        <text class="qlb">白噪音</text>
+      </view>
+      <view class="qbtn" bindtap="goChat">
+        <text class="qic">☕</text>
+        <text class="qlb">AI助手</text>
+      </view>
+      <view class="qbtn" bindtap="goTasks">
+        <text class="qic">★</text>
+        <text class="qlb">每日任务</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Daily Tip -->
+  <view class="card tip-card">
+    <text>💡 {{dailyTip}}</text>
+  </view>
+</view>

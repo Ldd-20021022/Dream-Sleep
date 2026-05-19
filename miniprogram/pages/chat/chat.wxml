@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="page-title">AI 睡眠助手</view>
+
+  <!-- Messages -->
+  <scroll-view class="msg-area" scroll-y scroll-into-view="msg-{{messages.length-1}}">
+    <view wx:if="{{messages.length===0}}" class="empty-state">
+      <text>我是你的AI睡眠教练，有什么想聊的？</text>
+      <view class="quick-qs">
+        <view class="qq" wx:for="{{quickQuestions}}" wx:key="*this" bindtap="sendQuick" data-q="{{item}}">{{item}}</view>
+      </view>
+    </view>
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{index}}" class="msg {{item.role}}">
+      <view class="msg-bubble">{{item.content}}</view>
+    </view>
+    <view wx:if="{{sending}}" class="msg assistant"><view class="msg-bubble typing">...</view></view>
+  </scroll-view>
+
+  <!-- Input -->
+  <view class="input-area">
+    <input class="input" placeholder="输入消息..." value="{{inputMsg}}" bindinput="onInput" bindconfirm="sendMessage" disabled="{{sending}}"/>
+    <button class="btn btn-primary btn-sm" bindtap="sendMessage" disabled="{{sending || !inputMsg}}">发送</button>
+  </view>
+</view>

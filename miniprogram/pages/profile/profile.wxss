@@ -1,0 +1,8 @@
+.user-row { display: flex; align-items: center; gap: 24rpx; }
+.avatar { font-size: 64rpx; }
+.uname { font-size: 32rpx; font-weight: 600; }
+.pts { font-size: 26rpx; color: var(--tx3); margin-top: 4rpx; }
+.menu-item { padding: 24rpx 0; border-bottom: 1rpx solid var(--bd); font-size: 30rpx; }
+.menu-item:last-child { border-bottom: none; }
+.plan-btn { padding: 16rpx 24rpx; border: 2rpx solid var(--bd); border-radius: 16rpx; font-size: 26rpx; text-align: center; }
+.plan-btn.on { border-color: var(--ac); background: rgba(108,99,255,0.1); color: var(--ac); }

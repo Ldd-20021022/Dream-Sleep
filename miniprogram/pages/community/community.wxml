@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="page-title">睡眠社区</view>
+
+  <view class="tabs">
+    <view class="tab {{tab==='groups'?'on':''}}" data-tab="groups" bindtap="setTab">互助小组</view>
+    <view class="tab {{tab==='challenges'?'on':''}}" data-tab="challenges" bindtap="setTab">挑战</view>
+    <view class="tab {{tab==='leaderboard'?'on':''}}" data-tab="leaderboard" bindtap="setTab">排行榜</view>
+    <view class="tab {{tab==='posts'?'on':''}}" data-tab="posts" bindtap="setTab">动态</view>
+  </view>
+
+  <!-- Groups -->
+  <view wx:if="{{tab==='groups'}}">
+    <view wx:for="{{groups}}" wx:key="id" class="card">
+      <view class="row-between">
+        <view><text class="g-icon">{{item.icon}}</text><text class="g-name">{{item.name}}</text></view>
+        <button wx:if="{{!item.is_member}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="joinGroup">加入</button>
+        <button wx:else class="btn btn-secondary btn-sm" data-id="{{item.id}}" bindtap="leaveGroup">已加入</button>
+      </view>
+      <view class="g-desc">{{item.description}} · {{item.member_count}}人</view>
+    </view>
+  </view>
+
+  <!-- Challenges -->
+  <view wx:if="{{tab==='challenges'}}">
+    <view wx:for="{{challenges}}" wx:key="id" class="card">
+      <view class="row-between">
+        <view><text class="g-icon">{{item.icon}}</text><text class="g-name">{{item.title}}</text></view>
+        <button wx:if="{{!item.joined}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="joinChallenge">参加</button>
+        <span wx:else class="badge">进行中</span>
+      </view>
+      <view class="g-desc">{{item.description}} · {{item.participant_count}}人参与</view>
+    </view>
+  </view>
+
+  <!-- Leaderboard -->
+  <view wx:if="{{tab==='leaderboard'}}">
+    <view class="period-row">
+      <button class="btn btn-sm {{lbPeriod==='weekly'?'btn-primary':'btn-secondary'}}" data-period="weekly" bindtap="setPeriod">本周</button>
+      <button class="btn btn-sm {{lbPeriod==='monthly'?'btn-primary':'btn-secondary'}}" data-period="monthly" bindtap="setPeriod">本月</button>
+    </view>
+    <view wx:for="{{leaderboard}}" wx:key="user_id" class="card lb-item">
+      <text class="lb-rank">{{item.rank}}</text>
+      <text class="lb-name">{{item.nickname}}</text>
+      <text class="lb-score">{{item.avg_score}}分</text>
+    </view>
+    <view wx:if="{{leaderboard.length===0}}" class="empty-state">暂无排行数据</view>
+  </view>
+
+  <!-- Posts -->
+  <view wx:if="{{tab==='posts'}}">
+    <view class="card">
+      <textarea class="input" value="{{postContent}}" bindinput="onPostInput" placeholder="分享你的睡眠感受..."/>
+      <view class="row-between" style="margin-top:16rpx">
+        <label class="cb"><checkbox checked="{{isAnonymous}}" bindtap="toggleAnon"/>匿名</label>
+        <button class="btn btn-primary btn-sm" bindtap="createPost">发布</button>
+      </view>
+    </view>
+    <view wx:for="{{posts}}" wx:key="id" class="card">
+      <view class="row-between"><text class="post-author">{{item.author}}</text><text class="post-time">{{item.created_at}}</text></view>
+      <view class="post-content">{{item.content}}</view>
+      <view class="row-between" style="margin-top:12rpx">
+        <text data-id="{{item.id}}" bindtap="likePost" style="color:{{item.is_liked?'#e74c3c':'#6a6a80'}}">{{item.is_liked?'❤️':'🤍'}} {{item.like_count}}</text>
+        <text style="color:var(--tx3)">💬 {{item.comment_count}}</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/record/record",
+    "pages/noise/noise",
+    "pages/chat/chat",
+    "pages/tasks/tasks",
+    "pages/analysis/analysis",
+    "pages/community/community",
+    "pages/knowledge/knowledge",
+    "pages/store/store",
+    "pages/courses/courses",
+    "pages/game/game",
+    "pages/assessment/assessment",
+    "pages/alarm/alarm",
+    "pages/vip/vip",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#111127",
+    "navigationBarTitleText": "梦眠",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0f0f1a",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#6a6a80",
+    "selectedColor": "#6c63ff",
+    "backgroundColor": "#111127",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "概览", "iconPath": "static/home.png", "selectedIconPath": "static/home-active.png" },
+      { "pagePath": "pages/record/record", "text": "记录", "iconPath": "static/record.png", "selectedIconPath": "static/record-active.png" },
+      { "pagePath": "pages/analysis/analysis", "text": "分析", "iconPath": "static/chart.png", "selectedIconPath": "static/chart-active.png" },
+      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "static/user.png", "selectedIconPath": "static/user-active.png" }
+    ]
+  },
+  "requiredBackgroundModes": ["audio"],
+  "sitemapLocation": "sitemap.json"
+}

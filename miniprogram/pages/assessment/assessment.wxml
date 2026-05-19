@@ -1,0 +1,22 @@
+<view class="container"><view class="page-title">睡眠评估</view>
+  <view wx:if="{{!selected}}">
+    <view wx:for="{{scales}}" wx:key="id" class="card" data-id="{{item.id}}" bindtap="selectScale">
+      <view class="section-title">{{item.name}}</view><view>{{item.desc}}</view><view style="font-size:22rpx;color:var(--tx3)">{{item.question_count}}题</view>
+    </view>
+  </view>
+  <view wx:elif="{{result}}" class="card"><view class="section-title">评估结果</view>
+    <view style="font-size:56rpx;font-weight:700;text-align:center">{{result.score}}/{{result.max_score}}</view>
+    <view class="badge" style="text-align:center;margin-top:8rpx">{{result.severity==='normal'?'正常':result.severity==='mild'?'轻度':result.severity==='moderate'?'中度':'重度'}}</view>
+    <view style="margin-top:16rpx;font-size:26rpx;color:var(--tx2)">{{result.ai_analysis}}</view>
+    <button class="btn btn-primary" style="margin-top:16rpx" bindtap="goBack">重新评估</button>
+  </view>
+  <view wx:elif="{{questions.length>0}}" class="card">
+    <view wx:for="{{questions}}" wx:key="id" wx:for-index="idx" class="q-item"><view class="q-text">{{idx+1}}. {{item.text}}</view>
+      <view wx:if="{{item.type==='scale'}}" class="q-opts">
+        <view wx:for="{{item.options}}" wx:key="*this" wx:for-index="oi" class="q-opt {{answers[item.id]===oi?'on':''}}" data-qid="{{item.id}}" data-val="{{oi}}" bindtap="setAnswer">{{item}}</view>
+      </view>
+      <input wx:elif="{{item.type==='number'}}" class="input" type="number" data-qid="{{item.id}}" bindinput="setAnswer" placeholder="输入数字"/>
+    </view>
+    <button class="btn btn-primary" style="margin-top:16rpx" bindtap="submit" loading="{{loading}}">提交评估</button>
+  </view>
+</view>

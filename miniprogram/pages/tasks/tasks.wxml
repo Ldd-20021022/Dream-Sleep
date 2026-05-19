@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="page-title">每日任务</view>
+
+  <view class="card prog-card" wx:if="{{!loading}}">
+    <view class="prog-bar"><view class="prog-fill" style="width:{{todayTasks.length===0?0:compIds.length/todayTasks.length*100}}%"></view></view>
+    <view class="prog-info">
+      <text>{{compIds.length}}/{{todayTasks.length}} 已完成</text>
+      <text>🏆 {{points}} 积分</text>
+    </view>
+  </view>
+
+  <view wx:if="{{todayTasks.length===0&&!loading}}" class="card">
+    <view class="empty-state">暂无今日任务，请完善健康档案获取个性化推荐</view>
+  </view>
+
+  <view wx:for="{{todayTasks}}" wx:key="id" class="card task-card {{compIds.indexOf(item.id)>-1?'done':''}}">
+    <view class="task-row">
+      <view class="task-chk {{compIds.indexOf(item.id)>-1?'checked':''}}" data-id="{{item.id}}" bindtap="toggleTask">
+        <text wx:if="{{compIds.indexOf(item.id)>-1}}">✓</text>
+      </view>
+      <view class="task-body">
+        <view class="task-title">{{item.title}}</view>
+        <view class="task-desc">{{item.desc}}</view>
+        <span class="badge">{{item.category}}</span>
+      </view>
+      <text class="task-pts" wx:if="{{compIds.indexOf(item.id)===-1}}">+{{item.points}}分</text>
+      <text class="task-pts done" wx:else>✓ 已完成</text>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{badges.length>0}}">
+    <view class="section-title">成就徽章</view>
+    <view class="badge-grid">
+      <view wx:for="{{badges}}" wx:key="badge_id" class="badge-item {{item.unlocked?'on':''}}">
+        <view class="badge-icon">{{item.icon}}</view>
+        <view class="badge-name">{{item.unlocked?item.name:'??'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

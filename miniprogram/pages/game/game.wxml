@@ -1,0 +1,18 @@
+<view class="container"><view class="page-title">游戏化中心</view>
+  <view class="card" wx:if="{{status}}">
+    <view style="text-align:center"><view style="font-size:72rpx;font-weight:700">{{status.level_name}}</view><view style="font-size:28rpx;color:var(--tx3)">Lv.{{status.level}} · {{status.total_xp}} XP</view></view>
+    <view class="prog-bar" style="margin-top:16rpx"><view class="prog-fill" style="width:{{status.current_xp/status.xp_needed*100}}%"></view></view>
+    <view style="text-align:center;font-size:24rpx;color:var(--tx3);margin-top:8rpx">{{status.current_xp}}/{{status.xp_needed}} XP</view>
+    <view style="display:flex;gap:16rpx;margin-top:16rpx;justify-content:center">
+      <button class="btn btn-primary btn-sm" bindtap="checkin">🎁 每日签到 +15XP</button>
+      <button class="btn btn-secondary btn-sm" bindtap="checkAchievements">🏆 检查成就</button>
+    </view>
+    <view style="text-align:center;font-size:24rpx;color:var(--tx3);margin-top:8rpx">🔥 连续{{status.streak_days}}天 · 最高{{status.max_streak}}天</view>
+  </view>
+  <view class="card"><view class="section-title">🏆 成就 ({{unlockedCount}}/{{achievements.length}})</view>
+    <view class="ach-grid"><view wx:for="{{achievements}}" wx:key="key" class="ach-item {{item.unlocked?'on':''}}"><view class="ach-icon">{{item.icon}}</view><view class="ach-name">{{item.unlocked?item.title:'??'}}</view></view></view>
+  </view>
+  <view class="card"><view class="section-title">🏅 XP 排行榜</view>
+    <view wx:for="{{leaderboard}}" wx:key="user_id" class="lb-row"><view class="lb-rank">{{item.rank}}</view><view class="lb-name">{{item.nickname}}</view><view class="lb-val">Lv{{item.level}} {{item.total_xp}}XP</view></view>
+  </view>
+</view>

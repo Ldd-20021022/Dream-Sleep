@@ -1,0 +1,19 @@
+.prog-card { padding: 24rpx; }
+.prog-bar { height: 12rpx; background: var(--hover); border-radius: 6rpx; overflow: hidden; margin-bottom: 16rpx; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--ac), var(--teal)); border-radius: 6rpx; transition: width 0.5s; }
+.prog-info { display: flex; justify-content: space-between; font-size: 26rpx; color: var(--tx2); }
+.task-card { padding: 24rpx; margin-bottom: 16rpx; }
+.task-card.done { opacity: 0.6; }
+.task-row { display: flex; align-items: center; gap: 20rpx; }
+.task-chk { width: 48rpx; height: 48rpx; min-width: 48rpx; border: 3rpx solid var(--bd); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: var(--suc); }
+.task-chk.checked { border-color: var(--suc); background: rgba(46,204,113,0.2); }
+.task-body { flex: 1; }
+.task-title { font-size: 28rpx; font-weight: 500; margin-bottom: 4rpx; }
+.task-desc { font-size: 24rpx; color: var(--tx3); margin-bottom: 8rpx; }
+.task-pts { font-size: 24rpx; color: var(--teal); white-space: nowrap; }
+.task-pts.done { color: var(--suc); }
+.badge-grid { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.badge-item { width: calc(25% - 12rpx); text-align: center; padding: 24rpx 8rpx; border: 1rpx solid var(--bd); border-radius: 16rpx; opacity: 0.4; }
+.badge-item.on { opacity: 1; border-color: var(--ac); background: rgba(108,99,255,0.1); }
+.badge-icon { font-size: 48rpx; margin-bottom: 8rpx; }
+.badge-name { font-size: 22rpx; }

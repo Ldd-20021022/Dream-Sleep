@@ -1,0 +1,16 @@
+<view class="container"><view class="page-title">睡眠课程</view>
+  <view wx:for="{{courses}}" wx:key="id" class="card course-card">
+    <view class="course-title">{{item.title}}<span wx:if="{{item.is_premium}}" class="badge" style="margin-left:8rpx;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span></view>
+    <view class="course-desc">{{item.desc}}</view>
+    <view class="course-meta">{{item.instructor}} · {{item.duration_hours}}h · {{item.chapters}}章 · {{item.enrolled}}人报名</view>
+    <view style="display:flex;gap:12rpx;margin-top:12rpx">
+      <button class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="viewCourse">查看章节</button>
+      <button class="btn btn-secondary btn-sm" data-id="{{item.id}}" bindtap="enrollCourse">报名</button>
+    </view>
+  </view>
+  <view wx:if="{{viewing}}" class="modal" bindtap="closeView"><view class="modal-box" catchtap="">
+    <view class="course-title">{{viewing.title}}</view>
+    <view wx:for="{{chapters}}" wx:key="id" class="chapter-item"><view class="chapter-num">Ch{{item.order}}</view><view><view class="chapter-title">{{item.title}}</view><view class="chapter-meta">{{item.duration_minutes}}分钟</view></view></view>
+    <button class="btn btn-secondary" style="margin-top:16rpx" bindtap="closeView">关闭</button>
+  </view></view>
+</view>
