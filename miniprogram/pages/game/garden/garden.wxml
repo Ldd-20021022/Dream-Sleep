@@ -1,0 +1,55 @@
+<view class="container">
+  <view class="page-title">🌻 梦境花园</view>
+
+  <view wx:if="{{garden}}" class="garden-scene">
+    <!-- Resources -->
+    <view class="resource-bar">
+      <view class="res-item water" bindtap="waterPlant">
+        <text>💧</text><text>{{waterDrops}}</text>
+      </view>
+      <view class="res-item sun" bindtap="collectSunlight">
+        <text>☀️</text><text>{{sunlight}}</text>
+      </view>
+      <view class="res-item"><text>📅</text><text>Day {{day}}</text></view>
+    </view>
+    <view class="res-hint">👆 点击💧浇水 / 点击☀️收集阳光</view>
+
+    <!-- Water animation -->
+    <view wx:if="{{showWaterAnim}}" class="water-anim">💧💧💧</view>
+    <view wx:if="{{showSunAnim}}" class="sun-anim">☀️✨☀️</view>
+
+    <!-- Plants Grid -->
+    <view class="plants-grid">
+      <view wx:for="{{plants}}" wx:key="id" class="plant-card {{item.unlocked ? 'unlocked' : 'locked'}}" style="animation: plantPop 0.5s {{index*0.15}}s ease both">
+        <view class="plant-icon">{{item.unlocked ? item.icon : '🔒'}}</view>
+        <view class="plant-name">{{item.unlocked ? item.name : 'Day '+item.day}}</view>
+        <view wx:if="{{item.unlocked}}" class="plant-desc">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <!-- Garden Tasks -->
+    <view class="card">
+      <view class="section-title">🎯 花园任务</view>
+      <view wx:for="{{tasks}}" wx:key="id" class="gtask-row">
+        <view class="gtask-icon {{item.done?'done':''}}" data-id="{{item.id}}" bindtap="completeTask">
+          {{item.done ? '✅' : '⏳'}}
+        </view>
+        <view class="gtask-text {{item.done?'done':''}}">{{item.text}}</view>
+        <view class="gtask-reward">{{item.reward}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-hint">加载花园中...</view>
+</view>
+
+<!-- Plant Unlock Celebration -->
+<view wx:if="{{showPlantUnlock && newPlant}}" class="unlock-overlay" bindtap="dismissUnlock">
+  <view class="unlock-card">
+    <view class="unlock-sparkle">✨🌱✨</view>
+    <view class="unlock-icon">{{newPlant.icon}}</view>
+    <view class="unlock-title">🌿 新植物解锁！</view>
+    <view class="unlock-name">{{newPlant.name}}</view>
+    <view class="unlock-desc">{{newPlant.desc}}</view>
+  </view>
+</view>

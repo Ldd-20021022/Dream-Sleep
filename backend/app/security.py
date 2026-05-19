@@ -101,23 +101,6 @@ def sanitize_input(text: str) -> str:
     return text.strip()
 
 
-def sanitize_dict(data: dict) -> dict:
-    """Recursively sanitize all string values in a dict."""
-    if not data:
-        return data
-    result = {}
-    for k, v in data.items():
-        if isinstance(v, str):
-            result[k] = sanitize_input(v)
-        elif isinstance(v, dict):
-            result[k] = sanitize_dict(v)
-        elif isinstance(v, list):
-            result[k] = [sanitize_input(x) if isinstance(x, str) else x for x in v]
-        else:
-            result[k] = v
-    return result
-
-
 # ===== Password Strength =====
 def validate_password_strength(password: str) -> dict:
     """Check password strength. Returns {valid, errors, strength}."""
@@ -145,25 +128,6 @@ def validate_password_strength(password: str) -> dict:
     }
 
 
-# ===== Request Logger =====
-def log_request(request: Request, user_id: int = None, action: str = None):
-    """Log API request for audit trail."""
-    try:
-        from app.database import SessionLocal
-        from app.models import AuditLog
-        db = SessionLocal()
-        db.add(AuditLog(
-            user_id=user_id,
-            action=action or request.url.path,
-            ip_address=request.client.host if request.client else "",
-            detail=str(request.method),
-        ))
-        db.commit()
-        db.close()
-    except Exception:
-        pass
-
-
 # ===== Periodic Cache Cleanup =====
 def start_cache_cleanup(interval: int = 300):
     """Periodically clean expired cache entries."""
@@ -177,3 +141,112 @@ def start_cache_cleanup(interval: int = 300):
 
 # Start cleanup on import
 start_cache_cleanup()
+
+
+# ===== WeChat Push Notification =====
+WECHAT_APPID = ""
+WECHAT_SECRET = ""
+WECHAT_TEMPLATE_ID = ""
+
+
+def set_wechat_config(appid: str, secret: str, template_id: str = ""):
+    global WECHAT_APPID, WECHAT_SECRET, WECHAT_TEMPLATE_ID
+    WECHAT_APPID = appid
+    WECHAT_SECRET = secret
+    WECHAT_TEMPLATE_ID = template_id
+
+
+def _get_wechat_access_token() -> str:
+    """Get WeChat access token from cache or refresh."""
+    cached = cache.get("wx_access_token")
+    if cached:
+        return cached
+    if not WECHAT_APPID or not WECHAT_SECRET:
+        return ""
+    try:
+        import urllib.request, json
+        url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={WECHAT_APPID}&secret={WECHAT_SECRET}"
+        resp = urllib.request.urlopen(url, timeout=10)
+        data = json.loads(resp.read())
+        token = data.get("access_token", "")
+        if token:
+            cache.set("wx_access_token", token, ttl=7000)  # 2 hours minus buffer
+        return token
+    except Exception:
+        return ""
+
+
+def send_wechat_template_message(openid: str, template_id: str, data: dict, page: str = "") -> bool:
+    """Send a WeChat template message to a user."""
+    token = _get_wechat_access_token()
+    if not token or not openid:
+        return False
+    try:
+        import urllib.request, json
+        payload = json.dumps({
+            "touser": openid,
+            "template_id": template_id,
+            "page": page,
+            "data": data,
+        }).encode()
+        url = f"https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token={token}"
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        resp = urllib.request.urlopen(req, timeout=10)
+        result = json.loads(resp.read())
+        return result.get("errcode") == 0
+    except Exception:
+        return False
+
+
+# ===== Push Notification Scheduler =====
+def start_push_scheduler(interval: int = 60):
+    """Periodically check and send push reminders via WeChat (only if configured)."""
+    def _check():
+        while True:
+            time.sleep(interval)
+            if not WECHAT_APPID or not WECHAT_SECRET:
+                continue
+            try:
+                from app.database import SessionLocal
+                from app.models import NotificationSetting, TaskCompletion, User
+                from datetime import datetime, timedelta
+                db = SessionLocal()
+                now = datetime.now()
+                today = now.strftime("%Y-%m-%d")
+                ch, cm = now.hour, now.minute
+                settings_list = db.query(NotificationSetting).filter(NotificationSetting.push_enabled == 1).all()
+                for ns in settings_list:
+                    if not ns.reminder_time: continue
+                    try:
+                        rh, rm = int(ns.reminder_time[:2]), int(ns.reminder_time[3:5])
+                        if abs((ch * 60 + cm) - (rh * 60 + rm)) <= 5:
+                            already = db.query(TaskCompletion).filter(
+                                TaskCompletion.user_id == ns.user_id,
+                                TaskCompletion.task_id == "push_reminder",
+                                TaskCompletion.date_key == today).first()
+                            if not already:
+                                db.add(TaskCompletion(user_id=ns.user_id, task_id="push_reminder", date_key=today, points=0))
+                                # Actually send WeChat template message
+                                if WECHAT_APPID and WECHAT_SECRET:
+                                    user = db.query(User).filter(User.id == ns.user_id).first()
+                                    if user and user.openid:
+                                        send_wechat_template_message(
+                                            user.openid,
+                                            WECHAT_TEMPLATE_ID or "",
+                                            {
+                                                "thing1": {"value": "梦眠提醒"},
+                                                "thing2": {"value": "该准备睡觉了，好的睡眠是健康的基础"},
+                                                "time3": {"value": ns.reminder_time},
+                                            },
+                                            page="/pages/index/index",
+                                        )
+                    except: pass
+                db.commit()
+                db.close()
+            except: pass
+    t = threading.Thread(target=_check, daemon=True)
+    t.start()
+
+
+start_push_scheduler()
+

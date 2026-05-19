@@ -1,0 +1,47 @@
+<view class="container">
+  <view class="page-title">🫁 呼吸训练</view>
+
+  <!-- Mode Select -->
+  <view class="mode-row" wx:if="{{phase==='idle'}}">
+    <view class="mode-card {{mode==='guide'?'mc-on':''}}" data-mode="guide" bindtap="setMode">
+      <view class="mc-icon">🧘</view><view class="mc-name">引导模式</view><view class="mc-desc">4轮 · 边学边练</view>
+    </view>
+    <view class="mode-card {{mode==='challenge'?'mc-on':''}}" data-mode="challenge" bindtap="setMode">
+      <view class="mc-icon">🎯</view><view class="mc-name">挑战模式</view><view class="mc-desc">6轮 · 节拍评分</view>
+    </view>
+  </view>
+
+  <!-- Breathing Circle -->
+  <view class="breathe-area" wx:if="{{phase!=='idle' && phase!=='done'}}">
+    <view class="breathe-circle" style="transform:scale({{circleScale}});background:{{circleColor}}">
+      <view class="bc-inner">
+        <view class="bc-phase">{{phaseText}}</view>
+        <view class="bc-countdown">{{countdown}}</view>
+        <view class="bc-round">第{{round}}/{{totalRounds}}轮</view>
+      </view>
+    </view>
+    <view class="bc-hint">4秒吸气 · 7秒屏息 · 8秒呼气</view>
+  </view>
+
+  <!-- Done -->
+  <view wx:if="{{phase==='done'}}" class="done-card">
+    <view class="done-icon">✅</view>
+    <view class="done-title">{{phaseText}}</view>
+    <view class="done-score">评分 {{score}} 分</view>
+    <view class="done-xp">+{{xpEarned}} XP</view>
+    <view wx:if="{{level}}" class="done-level">🎖 {{level}}</view>
+    <button class="btn btn-primary" bindtap="reset">再来一次</button>
+  </view>
+
+  <!-- Start -->
+  <view wx:if="{{phase==='idle'}}" class="start-wrap">
+    <view class="idle-circle">🫁</view>
+    <view class="idle-hint">选择模式后开始练习</view>
+    <button class="btn btn-primary" bindtap="startBreathing">▶ 开始呼吸训练</button>
+  </view>
+
+  <view class="info-card">
+    <view class="info-title">💡 4-7-8 呼吸法</view>
+    <view class="info-text">鼻子吸气4秒 → 屏住呼吸7秒 → 嘴巴缓慢呼气8秒。通过缓慢呼气激活迷走神经，向全身发出「安全」信号。</view>
+  </view>
+</view>

@@ -1,0 +1,101 @@
+<view class="container">
+  <view class="page-title">📋 睡眠周报</view>
+
+  <!-- Period Selector -->
+  <view class="period-row">
+    <view class="period-chip {{days===7?'on':''}}" data-days="7" bindtap="setDays">近7天</view>
+    <view class="period-chip {{days===14?'on':''}}" data-days="14" bindtap="setDays">近14天</view>
+    <view class="period-chip {{days===30?'on':''}}" data-days="30" bindtap="setDays">近30天</view>
+  </view>
+
+  <!-- Loading -->
+  <view wx:if="{{loading}}" class="card" style="text-align:center;padding:48rpx">
+    <view style="font-size:48rpx">⏳</view>
+    <view style="color:var(--tx3);margin-top:12rpx">生成报告中...</view>
+  </view>
+
+  <!-- No Data -->
+  <view wx:elif="{{!stats}}" class="card" style="text-align:center;padding:48rpx">
+    <view style="font-size:48rpx">📭</view>
+    <view style="color:var(--tx3);margin-top:12rpx">暂无足够数据生成报告</view>
+    <view style="color:var(--tx3);font-size:22rpx;margin-top:4rpx">至少需要1条睡眠记录</view>
+    <button class="btn btn-primary btn-sm" style="margin-top:24rpx" bindtap="goAnalysis">先去记录</button>
+  </view>
+
+  <!-- Report Content -->
+  <view wx:else>
+    <!-- AI Summary -->
+    <view wx:if="{{report.summary}}" class="card summary-card">
+      <view class="summary-icon">🤖</view>
+      <view class="summary-title">AI 综合分析</view>
+      <view class="summary-text">{{report.summary}}</view>
+    </view>
+
+    <!-- Key Metrics -->
+    <view class="card">
+      <view class="section-title">📊 关键指标</view>
+      <view class="metrics-grid">
+        <view class="metric-item">
+          <view class="metric-value score">{{stats.avg_score}}</view>
+          <view class="metric-label">平均评分</view>
+        </view>
+        <view class="metric-item">
+          <view class="metric-value">{{stats.avg_duration}}h</view>
+          <view class="metric-label">平均时长</view>
+        </view>
+        <view class="metric-item">
+          <view class="metric-value streak">{{stats.streak_days}}天</view>
+          <view class="metric-label">连续达标</view>
+        </view>
+        <view class="metric-item">
+          <view class="metric-value">{{stats.consistency}}</view>
+          <view class="metric-label">作息规律度</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Efficiency & Debt -->
+    <view class="card" wx:if="{{stats.avg_efficiency || stats.sleep_debt}}">
+      <view class="section-title">📈 效率与负债</view>
+      <view class="info-row">
+        <view class="info-item">
+          <view class="info-label">睡眠效率</view>
+          <view class="info-value">{{stats.avg_efficiency}}%</view>
+          <view class="info-hint">实际睡眠 / 床上时间</view>
+        </view>
+        <view class="info-item" wx:if="{{stats.sleep_debt}}">
+          <view class="info-label">睡眠负债</view>
+          <view class="info-value" style="color:#E74C3C">{{stats.sleep_debt.total_debt}}h</view>
+          <view class="info-hint">{{stats.sleep_debt.days_in_debt}}天低于目标</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Tag Distribution -->
+    <view class="card" wx:if="{{stats.tag_counts && Object.keys(stats.tag_counts).length > 0}}">
+      <view class="section-title">🏷️ 睡眠标签分布</view>
+      <view class="tag-list">
+        <view wx:for="{{stats.tag_counts}}" wx:key="tag" class="tag-row">
+          <view class="tag-name">{{item.tag || '未标记'}}</view>
+          <view class="tag-count-bar"><view class="tag-fill" style="width:{{item.count/stats.total_records*100}}%"></view></view>
+          <view class="tag-count">{{item.count}}次</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI Suggestions -->
+    <view class="card" wx:if="{{report.suggestions && report.suggestions.length > 0}}">
+      <view class="section-title">💡 改善建议</view>
+      <view wx:for="{{report.suggestions}}" wx:key="*this" class="suggestion-item">
+        <view class="suggestion-dot">•</view>
+        <view>{{item}}</view>
+      </view>
+    </view>
+
+    <!-- Action Buttons -->
+    <view class="action-row">
+      <button class="btn btn-secondary" style="flex:1" bindtap="exportCSV" loading="{{exporting}}">📥 导出CSV</button>
+      <button class="btn btn-primary" style="flex:1" bindtap="shareReport" loading="{{sharing}}">📤 分享报告</button>
+    </view>
+  </view>
+</view>

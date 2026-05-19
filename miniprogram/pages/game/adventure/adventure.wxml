@@ -1,0 +1,34 @@
+<view class="container">
+  <view class="page-title">⚔️ 睡眠大冒险</view>
+
+  <view wx:if="{{adventure}}" class="adv-scene">
+    <!-- Progress -->
+    <view class="adv-progress">🗺️ 探索进度：第 {{adventure.current_chapter}}/{{adventure.total_chapters}} 章</view>
+    <view class="adv-progress-bar"><view class="adv-progress-fill" style="width:{{adventure.progress_pct}}%"></view></view>
+
+    <!-- Chapters -->
+    <view wx:for="{{adventure.chapters}}" wx:key="chapter" class="chapter-card {{adventure.current_chapter >= item.chapter ? 'ch-unlocked' : 'ch-locked'}}">
+      <view class="ch-header">
+        <view class="ch-num">{{adventure.current_chapter >= item.chapter ? '✅' : '🔒'}} 第{{item.chapter}}章</view>
+        <view class="ch-boss">👾 Boss：{{item.boss}}</view>
+      </view>
+      <view class="ch-title">{{item.title}}</view>
+      <view class="ch-story">{{item.story}}</view>
+      <view wx:if="{{adventure.current_chapter >= item.chapter}}" class="ch-req">🔹 所需技能：{{item.skill_required}} · 奖励 +{{item.xp_reward}}XP</view>
+      <button wx:if="{{adventure.current_chapter >= item.chapter}}"
+              class="btn btn-primary btn-sm" data-chapter="{{item.chapter}}" bindtap="startBattle"
+              style="margin-top:16rpx">⚔️ 挑战 {{item.boss}}</button>
+    </view>
+
+    <!-- Battle Animation -->
+    <view wx:if="{{battling}}" class="battle-overlay">
+      <view class="battle-box">
+        <view class="battle-hp-bar"><view class="battle-hp-fill" style="width:{{battleHP}}%"></view></view>
+        <view class="battle-hp-text">{{battleHP > 0 ? 'Boss HP: '+battleHP+'/100' : 'Boss 已击败！'}}</view>
+        <view class="battle-text">{{battleText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-hint">加载冒险中...</view>
+</view>

@@ -106,25 +106,6 @@ def get_sleep_feedback(diary_text: str) -> str:
     return result or "我收到了你的睡眠记录。别担心，我们一起慢慢来，先保持记录习惯就是进步。"
 
 
-def chat_with_sleep_coach(user_message: str, history: list = None, user_context: str = "") -> str:
-    system = """你是一位温柔、专业、遵循认知行为疗法(CBT-I)的睡眠教练。
-倾听用户的睡眠困扰，提供科学的睡眠卫生建议，给予共情和鼓励。
-绝不提供医疗诊断。回答简洁温暖，每次回复150字以内。严重症状建议就医。"""
-    if user_context:
-        system += f"\n\n用户档案：{user_context}"
-
-    messages = [{"role": "system", "content": system}]
-    if history:
-        messages.extend(history[-20:])
-    messages.append({"role": "user", "content": user_message})
-
-    try:
-        result = _ai_call(messages, temperature=0.8, max_tokens=300)
-        return result or "抱歉，我暂时无法回复。请稍后再试，或者记录一下此刻的感受，这本身就有帮助。"
-    except Exception:
-        return "抱歉，我暂时无法回复。请稍后再试，或者记录一下此刻的感受，这本身就有帮助。"
-
-
 def ai_generate_tasks(profile_dict: dict = None, sleep_stats: dict = None, user_name: str = "") -> list:
     """AI generates 4 personalized daily tasks based on user profile and sleep data."""
     context_parts = [f"用户：{user_name}"] if user_name else []
@@ -157,14 +138,20 @@ def ai_generate_tasks(profile_dict: dict = None, sleep_stats: dict = None, user_
 
 {context}
 
-请生成4个任务，每个任务包含：id(t1-t18参考编号)、title(10字以内简短标题)、desc(15字以内描述)、category(分类)、points(固定5分)。
+请生成4个任务，每个任务包含：id(t1-t18参考编号)、title(10字以内简短标题)、desc(15字以内描述)、category(分类)、time_of_day(时段：morning/afternoon/evening)、points(固定5分)。
+
+任务分配原则：
+- morning(早晨)：光照、运动、起床习惯类
+- afternoon(下午)：咖啡因控制、午睡、学习类
+- evening(晚上)：放松、环境、睡前仪式类
+- 4个任务中至少包含2个不同时段
 
 任务应针对用户的具体问题。如果用户入睡困难，推荐放松和作息类任务；如果压力高，推荐心理减压类；如果是新用户，推荐基础睡眠卫生任务。
 
 参考分类：作息、习惯、放松、心理、饮食、运动、工具、环境
 
 严格按照以下JSON格式返回，不要其他内容：
-{{"tasks":[{{"id":"t1","title":"任务标题","desc":"简短描述","category":"分类","points":5}}]}}"""
+{{"tasks":[{{"id":"t1","title":"任务标题","desc":"简短描述","category":"分类","time_of_day":"evening","points":5}}]}}"""
 
     result = _ai_chat("你是专业的睡眠健康管理AI。只返回JSON，不返回其他内容。", prompt, temperature=0.9, max_tokens=500)
 
@@ -183,6 +170,7 @@ def ai_generate_tasks(profile_dict: dict = None, sleep_stats: dict = None, user_
                 "title": str(t.get("title", "放松一下"))[:20],
                 "desc": str(t.get("desc", "有助于改善睡眠"))[:30],
                 "category": str(t.get("category", "习惯"))[:10],
+                "time_of_day": str(t.get("time_of_day", "evening"))[:10],
                 "points": 5,
             })
         if valid_tasks:
@@ -495,6 +483,132 @@ def calc_streak(db: Session, user_id: int) -> int:
     return streak
 
 
+def get_week_streak_days(db: Session, user_id: int) -> list:
+    """Return a list of 7 booleans for the past 7 days ( today is index 6 )."""
+    from app.models import TaskCompletion
+    from datetime import date, timedelta
+    today = date.today()
+    result = []
+    for i in range(7):
+        d = today - timedelta(days=6 - i)
+        dk = d.strftime("%Y-%m-%d")
+        count = db.query(TaskCompletion).filter(
+            TaskCompletion.user_id == user_id, TaskCompletion.date_key == dk
+        ).count()
+        result.append(count >= 1)
+    return result
+
+
+def generate_daily_insight(last_sleep, week_records, streak_days, avg_score):
+    """Generate a personalized daily insight with priority and action."""
+    insights = []
+
+    # Check if no data at all
+    if not last_sleep:
+        return {
+            "priority": "info",
+            "priority_label": "开始",
+            "title": "欢迎来到梦眠",
+            "body": "记录你的第一晚睡眠，开启个性化睡眠改善之旅。",
+            "action": {"label": "立即记录", "route": "/pages/record/record"},
+        }
+
+    score = last_sleep.score if last_sleep else 0
+    duration = last_sleep.duration_hours if last_sleep else 0
+    quality = last_sleep.quality if last_sleep else ""
+
+    # 1. Score-based insights
+    if score >= 85:
+        insights.append({
+            "priority": "success",
+            "title": "昨晚睡眠质量优秀",
+            "body": f"评分 {score} 分，睡眠 {duration}h。保持当前的作息节奏，你的身体正在感谢你。",
+            "action": None,
+        })
+    elif score >= 70:
+        insights.append({
+            "priority": "info",
+            "title": "睡眠质量良好，还有提升空间",
+            "body": f"评分 {score} 分。试试睡前做5分钟呼吸练习，帮助进入更深层的睡眠。",
+            "action": {"label": "试试呼吸训练", "route": "/pages/game/breathing/breathing"},
+        })
+    elif score >= 50:
+        insights.append({
+            "priority": "warning",
+            "title": "睡眠需要关注",
+            "body": f"评分 {score} 分。建议今晚提前30分钟上床，减少睡前屏幕时间。",
+            "action": {"label": "设置闹钟提醒", "route": "/pages/alarm/alarm"},
+        })
+    elif score > 0:
+        insights.append({
+            "priority": "critical",
+            "title": "昨晚睡眠质量较差",
+            "body": f"评分 {score} 分，仅睡 {duration}h。今晚试试白噪音辅助入睡，如果持续低分建议咨询医生。",
+            "action": {"label": "打开白噪音", "route": "/pages/noise/noise"},
+        })
+    else:
+        insights.append({
+            "priority": "info",
+            "title": "昨晚还没有记录",
+            "body": "记录睡眠是改善的第一步，现在去记录吧。",
+            "action": {"label": "去记录", "route": "/pages/record/record"},
+        })
+
+    insight = insights[0]
+
+    # 2. Trend-based additional insight (overrides if trend is significant)
+    if len(week_records) >= 3:
+        recent_scores = [r.score for r in week_records[-3:]]
+        if len(recent_scores) >= 3 and all(recent_scores[i] < recent_scores[i + 1] for i in range(len(recent_scores) - 1)):
+            insight = {
+                "priority": "success",
+                "title": "连续上升趋势！",
+                "body": f"近3天睡眠评分持续上升，你的努力正在见效。继续保持！",
+                "action": None,
+            }
+        elif len(recent_scores) >= 3 and all(recent_scores[i] > recent_scores[i + 1] for i in range(len(recent_scores) - 1)):
+            insight = {
+                "priority": "warning",
+                "title": "评分连续下滑",
+                "body": "近3天睡眠评分持续下降。检查一下：是否最近压力变大？咖啡因摄入增加？作息被打乱？",
+                "action": {"label": "和AI教练聊聊", "route": "/pages/chat/chat"},
+            }
+
+    # 3. Streak-based motivation
+    if streak_days >= 7:
+        insight = {
+            "priority": "success",
+            "title": f"连续 {streak_days} 天达标！",
+            "body": f"你已经连续 {streak_days} 天保持良好的睡眠习惯，这是了不起的成就！",
+            "action": None,
+        }
+    elif streak_days == 0 and score > 0:
+        insight = {
+            "priority": "warning",
+            "title": "连续记录中断了",
+            "body": "没关系，重新开始永远不晚。今天记录睡眠，重新点燃连续记录的火苗。",
+            "action": {"label": "记录睡眠", "route": "/pages/record/record"},
+        }
+
+    # 4. Duration-specific check
+    if duration > 0 and duration < 5:
+        insight = {
+            "priority": "critical",
+            "title": "睡眠严重不足",
+            "body": f"昨晚仅睡 {duration} 小时，远低于推荐的7-9小时。长期睡眠不足会增加健康风险。今天请务必早点休息。",
+            "action": {"label": "设置早睡闹钟", "route": "/pages/alarm/alarm"},
+        }
+    elif duration > 0 and duration > 10:
+        insight = {
+            "priority": "warning",
+            "title": "睡眠时间偏长",
+            "body": f"昨晚睡了 {duration} 小时，超过推荐范围。过长的睡眠有时也暗示睡眠质量不佳。",
+            "action": {"label": "查看分析", "route": "/pages/analysis/analysis"},
+        }
+
+    return insight
+
+
 def get_tag_stats(records: list) -> dict:
     stats = {}
     for r in records:
@@ -509,24 +623,24 @@ def get_tag_stats(records: list) -> dict:
 
 # ===== Task Generation =====
 ALL_TASKS = [
-    {"id": "t1", "title": "22:30前关灯准备入睡", "desc": "建立规律作息，让身体适应固定入睡时间", "points": 5, "category": "作息"},
-    {"id": "t2", "title": "睡前30分钟放下手机", "desc": "减少蓝光刺激，帮助褪黑素自然分泌", "points": 5, "category": "习惯"},
-    {"id": "t3", "title": "做5分钟冥想或呼吸练习", "desc": "4-7-8呼吸法：吸气4秒、屏息7秒、呼气8秒", "points": 5, "category": "放松"},
-    {"id": "t4", "title": "记录3件今天感恩的事", "desc": "减少焦虑反刍，以积极心态入睡", "points": 5, "category": "心理"},
-    {"id": "t5", "title": "睡前2小时内不进食", "desc": "避免消化活动干扰睡眠质量", "points": 5, "category": "饮食"},
-    {"id": "t6", "title": "下午3点后不喝咖啡/茶", "desc": "咖啡因半衰期约5-6小时，下午摄入影响夜间睡眠", "points": 5, "category": "饮食"},
-    {"id": "t7", "title": "户外活动30分钟", "desc": "自然光照有助于调节昼夜节律", "points": 5, "category": "运动"},
-    {"id": "t8", "title": "使用白噪音辅助入睡", "desc": "选择适合你的音景，建立入睡声音关联", "points": 5, "category": "工具"},
-    {"id": "t9", "title": "保持卧室温度18-22°C", "desc": "凉爽环境更有利于深度睡眠", "points": 5, "category": "环境"},
-    {"id": "t10", "title": "睡前热水浴或泡脚", "desc": "体温先升后降的过程有助于入睡", "points": 5, "category": "放松"},
-    {"id": "t11", "title": "午睡不超过30分钟", "desc": "短午睡提神，长午睡影响夜间睡眠", "points": 5, "category": "作息"},
-    {"id": "t12", "title": "避免睡前饮酒", "desc": "酒精虽助入睡但破坏深度睡眠和REM", "points": 5, "category": "饮食"},
-    {"id": "t13", "title": "写睡前日记或担忧清单", "desc": "把焦虑卸载到纸上，减少大脑反刍", "points": 5, "category": "心理"},
-    {"id": "t14", "title": "睡前轻度拉伸5分钟", "desc": "释放肌肉紧张，缓解白天久坐压力", "points": 5, "category": "运动"},
-    {"id": "t15", "title": "醒来后不赖床超过10分钟", "desc": "快速起床建立清醒节律，减少睡眠惯性", "points": 5, "category": "作息"},
-    {"id": "t16", "title": "白天至少20分钟自然光照", "desc": "阳光是调节生物钟最重要的信号", "points": 5, "category": "环境"},
-    {"id": "t17", "title": "晚上只开暖色灯", "desc": "暖光(2700K)比冷光对睡眠干扰更小", "points": 5, "category": "环境"},
-    {"id": "t18", "title": "与AI助手对话讨论睡眠", "desc": "获取个性化建议和睡眠知识", "points": 5, "category": "工具"},
+    {"id": "t1", "title": "22:30前关灯准备入睡", "desc": "建立规律作息，让身体适应固定入睡时间", "points": 5, "category": "作息", "time_of_day": "evening"},
+    {"id": "t2", "title": "睡前30分钟放下手机", "desc": "减少蓝光刺激，帮助褪黑素自然分泌", "points": 5, "category": "习惯", "time_of_day": "evening"},
+    {"id": "t3", "title": "做5分钟冥想或呼吸练习", "desc": "4-7-8呼吸法：吸气4秒、屏息7秒、呼气8秒", "points": 5, "category": "放松", "time_of_day": "evening"},
+    {"id": "t4", "title": "记录3件今天感恩的事", "desc": "减少焦虑反刍，以积极心态入睡", "points": 5, "category": "心理", "time_of_day": "evening"},
+    {"id": "t5", "title": "睡前2小时内不进食", "desc": "避免消化活动干扰睡眠质量", "points": 5, "category": "饮食", "time_of_day": "evening"},
+    {"id": "t6", "title": "下午3点后不喝咖啡/茶", "desc": "咖啡因半衰期约5-6小时，下午摄入影响夜间睡眠", "points": 5, "category": "饮食", "time_of_day": "afternoon"},
+    {"id": "t7", "title": "户外活动30分钟", "desc": "自然光照有助于调节昼夜节律", "points": 5, "category": "运动", "time_of_day": "morning"},
+    {"id": "t8", "title": "使用白噪音辅助入睡", "desc": "选择适合你的音景，建立入睡声音关联", "points": 5, "category": "工具", "time_of_day": "evening"},
+    {"id": "t9", "title": "保持卧室温度18-22°C", "desc": "凉爽环境更有利于深度睡眠", "points": 5, "category": "环境", "time_of_day": "evening"},
+    {"id": "t10", "title": "睡前热水浴或泡脚", "desc": "体温先升后降的过程有助于入睡", "points": 5, "category": "放松", "time_of_day": "evening"},
+    {"id": "t11", "title": "午睡不超过30分钟", "desc": "短午睡提神，长午睡影响夜间睡眠", "points": 5, "category": "作息", "time_of_day": "afternoon"},
+    {"id": "t12", "title": "避免睡前饮酒", "desc": "酒精虽助入睡但破坏深度睡眠和REM", "points": 5, "category": "饮食", "time_of_day": "evening"},
+    {"id": "t13", "title": "写睡前日记或担忧清单", "desc": "把焦虑卸载到纸上，减少大脑反刍", "points": 5, "category": "心理", "time_of_day": "evening"},
+    {"id": "t14", "title": "睡前轻度拉伸5分钟", "desc": "释放肌肉紧张，缓解白天久坐压力", "points": 5, "category": "运动", "time_of_day": "evening"},
+    {"id": "t15", "title": "醒来后不赖床超过10分钟", "desc": "快速起床建立清醒节律，减少睡眠惯性", "points": 5, "category": "作息", "time_of_day": "morning"},
+    {"id": "t16", "title": "白天至少20分钟自然光照", "desc": "阳光是调节生物钟最重要的信号", "points": 5, "category": "环境", "time_of_day": "morning"},
+    {"id": "t17", "title": "晚上只开暖色灯", "desc": "暖光(2700K)比冷光对睡眠干扰更小", "points": 5, "category": "环境", "time_of_day": "evening"},
+    {"id": "t18", "title": "与AI助手对话讨论睡眠", "desc": "获取个性化建议和睡眠知识", "points": 5, "category": "工具", "time_of_day": "afternoon"},
 ]
 
 ALL_BADGES = [
@@ -928,6 +1042,811 @@ def generate_weekly_report(user_name: str, profile: dict, records: list, stats: 
         "action_items": action_items,
         "records_count": len(records),
     }
+
+
+# ===== 21天睡眠改善课程 =====
+def _21_day_course() -> list:
+    """21天系统睡眠改善课程 — 每天视频+文章+任务."""
+    return [
+        # ===== 第一周：睡眠基础 =====
+        {"day": 1, "video_url": "//player.bilibili.com/player.html?bvid=BV1gTSwYDEum&page=1&autoplay=0", "video_bvid": "BV1gTSwYDEum", "video_title": "CBT-I教程：睡眠的阶段和周期", "week": 1, "week_title": "睡眠基础",
+         "title": "了解你的睡眠", "subtitle": "掌握睡眠周期与生物钟的科学原理",
+         "category": "睡眠科学",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1gTSwYDEum&page=1&autoplay=0", "video_bvid": "BV1gTSwYDEum", "video_title": "CBT-I教程：睡眠的阶段和周期", "video_duration": "8分钟",
+         "article": """## 你的睡眠不是均匀的
+
+每个晚上，你的大脑会经历 4-6 个完整的睡眠周期，每个周期大约 90 分钟。
+
+### 一个完整的睡眠周期包括：
+
+**入睡期（N1）** — 占 5%
+身体开始放松，脑波放缓。这个阶段你很容易被叫醒，有时会有"坠落感"。
+
+**浅睡期（N2）** — 占 45-55%
+体温下降，心率减慢，眼球停止运动。这是睡眠中占比最大的阶段，对记忆巩固很重要。
+
+**深睡期（N3）** — 占 15-25%
+身体修复的黄金时间！生长激素分泌，免疫系统增强，细胞修复加速。
+
+**快速眼动期（REM）** — 占 20-25%
+大脑高度活跃，梦境发生的阶段。对情绪调节和创造力至关重要。
+
+### 关键洞察
+
+> 💡 在睡眠周期结束时（而非深睡中）被唤醒，你会感觉更清醒。这就是为什么有时睡 6 小时比 8 小时醒来更精神。
+
+**今日金句：睡眠不是浪费时间的空白期，而是大脑的"夜间维护程序"。**""",
+         "task": "今晚记录你的入睡时间和起床时间，计算你大约完成了几个90分钟周期。观察你是在哪个阶段醒来的。",
+         "xp": 15,
+         "tips": ["保持卧室完全黑暗，温度在 18-22°C", "同一时间起床比同一时间入睡更重要"]},
+
+        {"day": 2, "video_url": "//player.bilibili.com/player.html?bvid=BV14UUZYKEFh&page=1&autoplay=0", "video_bvid": "BV14UUZYKEFh", "video_title": "CBT-I教程：认知行为疗法概述", "week": 1, "week_title": "睡眠基础",
+         "title": "打造理想睡眠环境", "subtitle": "温度、光线、噪音——睡眠的三大环境因素",
+         "category": "睡眠环境",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV14UUZYKEFh&page=1&autoplay=0", "video_bvid": "BV14UUZYKEFh", "video_title": "CBT-I教程：认知行为疗法概述", "video_duration": "10分钟",
+         "article": """## 你的卧室是睡眠圣地还是清醒牢房？
+
+### 温度：凉爽是关键
+
+人体核心温度在入睡前自然下降，这是身体发出的"该睡了"信号。
+
+- **最佳温度**：18-22°C
+- 太热会导致频繁醒来，减少深睡和 REM 睡眠
+- 睡前 1-2 小时洗个热水澡：体温先升后降，正好触发睡意
+
+### 光线：黑暗是最好的安眠药
+
+视网膜中的 ipRGC 细胞对蓝光（480nm）最敏感，直接连接你的生物钟中枢。
+
+- **睡前 1 小时**：换成暖色灯光（2700K 以下）
+- **窗帘**：使用遮光窗帘或眼罩
+- **电子设备**：开启夜间模式，或干脆放另一个房间
+- **夜灯**：如果需要，用红色灯（对褪黑素影响最小）
+
+### 噪音：稳定比安静更重要
+
+突然的声音变化比持续的噪音更打扰睡眠。
+
+- 白噪音可以帮助掩盖突发的环境噪音
+- 风扇、空气净化器的稳定声音是不错的选择
+- 耳塞适合对声音敏感的人
+
+**今日金句：你的卧室环境就是你的睡眠质量的硬件基础。**""",
+         "task": "今晚做三件事：(1) 调低卧室温度到 20°C 左右；(2) 睡前 1 小时把灯光调成暖色；(3) 把所有电子屏幕移出卧室或开启夜间模式。记录你的感受。",
+         "xp": 15,
+         "tips": ["遮光窗帘是最值得投资的睡眠用品", "睡前 1 小时避免所有屏幕"]},
+
+        {"day": 3, "week": 1, "week_title": "睡眠基础",
+         "title": "建立规律作息", "subtitle": "固定起床时间是改善睡眠的第一法则",
+         "category": "作息规律",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1DL411D7nc&page=1&autoplay=0", "video_bvid": "BV1DL411D7nc", "video_title": "规律作息的神秘力量：太阳光", "video_duration": "7分钟",
+         "article": """## 为什么生物钟如此重要？
+
+你的大脑中有一个"主时钟"——视交叉上核（SCN），它通过光线信号校准，调控你的体温、激素分泌和睡眠-觉醒节律。
+
+### 起床时间 > 入睡时间
+
+睡眠专家一致认为：**固定起床时间比固定入睡时间更重要。**
+
+- 每天早上在同一时间起床（误差不超过 30 分钟）
+- 起床后立刻接触自然光 15-30 分钟
+- 即使在周末也不要"补觉"超过 1 小时
+
+### 社交时差
+
+> 周末比平时晚起 2 小时以上，相当于每周经历一次"跨时区旅行"。这在睡眠医学中被称为"社交时差"，是破坏生物钟的头号元凶。
+
+### 困了再上床
+
+- 只有真正感到困倦时才上床
+- 如果躺下 20 分钟还没睡着，起来去另一个房间
+- 做轻松的事（阅读、听轻音乐），等有困意再回去
+
+**今日金句：规律不是刻板，而是给身体一个可预测的安全信号。**""",
+         "task": "设定一个固定的起床时间（建议比现在早 30 分钟），连续 3 天坚持在同一时间起床（包括周末）。记录起床时间和你白天的精力状态。",
+         "xp": 15,
+         "tips": ["把闹钟放在房间另一端", "醒来后立即拉开窗帘"]},
+
+        {"day": 4, "video_url": "//player.bilibili.com/player.html?bvid=BV1Ka411N7nx&page=1&autoplay=0", "video_bvid": "BV1Ka411N7nx", "video_title": "杨定一：睡前一小时正念冥想", "week": 1, "week_title": "睡眠基础",
+         "title": "创造睡前仪式", "subtitle": "用仪式感告诉你的大脑：该关机了",
+         "category": "放松技巧",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1Ka411N7nx&page=1&autoplay=0", "video_bvid": "BV1Ka411N7nx", "video_title": "杨定一：睡前一小时正念冥想", "video_duration": "9分钟",
+         "article": """## 你的大脑需要"关机程序"
+
+就像电脑不能直接拔电源一样，你的大脑也需要一个从"白天模式"切换到"睡眠模式"的过渡过程。
+
+### 什么是好的睡前仪式？
+
+睡前仪式是一系列固定的、放松的活动，每天在同一时间、以相同顺序进行。
+
+### 推荐睡前仪式（30-45 分钟）
+
+1. **关闭电子设备**（睡前 1 小时）
+2. **轻度拉伸或瑜伽**（5-10 分钟）— 释放肌肉紧张
+3. **写下明天的待办清单** — 把焦虑"卸载"到纸上
+4. **感恩日记**（3 件事）
+5. **阅读纸质书**（10-15 分钟）— 选轻松的内容
+6. **冥想或深呼吸**（5 分钟）
+
+### 避免
+
+- 剧烈运动（睡前 2 小时内）
+- 工作相关的讨论或思考
+- 刺激性内容（新闻、社交媒体争论）
+- 大量饮水（减少起夜）
+
+**今日金句：仪式感不是矫情，而是用行为告诉大脑——安全了，可以休息了。**""",
+         "task": "今晚创建你的睡前仪式：选择 3 个放松活动，按顺序执行。记录执行后的入睡速度和睡眠感受。",
+         "xp": 15,
+         "tips": ["睡前仪式至少持续 20 分钟才有效果", "保持每天仪式的顺序一致"]},
+
+        {"day": 5, "week": 1, "week_title": "睡眠基础",
+         "title": "饮食与睡眠", "subtitle": "你的晚餐决定了你的睡眠质量",
+         "category": "饮食习惯",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV16k5X6sEkW&page=1&autoplay=0", "video_bvid": "BV16k5X6sEkW", "video_title": "健康生活方式：饮食运动与睡眠", "video_duration": "10分钟",
+         "article": """## 睡眠友好饮食指南
+
+### 你应该吃的（促眠食物）
+
+- **香蕉**：富含镁和钾，帮助肌肉放松
+- **温牛奶**：含有色氨酸，是褪黑素的前体
+- **杏仁**：富含镁
+- **全麦面包/燕麦**：复合碳水帮助色氨酸进入大脑
+- **樱桃**：少数天然含褪黑素的水果
+- **洋甘菊茶**：含有芹菜素，有镇静作用
+
+### 你应该避免的（睡眠杀手）
+
+- **咖啡因**（下午 2 点后）：半衰期 5-6 小时
+- **酒精**：虽帮入睡，但破坏深睡和 REM
+- **高糖食物**：导致血糖波动，引起夜间醒来
+- **辛辣食物**：可能引起烧心和体温升高
+- **大餐**（睡前 2 小时内）：消化活动干扰睡眠
+
+### 晚餐黄金法则
+
+- 睡前 2-3 小时完成晚餐
+- 晚餐不宜过饱（七分饱）
+- 如果睡前饿了，吃一小份助眠零食
+
+**今日金句：好的睡眠从白天的选择开始，尤其是你放进嘴里的东西。**""",
+         "task": "今天下午 2 点后不摄入任何咖啡因（咖啡、茶、可乐）。睡前 3 小时内不吃东西。记录你今晚入睡的速度和睡眠质量。",
+         "xp": 15,
+         "tips": ["用洋甘菊茶替代下午的咖啡", "晚餐吃含色氨酸的食物"]},
+
+        {"day": 6, "week": 1, "week_title": "睡眠基础",
+         "title": "运动与睡眠", "subtitle": "找到适合你的运动方式与时间",
+         "category": "运动健康",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV13m42137NL&page=1&autoplay=0", "video_bvid": "BV13m42137NL", "video_title": "提升10倍睡眠质量的终极指南", "video_duration": "8分钟",
+         "article": """## 运动是最被低估的"安眠药"
+
+规律运动者比不运动者入睡快 12 分钟，总睡眠时长多 42 分钟。
+
+### 什么时间运动最好？
+
+**早晨运动（6-9 点）**
+- 接触自然光，校准生物钟
+- 提升白天的精力和专注力
+- 对深睡有显著帮助
+
+**下午运动（15-18 点）**
+- 这是体温和肌肉力量的峰值时段
+- 运动表现最佳
+- 对入睡速度帮助最大
+
+**晚上运动需注意**
+- 睡前 1-2 小时内避免高强度运动
+- 轻度瑜伽和拉伸是例外（有助放松）
+
+### 运动处方
+
+- **有氧运动**（快走、游泳）：每周 150 分钟
+- **力量训练**：每周 2 次
+- **简单开始**：每天 30 分钟户外散步
+
+**今日金句：白天的每一滴汗水，都是今晚每一分钟深睡的预付款。**""",
+         "task": "今天进行至少 30 分钟的户外活动（散步、跑步、骑行都可以），最好在上午或下午进行。记录运动后的睡眠感受。",
+         "xp": 15,
+         "tips": ["户外运动额外获得自然光照", "运动后不要马上睡觉"]},
+
+        {"day": 7, "week": 1, "week_title": "睡眠基础",
+         "title": "第一周回顾", "subtitle": "检查习惯养成，调整计划",
+         "category": "复习总结",
+         "video_url": "", "video_duration": "6分钟",
+         "article": """## 恭喜完成第一周！回顾你的收获
+
+### 本周我们学习了：
+
+1. **睡眠周期** — 了解了 90 分钟的睡眠节律
+2. **睡眠环境** — 优化了温度、光线和噪音
+3. **规律作息** — 固化了起床时间
+4. **睡前仪式** — 创建了关机程序
+5. **饮食调整** — 调整了促眠饮食习惯
+6. **运动习惯** — 开始了规律运动
+
+### 自我检查
+
+请诚实回答以下问题：
+
+- ✅ 你是否每天都在同一时间起床？
+- ✅ 你的卧室温度是否在 18-22°C？
+- ✅ 你是否在睡前 1 小时减少了屏幕使用？
+- ✅ 你是否建立了睡前仪式？
+- ✅ 你是否减少了咖啡因和酒精的摄入？
+- ✅ 你是否开始规律运动？
+
+### 第二周预告
+
+下周我们将进入**心理调节**阶段，学习 CBT-I 认知行为疗法的核心技术，包括刺激控制疗法和认知重构。
+
+**今日金句：进步不一定是线性的，但每天微小的坚持，就是改变的开始。**""",
+         "task": "回顾本周的 6 个习惯目标，给自己打分（1-10 分）。选择做得最好的一项继续坚持，选择最需要改进的一项作为下周重点。",
+         "xp": 20,
+         "tips": ["不要把未完成的目标视为失败，而是看作数据", "下周从最想做的一项开始"]},
+
+        # ===== 第二周：心理调节 =====
+        {"day": 8, "video_url": "//player.bilibili.com/player.html?bvid=BV1BDapzbEB6&page=1&autoplay=0", "video_bvid": "BV1BDapzbEB6", "video_title": "彻夜没睡是一种假象——三招改善睡眠", "week": 2, "week_title": "心理调节",
+         "title": "认识失眠", "subtitle": "打破对失眠的恐惧循环",
+         "category": "CBT-I疗法",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1BDapzbEB6&page=1&autoplay=0", "video_bvid": "BV1BDapzbEB6", "video_title": "彻夜没睡是一种假象——三招改善睡眠", "video_duration": "10分钟",
+         "article": """## 失眠的恶性循环
+
+失眠不仅仅是"睡不着"，而是一个由**生理因素、心理因素和行为因素**共同维持的恶性循环。
+
+### 失眠的 3P 模型
+
+**易感因素（Predisposing）**
+- 天生睡眠浅、容易焦虑
+- 家族中有失眠史
+
+**诱发因素（Precipitating）**
+- 压力事件（工作、关系、健康）
+- 生活变化（搬家、时差、新工作）
+
+**维持因素（Perpetuating）**
+- 对睡眠的过度担忧
+- 在床上玩手机/工作
+- 白天补觉
+
+### 关键认知
+
+> 🔑 急性失眠和慢性失眠的区别不在于严重程度，而在于**维持因素**。大多数人的失眠之所以持续，是因为发展出了"睡眠焦虑"——越是担心睡不着，就越是睡不着。
+
+### 打破循环的第一步
+
+今晚试试这个实验：告诉自己"我不需要努力去睡，睡眠是身体的本能，不能强迫。我只是躺在床上休息。" — 这个态度转变本身就能减少入睡压力。
+
+**今日金句：失眠不是你的一部分，而是一个可以被改变的模式。**""",
+         "task": "今晚如果躺在床上睡不着，不要看时钟，不要计算「还剩几小时能睡」。只是安静地躺着，告诉自己「休息也很好」。记录你的焦虑水平变化。",
+         "xp": 15,
+         "tips": ["把钟表转过去看不见", "睡眠不能被强迫，只能被允许"]},
+
+        {"day": 9, "video_url": "//player.bilibili.com/player.html?bvid=BV1YTndzmEWD&page=1&autoplay=0", "video_bvid": "BV1YTndzmEWD", "video_title": "矛盾睡眠法——失眠朋友终于睡踏实了", "week": 2, "week_title": "心理调节",
+         "title": "刺激控制疗法", "subtitle": "CBT-I 最核心的技术：重建床与睡眠的连接",
+         "category": "CBT-I疗法",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1YTndzmEWD&page=1&autoplay=0", "video_duration": "12分钟",
+         "article": """## 你的大脑把床和什么联系在一起？
+
+如果你的床同时是办公室、电影院、餐厅和焦虑室，那大脑就不会把"床"和"睡眠"联系起来。
+
+### 刺激控制疗法六原则
+
+1. **只有困倦时才上床**
+2. **床只用于睡眠和性生活**（不玩手机、不工作、不吃东西）
+3. **躺下 20 分钟无法入睡，起床去另一个房间**
+4. **做轻松的事**（阅读、听轻音乐），直到感到困倦
+5. **如果回到床上还是睡不着，重复步骤 3**
+6. **每天同一时间起床**，无论前一晚睡了多久
+
+### 初期可能更难
+
+> ⚠️ 前 3-5 天可能更难入睡。这是正常的！你的大脑正在重新学习"床 = 睡眠"的条件反射。坚持 1-2 周，效果显著。
+
+### 为什么有效？
+
+这是巴甫洛夫的条件反射原理。当你的大脑反复经历"困 → 上床 → 睡着"，床就成了强大的睡眠触发器。
+
+**今日金句：床是睡觉的地方，不是思考人生的地方。**""",
+         "task": "今晚严格执行刺激控制疗法的前三条原则。如果躺下 20 分钟睡不着，果断起床去客厅。记录你执行了几次，以及最终入睡的时间。",
+         "xp": 15,
+         "tips": ["准备一个舒适的'起床去处'", "不要看时间！把钟表藏起来"]},
+
+        {"day": 10, "week": 2, "week_title": "心理调节",
+         "title": "睡眠限制疗法", "subtitle": "减少床上时间来增加实际睡眠",
+         "category": "CBT-I疗法",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1ZHszetEYn&page=1&autoplay=0", "video_bvid": "BV1ZHszetEYn", "video_title": "睡眠压力与昼夜节律：科学午睡指南", "video_duration": "10分钟",
+         "article": """## 听起来矛盾，但非常有效
+
+睡眠限制疗法的核心思想：**通过压缩你在床上的时间，来提高睡眠效率。**
+
+### 什么是睡眠效率？
+
+睡眠效率 = 实际睡眠时间 ÷ 在床上时间 × 100%
+
+- 正常：> 85%
+- 失眠者通常：< 70%（在床上 10 小时，只睡了 6 小时）
+
+### 操作方法
+
+1. 记录一周的睡眠日志
+2. 计算平均实际睡眠时间
+3. **将床上时间限制为平均睡眠时间 + 30 分钟**（最少不低于 5.5 小时）
+4. 例如：平均睡 6 小时 → 床上时间 6.5 小时
+5. 当睡眠效率连续 3 天 > 90%，增加 15 分钟床上时间
+6. 当睡眠效率 < 85%，减少 15 分钟
+
+### 初期感受
+
+> 前几天你会感觉睡得少了，你可能更困。但这是正常的！轻度睡眠剥夺会增加"睡眠驱动力"，让你更容易入睡、睡得更深。
+
+**今日金句：不是床上时间长就是睡得好，睡得高效才是真正的休息。**""",
+         "task": "计算你过去 3 天的平均睡眠效率和实际睡眠时间。设定一个目标床上时间（实际睡眠时间 + 30 分钟）。今晚严格在这个时间窗口内睡觉。",
+         "xp": 15,
+         "tips": ["固定起床时间是睡眠限制的关键", "白天不要小睡超过 20 分钟"]},
+
+        {"day": 11, "week": 2, "week_title": "心理调节",
+         "title": "认知重构", "subtitle": "改变对睡眠的错误信念",
+         "category": "CBT-I疗法",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1d9Ls6TEtH&page=1&autoplay=0", "video_bvid": "BV1d9Ls6TEtH", "video_title": "斯坦福专家：重启你的睡眠系统", "video_duration": "11分钟",
+         "article": """## 你对睡眠有哪些错误信念？
+
+认知重构是 CBT-I 的第三步，识别并改变那些让你更焦虑的睡眠相关错误信念。
+
+### 常见错误信念及替代想法
+
+**错误信念 1**：我必须睡满 8 小时，否则第二天会很糟糕。
+
+- 替代想法：睡眠需求因人而异（6-9 小时都正常）。即使睡少了，大多数日常活动我仍能完成。
+
+**错误信念 2**：如果今晚睡不好，明天一定会搞砸。
+
+- 替代想法：一晚糟糕的睡眠不会毁掉一整天。我曾有很多次睡眠不足但仍然完成了工作。
+
+**错误信念 3**：躺在床上休息不够，只有睡着才算数。
+
+- 替代想法：安静的休息本身就是恢复性的。身体在放松状态下也有修复功能。
+
+**错误信念 4**：失眠会毁了我的健康。
+
+- 替代想法：偶尔失眠是正常的。慢性失眠可以改善，不会造成永久伤害。
+
+### 练习方法
+
+每次出现"灾难性睡眠想法"时，写下来，然后理性地写出替代想法。
+
+**今日金句：你对睡眠的想法，往往比睡眠本身更让你疲惫。**""",
+         "task": "今天留意你对睡眠的自动负面想法。每当出现时，写下它，然后用一个更理性的替代想法来回应。至少练习 3 次。",
+         "xp": 15,
+         "tips": ["用笔记本记录'想法-替代想法'对照表", "对替代想法保持温和，不需要完全相信"]},
+
+        {"day": 12, "video_url": "//player.bilibili.com/player.html?bvid=BV1yRmEB5EHj&page=1&autoplay=0", "video_bvid": "BV1yRmEB5EHj", "video_title": "雨声助眠×渐进式肌肉放松法", "week": 2, "week_title": "心理调节",
+         "title": "渐进式肌肉放松", "subtitle": "释放身体的紧张，大脑自然会放松",
+         "category": "放松技巧",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1yRmEB5EHj&page=1&autoplay=0", "video_duration": "15分钟",
+         "article": """## 身体放松了，大脑才能放松
+
+渐进式肌肉放松法（PMR）由美国医生 Edmund Jacobson 于 1920 年代研发，是循证有效的放松技术。
+
+### 基本原理
+
+通过**有意识地先紧张、再放松**每个肌肉群，你能学会识别"紧张"和"放松"之间的差异。很多人长期处于无意识的肌肉紧张状态而不自知。
+
+### 15 分钟完整流程
+
+准备：平躺，深呼吸 3 次。
+
+1. **手和前臂**：握紧双拳 5 秒 → 突然放松 15 秒
+2. **上臂和二头肌**：弯曲手臂，收紧肌肉 5 秒 → 放松 15 秒
+3. **面部**：皱紧眉头、紧闭眼睛、咬紧牙关 5 秒 → 放松 15 秒
+4. **颈部和肩膀**：耸肩到耳朵 5 秒 → 放松 15 秒
+5. **胸部和背部**：深吸气收紧胸部 5 秒 → 呼气放松 15 秒
+6. **腹部**：收紧腹部 5 秒 → 放松 15 秒
+7. **臀部和大腿**：收紧臀部和腿 5 秒 → 放松 15 秒
+8. **小腿和脚**：脚趾向下弯曲 5 秒 → 放松 15 秒
+
+### 注意事项
+
+- 紧张时不要到疼痛的程度（7-8 分力即可）
+- 放松时仔细体会"松弛感"
+- 每天练习，效果逐渐增强
+
+**今日金句：身体是一扇门，放松它，睡眠自然会走进来。**""",
+         "task": "今晚睡前在床上的时候，做一次完整的渐进式肌肉放松练习（从头到脚，每个部位 5 秒紧张 + 15 秒放松）。记录你的紧张程度变化。",
+         "xp": 15,
+         "tips": ["如果中间睡着了，说明效果很好！", "可以配合舒缓的音乐"]},
+
+        {"day": 13, "video_url": "//player.bilibili.com/player.html?bvid=BV1imdLYHEpy&page=1&autoplay=0", "video_bvid": "BV1imdLYHEpy", "video_title": "10分钟睡前冥想：放下控制，安心入睡", "week": 2, "week_title": "心理调节",
+         "title": "正念入门", "subtitle": "观察而不评判——让思绪如云朵飘过",
+         "category": "正念冥想",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1imdLYHEpy&page=1&autoplay=0", "video_duration": "12分钟",
+         "article": """## 正念不是"什么都不想"
+
+很多人误以为冥想就是"清空大脑"，结果越努力越焦虑。正念的核心是**观察而不评判**。
+
+### 三个关键态度
+
+1. **不评判**：对任何出现的想法，不论好坏，只是注意到它
+2. **不执着**：想法和情绪会来，也会走。你不需要抓住或推开它们
+3. **回到呼吸**：当发现自己走神了（这很正常），温柔地把注意力带回呼吸
+
+### 5 分钟呼吸正念
+
+1. 找个舒适的坐姿或躺姿
+2. 闭上眼睛，正常呼吸
+3. 把注意力放在鼻孔气息进出的感觉上
+4. 当你发现走神了（一定会），只是注意到"哦，我刚才在想事情"，然后温柔地回到呼吸
+5. 不需要数呼吸，不需要控制呼吸深度
+
+### 正念与睡眠
+
+正念帮助睡眠的机制：
+- 减少"思维反刍"（反复想同一件事）
+- 降低生理唤起水平（心跳、血压）
+- 打破"睡不着 → 焦虑 → 更睡不着"的循环
+
+**今日金句：你不需要停止思维，只需要改变你和思维的关系。**""",
+         "task": "睡前做 5 分钟呼吸正念练习。不要期望「做对」，只是观察。如果走神 100 次，就温柔地回来 100 次。记录你的体验。",
+         "xp": 15,
+         "tips": ["走神不是失败，是练习的一部分", "可以从 3 分钟开始，逐步延长"]},
+
+        {"day": 14, "week": 2, "week_title": "心理调节",
+         "title": "第二周回顾", "subtitle": "CBT-I 核心技巧整合与巩固",
+         "category": "复习总结",
+         "video_url": "", "video_duration": "8分钟",
+         "article": """## 第二周完成！你已经掌握了 CBT-I 的核心工具
+
+### 本周学习的四项核心技术
+
+1. **认识失眠** — 理解 3P 模型，打破恐惧循环
+2. **刺激控制疗法** — 床 = 睡眠，20 分钟法则
+3. **睡眠限制疗法** — 提高睡眠效率的精准工具
+4. **认知重构** — 改变灾难化睡眠想法
+5. **渐进式放松** — 身体放松带动大脑放松
+6. **正念入门** — 观察而不评判的练习
+
+### CBT-I 整合使用建议
+
+| 如果你的问题是 | 优先使用 |
+|-----------|---------|
+| 躺下很久睡不着 | 刺激控制疗法 |
+| 早醒无法再入睡 | 刺激控制 + 认知重构 |
+| 睡眠很浅 | 睡眠限制 + 放松训练 |
+| 对睡眠过度焦虑 | 认知重构 + 正念 |
+| 半夜频繁醒来 | 刺激控制 + 正念 |
+
+### 第三周预告
+
+下周我们将进入**深度优化**阶段：呼吸法、身体扫描、压力管理、昼夜节律优化。
+
+**今日金句：掌握了这些工具，你就拥有了改善睡眠的主动权。**""",
+         "task": "从本周的 6 项技术中，选择 2 项对你最有效的，制定下周继续练习的计划。记录为什么这两项对你有用。",
+         "xp": 20,
+         "tips": ["不需要用所有技术，选择最适合你的", "长期坚持比短期密集更有效"]},
+
+        # ===== 第三周：深度优化 =====
+        {"day": 15, "video_url": "//player.bilibili.com/player.html?bvid=av586333123&page=1&autoplay=0", "video_bvid": "av586333123", "video_title": "深度放松：腹式呼吸快速缓解紧张焦虑", "week": 3, "week_title": "深度优化",
+         "title": "4-7-8 呼吸法", "subtitle": "哈佛医生的60秒入眠呼吸术",
+         "category": "呼吸技巧",
+         "video_url": "//player.bilibili.com/player.html?bvid=av586333123&page=1&autoplay=0", "video_duration": "8分钟",
+         "article": """## 4-7-8 呼吸法：最强大的放松工具
+
+由哈佛大学 Dr. Andrew Weil 推广的 4-7-8 呼吸法，源自瑜伽调息法（Pranayama），能在 60 秒内激活副交感神经系统。
+
+### 原理
+
+- **4 秒吸气**：通过鼻子，充分吸入氧气
+- **7 秒屏息**：让氧气在肺部充分交换，轻微升高 CO2 有助于血管扩张
+- **8 秒呼气**：通过嘴巴，缓慢、完全地呼出，激活迷走神经
+
+> 缓慢的呼气直接刺激迷走神经（副交感神经的主要通路），向全身发出"安全"信号。
+
+### 操作步骤
+
+1. 舒适地坐着或躺着
+2. 舌尖抵住上颚前部（门牙后方）
+3. 完全呼出肺里的空气
+4. 闭嘴，鼻子吸气，默数 **4** 秒
+5. 屏住呼吸，默数 **7** 秒
+6. 嘴巴呼气（发出"呼—"的声音），默数 **8** 秒
+7. 这是一轮，重复 **4 轮**
+
+### 何时使用
+
+- 入睡困难时
+- 半夜醒来后
+- 白天感到焦虑时
+- 需要快速平静下来时
+
+**今日金句：你不需要控制你的睡眠，只需要控制你的呼吸。**""",
+         "task": "今晚睡前做 4 轮 4-7-8 呼吸法（约 2 分钟）。如果在床上睡不着，再做 4 轮。记录你做完后的身体感受和入睡情况。",
+         "xp": 15,
+         "tips": ["初学者可能头晕，减为 3-3-6 开始", "呼气一定要慢，越长越好"]},
+
+        {"day": 16, "video_url": "//player.bilibili.com/player.html?bvid=BV1rurkYwEMc&page=1&autoplay=0", "video_bvid": "BV1rurkYwEMc", "video_title": "睡前身体扫描正念冥想练习", "week": 3, "week_title": "深度优化",
+         "title": "身体扫描冥想", "subtitle": "从头到脚的系统性深度放松",
+         "category": "正念冥想",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1rurkYwEMc&page=1&autoplay=0", "video_duration": "15分钟",
+         "article": """## 身体扫描：最温柔的睡眠引导
+
+身体扫描（Body Scan）是正念减压（MBSR）课程中最受欢迎的技术之一，特别适合在睡前进行。
+
+### 基本方法
+
+按顺序将注意力依次放在身体的每个部位，感受那里的感觉——温度、压力、脉动、紧张或放松。不需要改变任何东西，只是**觉察**。
+
+### 15 分钟身体扫描指南
+
+**准备**：平躺，双手放在身体两侧，闭上眼睛。
+
+1. **左脚趾** → 感受脚趾之间的接触
+2. **左脚掌** → 脚底的感觉
+3. **左脚踝** → 觉察踝关节
+4. **左小腿** → 从脚踝到膝盖
+5. **左膝盖** → 腿弯的感觉
+6. **左大腿** → 从膝盖到髋部
+7. **右脚趾** → 重复右侧
+8. **右脚掌** → ...
+9. （继续右侧到右大腿）
+10. **臀部** → 身体与床接触的压力
+11. **下背部** → 是否感到紧张？
+12. **腹部** → 随着呼吸的起伏
+13. **胸部** → 心跳的感觉
+14. **上背部** → 肩胛骨的位置
+15. **手指和手掌** → 左右分别
+16. **手腕和前臂** → 是否在握紧？
+17. **上臂** → 肩膀的沉重感
+18. **脖子和喉咙** → 是否有紧绷？
+19. **面部和下巴** → 有意识地放松
+20. **头顶** → 从头顶到全身的整合感受
+
+**今日金句：身体的每个部位都在说话，只是我们很少去听。**""",
+         "task": "今晚做一个完整的身体扫描冥想。不需要严格按照顺序，可以上下反复。关键是在每个部位停留 10-20 秒，只是觉察感觉。",
+         "xp": 15,
+         "tips": ["如果扫描时睡着了，说明身体需要休息", "把注意力当作手电筒的光束"]},
+
+        {"day": 17, "video_url": "//player.bilibili.com/player.html?bvid=BV1m3411J7aC&page=1&autoplay=0", "video_bvid": "BV1m3411J7aC", "video_title": "打破焦虑——八拍呼吸法", "week": 3, "week_title": "深度优化",
+         "title": "睡眠与压力管理", "subtitle": "白天如何管理压力来保护夜晚的睡眠",
+         "category": "压力管理",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1m3411J7aC&page=1&autoplay=0", "video_duration": "11分钟",
+         "article": """## 压力是睡眠的头号敌人
+
+你的身体并不知道"工作截止日期"和"被老虎追赶"的区别。当压力激活了 HPA 轴（下丘脑-垂体-肾上腺），皮质醇升高，直接抑制睡眠。
+
+### 关键在于白天，不是夜晚
+
+很多人犯的错误：白天压榨自己，晚上期待"自动切换"到放松模式。
+
+### 白天的压力管理工具箱
+
+**早晨（设定基调）**
+- 起床后不要立刻看手机
+- 10 分钟清晨散步（顺便获得光照）
+- 写下今天最重要的 3 件事
+
+**白天（主动调节）**
+- 每隔 90 分钟休息 5-10 分钟
+- 午餐后散步 15 分钟
+- 感到压力时，做 3 轮 4-7-8 呼吸
+
+**傍晚（过渡期）**
+- 在回家路上做"角色切换"仪式
+- 写下今天完成了什么（而不是没完成什么）
+- 把未完成的任务写进明天的清单
+
+### "担忧时间"技术
+
+每天固定 15 分钟（建议下午 4-5 点）专门用来"担忧"：把所有的烦恼写下来，思考解决方案。除此之外的时间，当担忧出现时，告诉自己"留到担忧时间处理"。
+
+**今日金句：最好的睡眠准备不是晚上的仪式，而是白天的压力管理。**""",
+         "task": "今天设置一个「担忧时间」（15 分钟），把所有焦虑写下来。除此之外，当担忧出现时，告诉自己「留到担忧时间」。睡前回顾这个技术是否有效。",
+         "xp": 15,
+         "tips": ["担忧时间不要设在睡前 2 小时内", "写下担忧本身就能减轻焦虑"]},
+
+        {"day": 18, "week": 3, "week_title": "深度优化",
+         "title": "昼夜节律深度优化", "subtitle": "光照、体温与褪黑素的精妙配合",
+         "category": "睡眠科学",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1KY4y1Q7NA&page=1&autoplay=0", "video_bvid": "BV1KY4y1Q7NA", "video_title": "人的昼夜节律是怎么回事？如何改变生物钟", "video_duration": "10分钟",
+         "article": """## 你的生物钟比你想象的更精确
+
+昼夜节律是内置于你身体每个细胞中的 24 小时时钟，由"主时钟"SCN（视交叉上核）统一协调。
+
+### 光照：最强的时间信号
+
+- **早晨（6-9 点）**：接触明亮自然光 20-30 分钟 → 抑制褪黑素，设置"白天开始"信号
+- **中午**：继续获得自然光，维持节律
+- **晚上（20 点后）**：逐步降低光照强度，换成暖光 → 允许褪黑素升高
+
+### 体温节律
+
+你的核心体温在一天中有约 1°C 的波动：
+- 白天：较高（37°C 左右）
+- 入睡前：开始下降（−0.5°C）
+- 凌晨 4-5 点：最低点
+- 醒来前：开始回升
+
+> 睡前热水浴通过"先升后降"的体温变化促进睡眠。
+
+### 褪黑素：黑暗的信号
+
+- 通常在睡前 2 小时开始分泌
+- 峰值在凌晨 2-4 点
+- 蓝光（480nm）是最强的褪黑素抑制剂
+
+### 优化行动清单
+
+- 早晨 30 分钟户外光（不用直视太阳）
+- 白天工作区保持明亮
+- 傍晚开始使用暖光灯
+- 睡前 1-2 小时屏幕开启夜间模式
+- 保持就寝和起床时间恒定（误差 <30 分钟）
+
+**今日金句：你不是在对抗失眠，你是在教会你的身体什么时间该做什么。**""",
+         "task": "今天做三件事：(1) 早晨起床后 30 分钟内接触户外自然光 20 分钟；(2) 傍晚后使用暖光灯；(3) 睡前 1 小时开启所有屏幕的夜间模式。",
+         "xp": 15,
+         "tips": ["早上不需要盯着太阳，只需在户外", "防蓝光眼镜也是有效工具"]},
+
+        {"day": 19, "week": 3, "week_title": "深度优化",
+         "title": "数字化排毒", "subtitle": "减少蓝光与信息过载对睡眠的侵蚀",
+         "category": "生活习惯",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1G9ndzjEtR&page=1&autoplay=0", "video_bvid": "BV1G9ndzjEtR", "video_title": "手机蓝光：睡前屏幕时间的隐形影响", "video_duration": "9分钟",
+         "article": """## 你的手机正在偷走你的睡眠
+
+2019 年的一项研究显示，睡前使用手机的人比不用的人入睡时间晚 21 分钟，深睡时间少 25%。
+
+### 问题不只是蓝光
+
+- **蓝光抑制褪黑素**：延迟睡眠时间 1-2 小时
+- **信息刺激**：社交媒体算法设计为让你停不下来
+- **FOMO 焦虑**：害怕错过信息，反复检查
+- **被动消耗**：刷手机时你不会意识到时间流逝
+
+### 数字化排毒计划
+
+**日落模式（睡前 1 小时）**
+- 所有屏幕开启夜间模式
+- 手机调成勿扰模式
+- 不查看社交媒体、邮件、新闻
+- 用纸质书、播客、轻音乐替代
+
+**卧室无手机**
+- 把充电器放在卧室外面
+- 使用传统闹钟
+- 把床恢复为只用于睡眠和性生活
+
+**早晨延迟看手机**
+- 起床后 30 分钟内不碰手机
+- 先做：光照、喝水、轻微活动
+- 再检查消息
+
+### 本周实验
+
+挑战自己：连续 3 天，睡前 1 小时不碰手机。观察你的入睡速度和睡眠质量的变化。
+
+**今日金句：你的注意力是宝贵的资源，不要把它免费送给算法。**""",
+         "task": "今晚睡前 1 小时把所有电子设备放在卧室外面。阅读纸质书或做放松练习。记录你今晚的入睡时间和睡眠质量。",
+         "xp": 15,
+         "tips": ["准备好替代活动：书、杂志、拼图、日记本", "告诉家人这是你的睡眠实验"]},
+
+        {"day": 20, "week": 3, "week_title": "深度优化",
+         "title": "长期维持策略", "subtitle": "防止复发：如何把这个计划变成永久习惯",
+         "category": "习惯养成",
+         "video_url": "//player.bilibili.com/player.html?bvid=BV1uuSABmEhY&page=1&autoplay=0", "video_bvid": "BV1uuSABmEhY", "video_title": "如何增加深度睡眠时间 | 醒来神清气爽", "video_duration": "9分钟",
+         "article": """## 如何不让 21 天的努力付诸东流
+
+睡眠改善不是一次性的修复，而是一种持续的生活方式。以下是防止退步的长期策略。
+
+### 1. 建立不可协商的基线
+
+即使生活忙碌，以下三项必须守住：
+
+- **固定起床时间**（误差 < 1 小时）
+- **睡前 1 小时远离屏幕**
+- **每天至少 15 分钟户外活动**
+
+### 2. 识别你的"触发事件"
+
+提前知道什么情况可能导致你的睡眠退步：
+
+- 出差/旅行 → 准备眼罩耳塞
+- 工作压力期 → 增加放松练习频率
+- 社交活动 → 事先设定离开时间
+- 生病 → 允许更多睡眠，但保持起床时间
+
+### 3. 坚持睡眠日志
+
+保持每月至少记录一周的睡眠日志。数据不会骗你，趋势变化能提前预警。
+
+### 4. 定期"重置"
+
+每 3 个月做一次"睡眠重置周"——重新严格按 21 天计划执行一周。就像软件需要定期重启一样。
+
+### 5. 庆祝进步，不苛求完美
+
+> 睡眠改善的关键指标不是"每晚都完美"，而是"80% 的晚上足够好"。
+
+**今日金句：生活不会完美，睡眠也不会。但你拥有了工具，可以随时回到轨道上。**""",
+         "task": "写下你的「睡眠保护计划」：你的 3 项不可协商的基线、5 个可能导致退步的触发事件，以及每个事件的应对策略。",
+         "xp": 15,
+         "tips": ["把计划放在看得见的地方", "和信任的人分享你的计划"]},
+
+        {"day": 21, "week": 3, "week_title": "深度优化",
+         "title": "毕业总结", "subtitle": "21天后的你：建立终身受益的睡眠习惯",
+         "category": "复习总结",
+         "video_url": "", "video_duration": "10分钟",
+         "article": """## 🎉 恭喜你完成了 21 天睡眠改善计划！
+
+### 你学到了什么
+
+**第一周：睡眠基础**
+- 理解睡眠周期（90 分钟节律）
+- 优化睡眠环境（温度、光线、噪音）
+- 建立规律作息（固定起床时间）
+- 创造睡前仪式
+- 调整饮食和运动习惯
+
+**第二周：心理调节**
+- 认识失眠的 3P 模型
+- 掌握刺激控制疗法
+- 应用睡眠限制疗法
+- 实践认知重构
+- 学会渐进式肌肉放松和正念
+
+**第三周：深度优化**
+- 掌握 4-7-8 呼吸法
+- 体验身体扫描冥想
+- 学会压力管理
+- 优化昼夜节律
+- 制定长期维持策略
+
+### 接下来做什么
+
+1. **坚持基线**：固定起床时间 + 睡前仪式 + 户外活动
+2. **每月回顾**：用一周时间记录睡眠日志
+3. **定期重置**：有需要时重新执行 21 天计划
+4. **帮助他人**：把学到的知识分享给需要的朋友
+
+### 最后的寄语
+
+睡眠是身体与生俱来的能力，不是需要努力争取的奖品。你现在拥有的不是"完美的睡眠"，而是**在任何情况下都能让自己休息下来的能力**。
+
+有时候你会睡得不好，这是完全正常的。关键是，你知道为什么，也知道该怎么办。你已经不是那个被失眠困扰而无能为力的人了。
+
+**今日金句：21 天不是终点，而是一个新起点。所有的改变，从今天开始。晚安，好梦。🌙**""",
+         "task": "写下你完成 21 天课程的感受和最大的收获。写下你接下来 3 个月的睡眠目标。把这个课程推荐给一个可能需要的朋友。",
+         "xp": 50,
+         "tips": ["你已经完成了 21 天的旅程，今晚好好奖励自己", "睡眠是一辈子的朋友，善待它"]},
+    ]
+
+
+# Program metadata
+_21_DAY_META = {
+    "id": "21day_sleep_program",
+    "title": "21天睡眠改善计划",
+    "subtitle": "每天10分钟，三周养成终身受益的睡眠习惯",
+    "description": "基于CBT-I认知行为疗法的系统化睡眠改善课程。21天，每天包含视频讲解、深度文章和每日任务，从睡眠基础到心理调节再到深度优化，循序渐进地帮助你改善睡眠。",
+    "instructor": "睡眠教练AI",
+    "total_days": 21,
+    "weeks": 3,
+    "week_titles": ["第一周：睡眠基础", "第二周：心理调节", "第三周：深度优化"],
+    "category": "睡眠改善",
+    "difficulty": "初学者友好",
+}
+
+
+def get_21day_course() -> list:
+    return _21_day_course()
+
+
+def get_21day_meta() -> dict:
+    return _21_DAY_META
+
+
+def get_day_content(day: int):
+    """Get content for a specific day (1-indexed)."""
+    if day < 1 or day > 21:
+        return None
+    courses = _21_day_course()
+    return courses[day - 1] if day <= len(courses) else None
 
 
 def export_records_csv(records: list) -> str:

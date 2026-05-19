@@ -2,7 +2,7 @@
 .msg { display: flex; margin-bottom: 20rpx; }
 .msg.user { justify-content: flex-end; }
 .msg.assistant { justify-content: flex-start; }
-.msg-bubble { max-width: 80%; padding: 20rpx 28rpx; border-radius: 24rpx; font-size: 28rpx; line-height: 1.5; }
+.msg-bubble { max-width: 80%; padding: 20rpx 28rpx; border-radius: 24rpx; font-size: 28rpx; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 .msg.user .msg-bubble { background: var(--ac); color: #fff; border-bottom-right-radius: 8rpx; }
 .msg.assistant .msg-bubble { background: var(--hover); border-bottom-left-radius: 8rpx; }
 .typing { animation: blink 1.4s infinite; }

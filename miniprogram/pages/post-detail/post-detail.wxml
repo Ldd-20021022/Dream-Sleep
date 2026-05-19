@@ -1,0 +1,79 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <block wx:elif="{{post}}">
+    <!-- Author Bar -->
+    <view class="author-bar">
+      <view class="author-avatar" style="background:{{avatarColor(post.author)}}" data-user-id="{{post.author_id}}" bindtap="goUser">{{post.author ? post.author[0] : '?'}}</view>
+      <view class="author-info">
+        <view class="author-name" data-user-id="{{post.author_id}}" bindtap="goUser">{{post.author}}</view>
+        <view class="post-time">{{timeAgo(post.created_at)}}</view>
+      </view>
+      <view wx:if="{{post.author_id > 0}}" class="follow-btn {{post.is_following_author ? 'following' : ''}}" bindtap="toggleFollow">
+        {{post.is_following_author ? '已关注' : '+ 关注'}}
+      </view>
+    </view>
+
+    <!-- Content -->
+    <view class="post-content">{{post.content}}</view>
+    <image wx:if="{{post.image}}" src="{{post.image}}" mode="widthFix" class="post-image"/>
+
+    <!-- Score + Meta -->
+    <view class="post-meta-row">
+      <view wx:if="{{post.sleep_score}}" class="score-badge {{post.sleep_score >= 80 ? 'good' : 'ok'}}">⭐ {{post.sleep_score}}分</view>
+      <view wx:if="{{post.topic_id}}" class="topic-badge">{{post.topic_id}}</view>
+    </view>
+
+    <!-- Actions -->
+    <view class="post-actions-bar">
+      <view class="action-btn {{post.is_liked ? 'liked' : ''}}" bindtap="likePost">
+        <text>{{post.is_liked ? '❤️' : '🤍'}} {{post.like_count || 0}}</text>
+      </view>
+      <view class="action-btn">
+        <text>💬 {{post.comment_count || 0}}</text>
+      </view>
+      <view class="action-btn {{post.is_bookmarked ? 'bookmarked' : ''}}" bindtap="toggleBookmark">
+        <text>{{post.is_bookmarked ? '🔖' : '🏷️'}}</text>
+      </view>
+      <view class="action-btn" bindtap="sharePost">
+        <text>📤 分享</text>
+      </view>
+    </view>
+
+    <!-- Comments -->
+    <view class="comments-section">
+      <view class="section-title">评论 ({{post.comment_count || 0}})</view>
+      <view wx:if="{{comments.length===0}}" class="empty-text">暂无评论，来写第一条</view>
+      <view wx:for="{{comments}}" wx:key="id" class="comment-item">
+        <view class="comment-avatar" style="background:{{avatarColor(item.author)}}">{{item.author ? item.author[0] : '?'}}</view>
+        <view class="comment-body">
+          <view class="comment-author">{{item.author}} <text class="comment-time">{{timeAgo(item.created_at)}}</text></view>
+          <view class="comment-content">{{item.content}}</view>
+          <view class="comment-actions-inline">
+            <text class="ca-like" data-comment-id="{{item.id}}" bindtap="likeComment">❤️ {{item.like_count || 0}}</text>
+            <text class="ca-reply" data-comment-id="{{item.id}}" data-author="{{item.author}}" bindtap="replyToComment">回复</text>
+          </view>
+          <!-- Nested replies -->
+          <view wx:if="{{item.replies && item.replies.length > 0}}" class="nested-replies">
+            <view wx:for="{{item.replies}}" wx:key="id" wx:for-item="reply" class="reply-item">
+              <view class="reply-avatar" style="background:{{avatarColor(reply.author)}}">{{reply.author ? reply.author[0] : '?'}}</view>
+              <view class="reply-body">
+                <view class="reply-author">{{reply.author}} <text class="comment-time">{{timeAgo(reply.created_at)}}</text></view>
+                <view class="reply-content">{{reply.content}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty">帖子不存在或已删除</view>
+</view>
+
+<!-- Comment Input (fixed bottom) -->
+<view wx:if="{{post}}" class="comment-fixed-bar">
+  <view wx:if="{{replyToUser}}" class="reply-hint">回复 @{{replyToUser}} <text class="reply-cancel" bindtap="cancelReply">✕</text></view>
+  <view class="cfb-row">
+    <input class="cfb-input" placeholder="写下评论..." value="{{commentText}}" bindinput="onCommentInput" confirm-type="send" bindconfirm="sendComment"/>
+    <button class="cfb-send" bindtap="sendComment">发送</button>
+  </view>
+</view>

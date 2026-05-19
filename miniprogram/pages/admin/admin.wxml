@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="page-title">🛡️ 管理面板</view>
+
+  <!-- Stats -->
+  <view wx:if="{{stats}}" class="stats-grid">
+    <view class="stat-box"><view class="stat-num">{{stats.total_users}}</view><view class="stat-label">用户</view></view>
+    <view class="stat-box"><view class="stat-num">{{stats.total_posts}}</view><view class="stat-label">帖子</view></view>
+    <view class="stat-box"><view class="stat-num">{{stats.total_comments}}</view><view class="stat-label">评论</view></view>
+    <view class="stat-box warn"><view class="stat-num">{{stats.pending_reports}}</view><view class="stat-label">待处理举报</view></view>
+  </view>
+
+  <!-- Pending Reports -->
+  <view class="card">
+    <view class="section-title">🚩 待处理举报 ({{reports.length}})</view>
+    <view wx:if="{{reports.length===0}}" class="empty">暂无待处理举报</view>
+    <view wx:for="{{reports}}" wx:key="id" class="report-item">
+      <view class="report-info">
+        <view>帖子 #{{item.post_id}} · {{item.reason}}</view>
+        <view class="report-time">举报人 #{{item.reporter_id}} · {{item.created_at}}</view>
+      </view>
+      <view class="report-actions">
+        <button class="btn-delete" data-id="{{item.id}}" data-action="delete_post" bindtap="resolveReport">删帖</button>
+        <button class="btn-dismiss" data-id="{{item.id}}" data-action="dismiss" bindtap="resolveReport">驳回</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Recent Users -->
+  <view class="card">
+    <view class="section-title">👤 最近注册</view>
+    <view wx:for="{{recentUsers}}" wx:key="id" class="user-row">
+      <view class="user-name">{{item.nickname}}</view>
+      <view class="user-time">{{item.created_at}}</view>
+    </view>
+  </view>
+</view>

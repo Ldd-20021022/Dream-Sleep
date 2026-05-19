@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="page-title">🧩 睡眠问答</view>
+
+  <view wx:if="{{!submitted && questions.length > 0}}">
+    <view class="progress-text">第 {{current+1}}/{{questions.length}} 题</view>
+    <view class="progress-bar"><view class="progress-fill" style="width:{{(current+1)/questions.length*100}}%"></view></view>
+
+    <view class="q-card" wx:for="{{questions}}" wx:key="id" wx:if="{{index === current}}">
+      <view class="q-num">Q{{index+1}}</view>
+      <view class="q-text">{{item.q}}</view>
+      <view wx:for="{{item.opts}}" wx:key="*this" wx:for-item="opt" wx:for-index="oi"
+            class="q-opt {{answers[item.id]===oi?'q-opt-sel':''}}" data-idx="{{oi}}" bindtap="selectOpt">
+        <view class="q-opt-letter">{{['A','B','C','D'][oi]}}</view>
+        <view class="q-opt-text">{{opt}}</view>
+      </view>
+    </view>
+
+    <view class="q-nav">
+      <button class="btn btn-secondary btn-sm" bindtap="prevQ" disabled="{{current===0}}">上一题</button>
+      <button wx:if="{{current < questions.length-1}}" class="btn btn-primary btn-sm" bindtap="nextQ">下一题</button>
+      <button wx:else class="btn btn-primary btn-sm" bindtap="submitQuiz">✅ 提交答案</button>
+    </view>
+  </view>
+
+  <view wx:if="{{submitted && results}}" class="results-section">
+    <view class="done-icon">📊</view>
+    <view class="done-title">答题结果</view>
+    <view class="score-big">{{correctCount}}/{{results.length}}</view>
+    <view class="done-xp">+{{xpEarned}} XP · 🧩 +{{fragments}} 碎片</view>
+
+    <view wx:for="{{results}}" wx:key="id" class="result-item {{item.correct?'rc-correct':'rc-wrong'}}">
+      <view class="ri-status">{{item.correct?'✅':'❌'}}</view>
+      <view class="ri-explain">{{item.explain}}</view>
+    </view>
+
+    <button class="btn btn-primary" bindtap="reset" style="margin-top:24rpx">再来一轮</button>
+  </view>
+
+  <view wx:if="{{questions.length === 0 && !submitted}}" class="empty-hint">加载题目中...</view>
+</view>

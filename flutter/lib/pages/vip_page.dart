@@ -11,6 +11,7 @@ class VipPage extends StatefulWidget {
 
 class _VipPageState extends State<VipPage> {
   Map<String, dynamic>? _premium;
+  List _payPlans = [];
   String _billing = 'monthly';
   bool _payLoading = false;
   Map<String, dynamic>? _payOrder;
@@ -19,15 +20,10 @@ class _VipPageState extends State<VipPage> {
   int _referralCount = 0;
   double _referralReward = 0;
   bool _showPayModal = false;
+  String _couponCode = '';
+  int _expireSeconds = 0;
 
-  final _tierFeatures = {
-    'free': ['基础睡眠记录', 'AI助手(每日5次)', '白噪音基础', '每日任务'],
-    'freeMissing': ['深度睡眠报告', '睡眠预测', '高级白噪音', '语音日记', '家庭共享'],
-    'pro': ['无限AI对话', '高级白噪音引擎', '深度睡眠报告', '睡眠预测', '优先支持', '全部改善计划'],
-    'premium': ['全部Pro功能', 'AI深度分析报告', '个性化睡眠教练', '语音日记', '高级睡眠故事', '健康数据同步', '家庭共享(5人)'],
-  };
-
-  final _compareRows = [
+  final _compareRows = const [
     {'name': '每日AI对话', 'free': '5次', 'pro': '无限', 'premium': '无限', 'highlight': true},
     {'name': '白噪音引擎', 'free': '基础', 'pro': '高级', 'premium': '全部', 'highlight': false},
     {'name': '睡眠报告', 'free': '基础', 'pro': '深度', 'premium': 'AI深度', 'highlight': true},
@@ -41,7 +37,7 @@ class _VipPageState extends State<VipPage> {
     {'name': '商城折扣', 'free': '无', 'pro': '95折', 'premium': '9折', 'highlight': false},
   ];
 
-  final _perks = [
+  final _perks = const [
     {'icon': '🎁', 'title': '专属折扣', 'desc': '助眠商城9折优惠'},
     {'icon': '🚀', 'title': '优先体验', 'desc': '新功能抢先试用'},
     {'icon': '💎', 'title': '专属标识', 'desc': '尊贵会员身份'},
@@ -60,11 +56,13 @@ class _VipPageState extends State<VipPage> {
     try {
       final results = await Future.wait([
         api.get('/api/v1/premium/status'),
+        api.get('/api/v1/payment/plans'),
         api.get('/api/v1/payment/orders'),
       ]);
       setState(() {
         _premium = results[0];
-        _payOrders = (results[1]['orders'] as List?) ?? [];
+        _payPlans = (results[1]['plans'] as List?) ?? [];
+        _payOrders = (results[2]['orders'] as List?) ?? [];
       });
     } catch (_) {}
   }
@@ -90,13 +88,42 @@ class _VipPageState extends State<VipPage> {
     return 0;
   }
 
+  // Dynamic pricing from API
+  String _planPriceYuan(String planKey) {
+    final plan = _payPlans.cast<Map<String, dynamic>?>().firstWhere((p) => p?['id'] == planKey, orElse: () => null);
+    return plan != null ? plan['amount_yuan'].toString() : '--';
+  }
+
+  String _planOriginalYuan(String planKey) {
+    final plan = _payPlans.cast<Map<String, dynamic>?>().firstWhere((p) => p?['id'] == planKey, orElse: () => null);
+    return plan != null ? (plan['amount'] / 100).toStringAsFixed(0) : '--';
+  }
+
+  List<String> _tierFeatures(String tier) {
+    if (_premium != null && _premium!['tier_info'] != null && _premium!['tier_info']['features'] != null) {
+      return List<String>.from(_premium!['tier_info']['features']);
+    }
+    return const {
+      'free': ['基础睡眠记录', 'AI助手(每日5次)', '白噪音基础', '每日任务'],
+      'pro': ['无限AI对话', '高级白噪音引擎', '深度睡眠报告', '睡眠预测', '优先支持', '全部改善计划'],
+      'premium': ['全部Pro功能', 'AI深度分析报告', '个性化睡眠教练', '语音日记', '高级睡眠故事', '健康数据同步', '家庭共享(5人)'],
+    }[tier] ?? [];
+  }
+
   Future<void> _createOrder(String plan) async {
     setState(() => _payLoading = true);
     final api = context.read<ApiService>();
     api.setToken(context.read<AuthService>().token);
     try {
-      final data = await api.post('/api/v1/payment/orders', {'plan_id': plan, 'method': 'wechat'});
-      setState(() { _payOrder = data; _showPayModal = true; });
+      final body = <String, dynamic>{'plan_id': plan, 'method': 'wechat'};
+      if (_couponCode.isNotEmpty) body['coupon_code'] = _couponCode;
+      final data = await api.post('/api/v1/payment/orders', body);
+      setState(() {
+        _payOrder = data;
+        _showPayModal = true;
+        _expireSeconds = (data['expire_minutes'] ?? 30) * 60;
+      });
+      _startExpireTimer();
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('创建订单失败')));
@@ -105,13 +132,33 @@ class _VipPageState extends State<VipPage> {
     setState(() => _payLoading = false);
   }
 
+  void _startExpireTimer() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted || !_showPayModal) return false;
+      setState(() => _expireSeconds = _expireSeconds - 1);
+      if (_expireSeconds <= 0) {
+        _closePayModal();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('订单已过期')));
+        }
+        return false;
+      }
+      return true;
+    });
+  }
+
   Future<void> _confirmPay() async {
     setState(() => _payLoading = true);
     final api = context.read<ApiService>();
     api.setToken(context.read<AuthService>().token);
     try {
-      await api.post('/api/v1/payment/orders/${_payOrder!['order_id']}/pay', {'transaction_id': 'SIM${DateTime.now().millisecondsSinceEpoch}'});
-      setState(() { _showPayModal = false; _payOrder = null; });
+      final txnId = 'SIM${DateTime.now().millisecondsSinceEpoch}';
+      await api.post(
+        '/api/v1/payment/orders/${_payOrder!['order_id']}/pay',
+        {'transaction_id': txnId},
+      );
+      setState(() { _showPayModal = false; _payOrder = null; _couponCode = ''; });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('支付成功！')));
       }
@@ -122,6 +169,20 @@ class _VipPageState extends State<VipPage> {
       }
     }
     setState(() => _payLoading = false);
+  }
+
+  Future<void> _cancelOrder() async {
+    if (_payOrder == null) return;
+    final api = context.read<ApiService>();
+    api.setToken(context.read<AuthService>().token);
+    try {
+      await api.post('/api/v1/payment/orders/${_payOrder!['order_id']}/cancel', {});
+    } catch (_) {}
+    _closePayModal();
+  }
+
+  void _closePayModal() {
+    setState(() { _showPayModal = false; _payOrder = null; _couponCode = ''; });
   }
 
   @override
@@ -148,10 +209,8 @@ class _VipPageState extends State<VipPage> {
                 ])),
                 if (tier == 'free')
                   Column(children: [
-                    const Text('¥29', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                    Text('¥${_planPriceYuan('pro_monthly')}', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
                     const Text('/月'),
-                    const SizedBox(height: 8),
-                    ElevatedButton(onPressed: () {}, child: const Text('立即升级')),
                   ]),
               ]),
             ),
@@ -167,11 +226,13 @@ class _VipPageState extends State<VipPage> {
 
             // Pricing Cards
             SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
-              _pricingCard('🌱', '免费版', '0', '/永久', _tierFeatures['free']!, _tierFeatures['freeMissing']!, null),
+              _pricingCard('🌱', '免费版', '0', '/永久', const ['基础睡眠记录', 'AI助手(每日5次)', '白噪音基础', '每日任务'], const ['深度睡眠报告', '睡眠预测', '高级白噪音'], null),
               if (tier != 'premium')
-                _pricingCard('⭐', '专业版', _billing == 'yearly' ? '16' : '29', '/月', _tierFeatures['pro']!, ['家庭共享'],
+                _pricingCard('⭐', '专业版', _billing == 'yearly' ? _planPriceYuan('pro_yearly') : _planPriceYuan('pro_monthly'), '/月',
+                    const ['无限AI对话', '高级白噪音引擎', '深度睡眠报告', '睡眠预测', '优先支持', '全部改善计划'], const ['家庭共享'],
                     _billing == 'yearly' ? 'pro_yearly' : 'pro_monthly', recommended: true),
-              _pricingCard('👑', '尊享版', _billing == 'yearly' ? '33' : '59', '/月', _tierFeatures['premium']!, [],
+              _pricingCard('👑', '尊享版', _billing == 'yearly' ? _planPriceYuan('premium_yearly') : _planPriceYuan('premium_monthly'), '/月',
+                  const ['全部Pro功能', 'AI深度分析报告', '个性化睡眠教练', '语音日记', '高级睡眠故事', '健康数据同步', '家庭共享(5人)'], [],
                   _billing == 'yearly' ? 'premium_yearly' : 'premium_monthly'),
             ])),
             const SizedBox(height: 16),
@@ -231,22 +292,44 @@ class _VipPageState extends State<VipPage> {
       // Pay Modal
       if (_showPayModal && _payOrder != null)
         GestureDetector(
-          onTap: () => setState(() => _showPayModal = false),
+          onTap: _closePayModal,
           child: Container(color: Colors.black54, child: Center(
             child: Card(
               child: Container(width: 320, padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
                 const Text('💳', style: TextStyle(fontSize: 48)),
                 Text(_payOrder!['plan_name'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Text('¥${_payOrder!['amount_yuan']}', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                if ((_payOrder!['coupon_discount_yuan'] ?? 0) > 0)
+                  Text('优惠券已抵扣 ¥${_payOrder!['coupon_discount_yuan']}', style: const TextStyle(color: Colors.green, fontSize: 13)),
                 Text('订单号: ${_payOrder!['order_no']}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                const SizedBox(height: 16),
+                Text('⏱ $_expireSeconds秒后过期', style: const TextStyle(color: Colors.red, fontSize: 12)),
+                const SizedBox(height: 12),
+                if ((_payOrder!['coupon_discount_yuan'] ?? 0) == 0)
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: '优惠券代码（选填）',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      style: const TextStyle(fontSize: 13),
+                      onChanged: (v) => _couponCode = v.trim(),
+                    ),
+                  ),
+                const SizedBox(height: 12),
                 const Text('🔒 模拟支付环境', style: TextStyle(color: Colors.grey, fontSize: 12)),
                 const SizedBox(height: 16),
                 SizedBox(width: double.infinity, child: ElevatedButton(
                   onPressed: _payLoading ? null : _confirmPay,
                   child: Text(_payLoading ? '支付中...' : '确认支付 ¥${_payOrder!['amount_yuan']}'),
                 )),
-                TextButton(onPressed: () => setState(() => _showPayModal = false), child: const Text('取消')),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  TextButton(onPressed: _cancelOrder, child: const Text('取消订单', style: TextStyle(color: Colors.red))),
+                  const SizedBox(width: 16),
+                  TextButton(onPressed: _closePayModal, child: const Text('关闭')),
+                ]),
               ])),
             ),
           )),

@@ -1,38 +1,77 @@
-<view class="container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh">
-  <view style="text-align:center;margin-bottom:60rpx">
-    <view style="font-size:96rpx;margin-bottom:16rpx">🌙</view>
-    <view style="font-size:48rpx;font-weight:700;background:linear-gradient(135deg,var(--ac),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent">梦眠</view>
-    <view style="font-size:28rpx;color:var(--tx3);margin-top:8rpx">{{isRegister?'创建账号':'AI智能睡眠管理'}}</view>
+<view class="login-page">
+  <!-- Animated stars bg -->
+  <view class="login-stars">
+    <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}}" wx:key="*this" class="star star-{{item}}" style="left:{{item*7%100}}%;top:{{item*11%90+5}}%;animation-delay:{{item*0.4}}s"></view>
   </view>
 
-  <view style="width:100%;max-width:600rpx">
-    <!-- Login -->
-    <view class="card" wx:if="{{!isRegister}}">
-      <view class="form-group"><text class="label">用户名</text><input class="input" placeholder="请输入用户名" value="{{username}}" bindinput="setUname"/></view>
-      <view class="form-group" style="position:relative">
-        <text class="label">密码</text>
-        <input class="input" type="{{showPwd?'text':'password'}}" placeholder="请输入密码" value="{{password}}" bindinput="setPwd"/>
-        <view class="pwd-eye" bindtap="togglePwd">{{showPwd?'🙈':'👁'}}</view>
+  <!-- Main content -->
+  <view class="login-body">
+    <!-- Dream scene -->
+    <view class="dream-scene-login">
+      <view class="moon-glow"></view>
+      <view class="moon-icon">🌙</view>
+      <view class="dream-text">
+        <view class="app-name">梦 眠</view>
+        <view class="app-desc">梦境守护者</view>
       </view>
-      <view wx:if="{{error}}" class="err-box">{{error}}<text wx:if="{{lockCountdown>0}}"> ({{lockCountdown}}秒后重试)</text></view>
-      <button class="btn btn-primary" style="width:100%;margin-top:24rpx" bindtap="handleLogin" loading="{{loading}}" disabled="{{lockCountdown>0}}">{{loading?'登录中...':lockCountdown>0?lockCountdown+'秒后重试':'登录'}}</button>
-      <view style="text-align:center;margin-top:20rpx;font-size:24rpx;color:var(--tx3)">还没有账号？<text style="color:var(--ac)" bindtap="switchToRegister">立即注册</text></view>
     </view>
 
-    <!-- Register -->
-    <view class="card" wx:if="{{isRegister}}">
-      <view class="form-group"><text class="label">用户名</text><input class="input" placeholder="2-20个字符" value="{{regUser}}" bindinput="setRegUser" maxlength="20"/></view>
-      <view class="form-group"><text class="label">邮箱</text><input class="input" type="text" placeholder="用于找回密码" value="{{regEmail}}" bindinput="setRegEmail"/></view>
-      <view class="form-group" style="position:relative">
-        <text class="label">密码（字母+数字，6位以上）</text>
-        <input class="input" type="{{showPwdReg?'text':'password'}}" placeholder="至少6位" value="{{regPwd}}" bindinput="setRegPwd"/>
-        <view class="pwd-eye" bindtap="togglePwdReg">{{showPwdReg?'🙈':'👁'}}</view>
+    <!-- Returning hint -->
+    <view wx:if="{{returning}}" class="returning-bar">
+      <view class="returning-dot"></view>
+      <text>欢迎回来，正在进入梦境...</text>
+    </view>
+
+    <!-- Login actions -->
+    <view class="login-actions" wx:else>
+      <!-- WeChat login -->
+      <button class="btn-wx" bindtap="handleWxLogin" loading="{{loading}}" disabled="{{loading}}">
+        <text wx:if="{{!loading}}" class="btn-wx-icon">💬</text>
+        <text>{{loading ? '登录中...' : '微信一键登录'}}</text>
+      </button>
+
+      <!-- Divider -->
+      <view class="divider-row">
+        <view class="divider-line"></view>
+        <text class="divider-text">其他方式</text>
+        <view class="divider-line"></view>
       </view>
-      <view wx:if="{{regPwd}}" class="pw-bar-wrap"><view class="pw-bar-fill" style="width:{{pwStrength*25}}%;background:{{pwStrength<=1?'var(--err)':pwStrength<=2?'var(--warn)':pwStrength<=3?'var(--teal)':'var(--suc)'}}"></view><text style="font-size:22rpx;margin-left:12rpx;color:var(--tx3)">{{['弱','弱','中','强','很强'][pwStrength]}}</text></view>
-      <view class="form-group"><text class="label">昵称</text><input class="input" placeholder="显示名称" value="{{regNick}}" bindinput="setRegNick"/></view>
-      <view wx:if="{{regErr}}" class="err-box">{{regErr}}</view>
-      <button class="btn btn-primary" style="width:100%;margin-top:24rpx" bindtap="handleRegister" loading="{{regLoading}}" disabled="{{!regValid}}">{{regLoading?'注册中...':'注册'}}</button>
-      <view style="text-align:center;margin-top:20rpx;font-size:24rpx;color:var(--tx3)">已有账号？<text style="color:var(--ac)" bindtap="switchToLogin">返回登录</text></view>
+
+      <!-- Legacy toggle -->
+      <view wx:if="{{!showLegacy}}" class="legacy-link" bindtap="toggleLegacy">
+        <text>🔑 账号密码登录</text>
+      </view>
+
+      <!-- Legacy form -->
+      <view wx:if="{{showLegacy}}" class="legacy-card">
+        <input class="legacy-input" placeholder="用户名" value="{{username}}" bindinput="setUsername" focus="{{showLegacy}}"/>
+        <input class="legacy-input" type="password" placeholder="密码" value="{{password}}" bindinput="setPassword"/>
+        <view wx:if="{{legacyError}}" class="legacy-err">{{legacyError}}</view>
+        <button class="btn-legacy" bindtap="handleLegacyLogin" loading="{{legacyLoading}}">进入梦境</button>
+        <view class="legacy-back" bindtap="toggleLegacy">← 返回</view>
+      </view>
+
+      <!-- Register toggle -->
+      <view wx:if="{{!showRegister}}" class="legacy-link" bindtap="toggleRegister">
+        <text>✨ 注册新账号</text>
+      </view>
+
+      <!-- Register form -->
+      <view wx:if="{{showRegister}}" class="legacy-card">
+        <input class="legacy-input" placeholder="用户名 (2-20字符)" value="{{regUsername}}" bindinput="setRegUser" focus="{{showRegister}}"/>
+        <input class="legacy-input" placeholder="邮箱" value="{{regEmail}}" bindinput="setRegEmail"/>
+        <input class="legacy-input" type="number" placeholder="手机号 (必填)" value="{{regPhone}}" bindinput="setRegPhone" maxlength="11"/>
+        <input class="legacy-input" type="password" placeholder="密码 (6位以上)" value="{{regPassword}}" bindinput="setRegPwd"/>
+        <input class="legacy-input" type="password" placeholder="确认密码" value="{{regPassword2}}" bindinput="setRegPwd2"/>
+        <view wx:if="{{regError}}" class="legacy-err">{{regError}}</view>
+        <button class="btn-legacy" bindtap="handleRegister" loading="{{regLoading}}">✨ 创建账号</button>
+        <view class="legacy-back" bindtap="toggleRegister">← 返回</view>
+      </view>
+
+      <!-- Footer -->
+      <view class="login-footer">
+        <text>登录即同意《用户协议》和《隐私政策》</text>
+      </view>
     </view>
   </view>
 </view>

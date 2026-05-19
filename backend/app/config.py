@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     DEEPSEEK_API_KEY: str = ""
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    WECHAT_APPID: str = "wx551623c01821827f"
+    WECHAT_SECRET: str = ""
     # Production mode flag — set to True to disable docs and enable stricter CORS
     PRODUCTION: bool = False
 

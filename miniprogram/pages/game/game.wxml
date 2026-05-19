@@ -1,18 +1,190 @@
-<view class="container"><view class="page-title">游戏化中心</view>
-  <view class="card" wx:if="{{status}}">
-    <view style="text-align:center"><view style="font-size:72rpx;font-weight:700">{{status.level_name}}</view><view style="font-size:28rpx;color:var(--tx3)">Lv.{{status.level}} · {{status.total_xp}} XP</view></view>
-    <view class="prog-bar" style="margin-top:16rpx"><view class="prog-fill" style="width:{{status.current_xp/status.xp_needed*100}}%"></view></view>
-    <view style="text-align:center;font-size:24rpx;color:var(--tx3);margin-top:8rpx">{{status.current_xp}}/{{status.xp_needed}} XP</view>
-    <view style="display:flex;gap:16rpx;margin-top:16rpx;justify-content:center">
-      <button class="btn btn-primary btn-sm" bindtap="checkin">🎁 每日签到 +15XP</button>
-      <button class="btn btn-secondary btn-sm" bindtap="checkAchievements">🏆 检查成就</button>
+<view class="container">
+  <!-- Ritual Flow (full screen) -->
+  <view wx:if="{{ritualStep>0}}" class="ritual-wrap">
+    <view class="ritual-card">
+      <view wx:if="{{!ritualDone}}">
+        <view style="text-align:center;margin-bottom:24rpx">
+          <view style="font-size:64rpx;margin-bottom:8rpx">🌙</view>
+          <view style="font-size:32rpx;font-weight:700">睡前仪式</view>
+        </view>
+        <!-- Step 1: Worry -->
+        <view wx:if="{{ritualStep===1}}">
+          <view style="text-align:center;margin-bottom:16rpx"><text style="font-size:24rpx;color:var(--tx3)">步骤 1/{{ritualMode==='quick'?'2':ritualMode==='standard'?'3':'4'}}</text></view>
+          <view style="font-size:48rpx;text-align:center;margin-bottom:8rpx">💭</view>
+          <view style="font-size:28rpx;font-weight:600;text-align:center;margin-bottom:4rpx">烦恼粉碎</view>
+          <view style="font-size:22rpx;color:var(--tx3);text-align:center;margin-bottom:20rpx">写下今天让你焦虑的事</view>
+          <view wx:if="{{ritualWorries.length===0}}" style="display:flex;gap:12rpx;margin-bottom:16rpx">
+            <input class="input" value="{{ritualWorryInput}}" placeholder="写下你的烦恼..." bindinput="onRitualWorryInput" bindconfirm="addRitualWorry" style="flex:1;height:80rpx"/>
+            <button class="btn btn-primary btn-sm" bindtap="addRitualWorry">提交</button>
+          </view>
+          <view wx:for="{{ritualWorries}}" wx:key="id" style="padding:16rpx;margin-bottom:8rpx;border-radius:12rpx;background:rgba(94,224,160,0.08);font-size:24rpx;text-decoration:line-through;opacity:0.6">💥 {{item.text}}</view>
+          <button wx:if="{{ritualWorries.length>=1}}" class="btn btn-primary" style="width:100%;margin-top:16rpx" hover-class="btn-hover" bindtap="ritualNextStep">继续 →</button>
+        </view>
+        <!-- Step 2: Breathing -->
+        <view wx:if="{{ritualStep===2}}">
+          <view style="text-align:center;margin-bottom:16rpx"><text style="font-size:24rpx;color:var(--tx3)">步骤 2/{{ritualMode==='quick'?'2':ritualMode==='standard'?'3':'4'}}</text></view>
+          <view style="font-size:48rpx;text-align:center;margin-bottom:8rpx">🫁</view>
+          <view style="font-size:28rpx;font-weight:600;text-align:center;margin-bottom:4rpx">呼吸训练</view>
+          <view style="font-size:22rpx;color:var(--tx3);text-align:center;margin-bottom:20rpx">4-7-8呼吸法 · {{ritualBreathMax}}轮</view>
+          <view wx:if="{{ritualBreathDone}}" style="text-align:center;font-size:64rpx;margin-bottom:16rpx">✅</view>
+          <view wx:else>
+            <view style="width:200rpx;height:200rpx;border-radius:50%;margin:0 auto 24rpx;background:var(--primary-soft);display:flex;align-items:center;justify-content:center">
+              <view style="font-size:72rpx;font-weight:700;color:var(--primary)">{{ritualBreathTimer}}</view>
+            </view>
+            <view style="font-size:36rpx;font-weight:700;color:var(--primary);text-align:center;margin-bottom:8rpx">{{ritualBreathPhase||'准备'}}</view>
+            <view style="font-size:22rpx;color:var(--tx3);text-align:center;margin-bottom:16rpx">第 {{ritualBreathRounds+1}}/{{ritualBreathMax}} 轮</view>
+            <button wx:if="{{!ritualBreathPlaying}}" class="btn btn-primary" style="width:100%" bindtap="startRitualBreathing">开始呼吸</button>
+            <button wx:else class="btn btn-secondary" style="width:100%" bindtap="stopRitualBreathing">停止</button>
+          </view>
+          <button wx:if="{{ritualBreathDone}}" class="btn btn-primary" style="width:100%;margin-top:16rpx" bindtap="ritualNextStep">继续 →</button>
+          <button wx:if="{{ritualMode==='quick'&&ritualBreathDone}}" class="btn btn-primary" style="width:100%;margin-top:12rpx" bindtap="finishRitual">✨ 完成仪式</button>
+        </view>
+        <!-- Step 3: Quiz -->
+        <view wx:if="{{ritualStep===3}}">
+          <view style="text-align:center;margin-bottom:16rpx"><text style="font-size:24rpx;color:var(--tx3)">步骤 3/{{ritualMode==='standard'?'3':'4'}}</text></view>
+          <view style="font-size:48rpx;text-align:center;margin-bottom:8rpx">🧠</view>
+          <view style="font-size:28rpx;font-weight:600;text-align:center;margin-bottom:4rpx">知识问答</view>
+          <view style="font-size:22rpx;color:var(--tx3);text-align:center;margin-bottom:20rpx">答{{ritualMode==='deep'?'5':'3'}}道题，让大脑安静下来</view>
+          <view wx:if="{{ritualQuizDone}}" style="text-align:center;font-size:64rpx;margin-bottom:12rpx">✅ 得分 {{ritualQuizScore}}</view>
+          <view wx:elif="{{ritualQuizCurrent}}">
+            <view style="font-size:28rpx;font-weight:500;margin-bottom:20rpx">{{ritualQuizCurrent.q}}</view>
+            <view wx:for="{{ritualQuizCurrent.opts}}" wx:key="label" wx:for-item="opt" wx:for-index="oi">
+              <button class="btn {{ritualQuizAnswer===oi?(oi===ritualQuizCurrent.ans?'btn-primary':'btn-danger'):'btn-secondary'}}" style="width:100%;margin-bottom:8rpx;text-align:left" disabled="{{ritualQuizAnswer>=0}}" data-idx="{{oi}}" bindtap="answerRitualQuiz">{{opt.label}}. {{opt.text}}</button>
+            </view>
+          </view>
+          <view wx:if="{{!ritualQuizCurrent&&!ritualQuizDone}}" style="text-align:center;padding:40rpx;color:var(--tx3)">加载题目中...</view>
+          <button wx:if="{{ritualQuizAnswer>=0&&!ritualQuizDone}}" class="btn btn-primary" style="width:100%;margin-top:16rpx" bindtap="nextRitualQuiz">下一题 →</button>
+          <button wx:if="{{ritualQuizDone&&ritualMode==='standard'}}" class="btn btn-primary" style="width:100%;margin-top:16rpx" bindtap="finishRitual">✨ 完成仪式</button>
+          <button wx:if="{{ritualQuizDone&&ritualMode==='deep'}}" class="btn btn-primary" style="width:100%;margin-top:16rpx" bindtap="ritualNextStep">最后一步 →</button>
+        </view>
+        <!-- Step 4: Closing -->
+        <view wx:if="{{ritualStep===4}}">
+          <view style="text-align:center;margin-bottom:16rpx"><text style="font-size:24rpx;color:var(--tx3)">步骤 4/4</text></view>
+          <view style="font-size:48rpx;text-align:center;margin-bottom:8rpx">🌟</view>
+          <view style="font-size:28rpx;font-weight:600;text-align:center;margin-bottom:16rpx">今夜寄语</view>
+          <view style="padding:24rpx;background:var(--primary-soft);border-radius:16rpx;font-size:26rpx;color:var(--tx2);line-height:1.8;text-align:center">今晚你粉碎了烦恼、练习了呼吸、回答了知识题。你的梦境世界将迎来一个宁静的夜晚。守护者，晚安 🌙</view>
+          <button class="btn btn-primary" style="width:100%;margin-top:24rpx" bindtap="finishRitual">✨ 完成仪式</button>
+        </view>
+      </view>
+      <!-- Ritual Complete -->
+      <view wx:else style="text-align:center;padding:40rpx 0">
+        <view style="font-size:100rpx;margin-bottom:16rpx">🎁</view>
+        <view style="font-size:36rpx;font-weight:700;margin-bottom:8rpx">仪式完成！</view>
+        <view style="font-size:28rpx;color:var(--tx2);margin-bottom:4rpx">获得 {{ritualXP}} XP</view>
+        <view style="font-size:24rpx;color:var(--primary);margin-bottom:24rpx">✨ 获得 {{ritualFragQuality==='legendary'?'传奇':ritualFragQuality==='epic'?'史诗':ritualFragQuality==='rare'?'稀有':'普通'}} 碎片</view>
+        <button class="btn btn-primary" bindtap="exitRitual">返回道场</button>
+      </view>
     </view>
-    <view style="text-align:center;font-size:24rpx;color:var(--tx3);margin-top:8rpx">🔥 连续{{status.streak_days}}天 · 最高{{status.max_streak}}天</view>
   </view>
-  <view class="card"><view class="section-title">🏆 成就 ({{unlockedCount}}/{{achievements.length}})</view>
-    <view class="ach-grid"><view wx:for="{{achievements}}" wx:key="key" class="ach-item {{item.unlocked?'on':''}}"><view class="ach-icon">{{item.icon}}</view><view class="ach-name">{{item.unlocked?item.title:'??'}}</view></view></view>
-  </view>
-  <view class="card"><view class="section-title">🏅 XP 排行榜</view>
-    <view wx:for="{{leaderboard}}" wx:key="user_id" class="lb-row"><view class="lb-rank">{{item.rank}}</view><view class="lb-name">{{item.nickname}}</view><view class="lb-val">Lv{{item.level}} {{item.total_xp}}XP</view></view>
+
+  <!-- Normal Game View -->
+  <view wx:else>
+    <!-- Tabs -->
+    <view class="tab-row">
+      <view class="tab-btn {{tab==='dojo'?'tab-on':''}}" data-tab="dojo" bindtap="switchTab">⚔️ 训练道场</view>
+      <view class="tab-btn {{tab==='status'?'tab-on':''}}" data-tab="status" bindtap="switchTab">📊 我的状态</view>
+      <view class="tab-btn {{tab==='leaderboard'?'tab-on':''}}" data-tab="leaderboard" bindtap="switchTab">🏆 排行榜</view>
+    </view>
+
+    <!-- Dojo -->
+    <view wx:if="{{tab==='dojo'}}">
+      <!-- Guardian Attributes -->
+      <view class="card" style="text-align:center;margin-bottom:20rpx">
+        <view style="font-size:28rpx;font-weight:700;margin-bottom:16rpx">🛡️ 守护者属性</view>
+        <view style="display:flex;justify-content:space-around">
+          <view wx:for="{{attrRows}}" wx:key="key" wx:for-item="row" style="text-align:center">
+            <view style="font-size:36rpx">{{row.icon}}</view>
+            <view style="font-size:20rpx;color:var(--tx3);margin:4rpx 0">{{row.name}}</view>
+            <view style="font-size:28rpx;letter-spacing:2rpx">
+              <text wx:for="{{dotRows}}" wx:key="*this" wx:for-item="d" style="color:{{d<=row.filled?row.color:'var(--bd)'}}">●</text>
+            </view>
+          </view>
+        </view>
+        <button class="btn btn-primary btn-sm" style="margin-top:16rpx" bindtap="checkin">🎁 每日签到 +15XP</button>
+      </view>
+
+      <!-- Ritual Entry: 3 modes on card -->
+      <view class="card ritual-entry">
+        <view style="text-align:center;margin-bottom:20rpx">
+          <view class="ritual-moon">🌙</view>
+          <view style="font-size:28rpx;font-weight:700;color:#fff">睡前仪式</view>
+          <view wx:if="{{guardian.ritualStreak>0}}" style="font-size:20rpx;color:var(--teal);margin-top:4rpx">🔥 已连续 {{guardian.ritualStreak}} 天</view>
+        </view>
+        <view class="ritual-modes">
+          <view class="ritual-mode" hover-class="ritual-mode-hover" bindtap="selectRitualMode" data-mode="quick">
+            <view class="rm-icon">⚡</view>
+            <view class="rm-name">快速</view>
+            <view class="rm-time">2分钟</view>
+          </view>
+          <view class="ritual-mode" hover-class="ritual-mode-hover" bindtap="selectRitualMode" data-mode="standard">
+            <view class="rm-icon">🌙</view>
+            <view class="rm-name">标准</view>
+            <view class="rm-time">5分钟</view>
+          </view>
+          <view class="ritual-mode" hover-class="ritual-mode-hover" bindtap="selectRitualMode" data-mode="deep">
+            <view class="rm-icon">🧘</view>
+            <view class="rm-name">深度</view>
+            <view class="rm-time">10分钟</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Training Stations -->
+      <view style="display:grid;grid-template-columns:repeat(2,1fr);gap:12rpx;margin-bottom:20rpx">
+        <view wx:for="{{games}}" wx:key="id" wx:if="{{item.status==='active'}}" class="card train-card" data-id="{{item.id}}" bindtap="enterGame" style="text-align:center">
+          <view style="font-size:40rpx">{{item.icon}}</view>
+          <view style="font-size:26rpx;font-weight:600;margin:8rpx 0">{{item.name}}</view>
+          <view style="font-size:20rpx;color:var(--tx3)">{{item.attrName}}训练</view>
+          <view style="margin-top:8rpx"><text style="font-size:18rpx;padding:4rpx 12rpx;border-radius:12rpx;background:var(--primary-soft);color:var(--primary)">可训练</text></view>
+        </view>
+      </view>
+
+      <!-- Coming Soon -->
+      <view wx:if="{{games.length>4}}" style="margin-bottom:20rpx">
+        <view style="font-size:22rpx;color:var(--tx3);margin-bottom:8rpx">即将推出</view>
+        <view style="display:flex;gap:12rpx;flex-wrap:wrap">
+          <view wx:for="{{games}}" wx:key="id" wx:if="{{item.status==='coming'}}" style="padding:12rpx 20rpx;border-radius:16rpx;background:var(--hover);font-size:22rpx;color:var(--tx3);display:flex;align-items:center;gap:8rpx">{{item.icon}} {{item.name}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Status Tab (kept from original) -->
+    <view wx:if="{{tab==='status'}}">
+      <view wx:if="{{dashboard}}" class="card" style="text-align:center;margin-bottom:20rpx">
+        <view style="font-size:72rpx;font-weight:700">{{dashboard.user?dashboard.user.level_name:(dashboard.level_name||'守护者')}}</view>
+        <view style="font-size:24rpx;color:var(--tx3);margin-bottom:16rpx">Lv.{{dashboard.user?dashboard.user.level:(dashboard.level||1)}} · {{dashboard.user?dashboard.user.total_xp:(dashboard.total_xp||0)}} XP · 🔥连续{{dashboard.user?dashboard.user.streak_days:(dashboard.streak_days||0)}}天</view>
+        <view class="prog-bar" style="margin-bottom:16rpx"><view class="prog-fill" style="width:{{(dashboard.user?dashboard.user.xp_pct:(dashboard.xp_pct||0))}}%"></view></view>
+        <view style="font-size:22rpx;color:var(--tx3);margin-bottom:16rpx">{{dashboard.user?dashboard.user.current_xp:(dashboard.current_xp||0)}}/{{dashboard.user?dashboard.user.xp_needed:(dashboard.xp_needed||0)}} XP</view>
+        <button class="btn btn-primary btn-sm" bindtap="checkin">🎁 每日签到</button>
+      </view>
+      <view wx:elif="{{loggedIn}}" class="card" style="text-align:center;padding:40rpx"><view style="font-size:40rpx;margin-bottom:12rpx">⏳</view><view style="color:var(--tx3)">加载中...</view></view>
+      <view wx:else class="card" style="text-align:center;padding:48rpx">
+        <view style="font-size:48rpx;margin-bottom:12rpx">🔒</view>
+        <view style="font-size:24rpx;color:var(--tx3);margin-bottom:16rpx">登录后查看游戏状态</view>
+        <button class="btn btn-primary btn-sm" bindtap="goLogin">去登录</button>
+      </view>
+      <!-- Achievements -->
+      <view wx:if="{{achievements.length>0}}" class="card"><view class="section-title">🏆 成就</view>
+        <view style="display:grid;grid-template-columns:repeat(4,1fr);gap:12rpx">
+          <view wx:for="{{achievements}}" wx:key="key" style="text-align:center;opacity:{{item.unlocked?'1':'0.3'}}">
+            <view style="font-size:44rpx">{{item.icon}}</view>
+            <view style="font-size:18rpx">{{item.unlocked?item.title:'??'}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Leaderboard Tab -->
+    <view wx:if="{{tab==='leaderboard'}}">
+      <view wx:if="{{leaderboard.length>0}}" class="card">
+        <view class="section-title">🏆 排行榜</view>
+        <view wx:for="{{leaderboard}}" wx:key="rank" style="display:flex;align-items:center;gap:16rpx;padding:16rpx 0;border-bottom:1rpx solid var(--bd)">
+          <view style="font-size:32rpx;width:60rpx;text-align:center">{{item.medal}}</view>
+          <view style="flex:1"><view style="font-size:26rpx;font-weight:500">{{item.username||item.nickname}}</view><view style="font-size:20rpx;color:var(--tx3)">Lv.{{item.level}} · {{item.total_xp}}XP</view></view>
+          <view style="font-size:22rpx;color:var(--warn)">🔥{{item.streak_days}}天</view>
+        </view>
+      </view>
+      <view wx:else class="card empty-state"><view style="font-size:48rpx;margin-bottom:12rpx">🏆</view><view>暂无排行榜数据</view></view>
+    </view>
   </view>
 </view>

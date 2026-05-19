@@ -10,9 +10,11 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
+    phone = Column(String(20), default="")
     hashed_password = Column(String(255), nullable=False)
     nickname = Column(String(50), default="")
     avatar = Column(String(255), default="")
+    openid = Column(String(100), default="")
     is_admin = Column(Integer, default=0)  # 0=user, 1=admin
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -60,6 +62,8 @@ class HealthProfile(Base):
     exercise_type = Column(Text, default="")
     stress_level = Column(String(20), default="")
     sleep_issues = Column(Text, default="")
+    primary_goal = Column(String(200), default="")
+    preferred_sounds = Column(String(200), default="")
     snoring = Column(String(20), default="")
     dream_frequency = Column(String(20), default="")
     wake_up_count = Column(Integer, default=0)
@@ -69,9 +73,7 @@ class HealthProfile(Base):
     bedroom_light = Column(String(20), default="")
     bedroom_noise = Column(String(20), default="")
     improvement_priority = Column(Text, default="")
-    preferred_sounds = Column(Text, default="")
     preferred_tasks = Column(Text, default="")
-    primary_goal = Column(Text, nullable=True)
     notes = Column(Text, default="")
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -257,7 +259,11 @@ class SleepPost(Base):
     __tablename__ = "sleep_posts"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    topic_id = Column(String(30), default="")
+    group_id = Column(Integer, default=0)
     content = Column(Text, default="")
+    image = Column(String(500), default="")
+    video_url = Column(String(500), default="")
     sleep_score = Column(Integer, nullable=True)
     sleep_duration = Column(Float, nullable=True)
     like_count = Column(Integer, default=0)
@@ -267,22 +273,112 @@ class SleepPost(Base):
 
 
 class PostComment(Base):
-    """Comment on a sleep post."""
+    """Comment on a sleep post. Supports nested replies via parent_id."""
     __tablename__ = "post_comments"
     id = Column(Integer, primary_key=True, index=True)
     post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    parent_id = Column(Integer, default=0)
+    reply_to_user_id = Column(Integer, default=0)
     content = Column(Text, default="")
+    image = Column(String(500), default="")
+    like_count = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
 
 
 class PostLike(Base):
-    """Like on a sleep post."""
+    """Like on a sleep post (kept for backward compat)."""
     __tablename__ = "post_likes"
     id = Column(Integer, primary_key=True, index=True)
     post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class PostReaction(Base):
+    """Emoji reaction on a post (supports multiple types)."""
+    __tablename__ = "post_reactions"
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    reaction_type = Column(String(20), default="like")  # like/love/laugh/sad/angry/sleep/fire
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class UserFollow(Base):
+    """Follow relationship between users."""
+    __tablename__ = "user_follows"
+    id = Column(Integer, primary_key=True, index=True)
+    follower_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    followee_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class Notification(Base):
+    """User notifications (likes, comments, follows, system)."""
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    type = Column(String(20), default="system")  # like/comment/follow/system
+    title = Column(String(100), default="")
+    body = Column(String(200), default="")
+    related_id = Column(Integer, default=0)
+    is_read = Column(Integer, default=0)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class PostBookmark(Base):
+    """User bookmarks a post."""
+    __tablename__ = "post_bookmarks"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class PostReport(Base):
+    """User reports a post."""
+    __tablename__ = "post_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
+    reason = Column(String(100), default="")
+    status = Column(String(20), default="pending")  # pending/resolved/dismissed
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class Message(Base):
+    """Private message between users."""
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    receiver_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    content = Column(Text, default="")
+    voice_url = Column(String(500), default="")
+    voice_duration = Column(Integer, default=0)  # seconds
+    image_url = Column(String(500), default="")
+    is_read = Column(Integer, default=0)
+    read_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class UserBlock(Base):
+    """User blocks another user."""
+    __tablename__ = "user_blocks"
+    id = Column(Integer, primary_key=True, index=True)
+    blocker_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    blocked_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class PostEditHistory(Base):
+    """Track post edit history."""
+    __tablename__ = "post_edit_histories"
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("sleep_posts.id", ondelete="CASCADE"), nullable=False)
+    old_content = Column(Text, default="")
+    new_content = Column(Text, default="")
+    edited_at = Column(DateTime, server_default=func.now())
 
 
 class Membership(Base):
@@ -294,6 +390,20 @@ class Membership(Base):
     started_at = Column(DateTime, server_default=func.now())
     expires_at = Column(DateTime, nullable=True)
     auto_renew = Column(Integer, default=0)
+    order_id = Column(Integer, ForeignKey("payment_orders.id"), nullable=True)  # 最近支付订单
+
+
+class MembershipLog(Base):
+    """Membership change history (upgrade/downgrade/renew/cancel)."""
+    __tablename__ = "membership_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    from_tier = Column(String(20), default="free")
+    to_tier = Column(String(20), nullable=False)
+    order_id = Column(Integer, ForeignKey("payment_orders.id"), nullable=True)
+    change_type = Column(String(20), nullable=False)  # upgrade, downgrade, renew, cancel, expire
+    amount = Column(Integer, default=0)  # in cents
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class SleepStory(Base):
@@ -398,6 +508,7 @@ class UserSettings(Base):
     language = Column(String(10), default="zh")
     font_size = Column(String(10), default="medium")
     show_xp_animations = Column(Integer, default=1)
+    knowledge_bookmarks = Column(Text, default="")
 
 
 class SleepProduct(Base):
@@ -438,6 +549,17 @@ class CourseEnrollment(Base):
     progress = Column(Integer, default=0)
     completed = Column(Integer, default=0)
     enrolled_at = Column(DateTime, server_default=func.now())
+
+
+class ProgramProgress(Base):
+    """21-day sleep improvement program progress tracking."""
+    __tablename__ = "program_progress"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
+    current_day = Column(Integer, default=0)  # completed days (0-21)
+    started_at = Column(DateTime, server_default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
 
 class ReferralCode(Base):

@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from app.database import engine, Base
 from app.models import *  # noqa
-from app.routers import auth_router, sleep_router, profile_router, chat_router, task_router, wellness_router, admin_router, community_router, voice_router, premium_router, platform_router, payment_router, game_router, mood_router, settings_router, store_router, course_router, referral_router, doctor_router, environment_router, data_router, integration_router, competition_router, relax_router, live_router, growth_router, web3_router, dataset_router, llm_router, iot_router, watch_router
+from app.routers import auth_router, sleep_router, profile_router, chat_router, task_router, wellness_router, admin_router, community_router, voice_router, premium_router, platform_router, payment_router, game_router, mood_router, settings_router, store_router, course_router, program_router, referral_router, doctor_router, environment_router, data_router, integration_router, competition_router, relax_router, live_router, growth_router, web3_router, dataset_router, llm_router, iot_router, watch_router
 from app.config import settings as _settings
 from app.security import rate_limit, get_rate_limit_key, sanitize_input
 
@@ -75,6 +75,7 @@ app.include_router(mood_router)
 app.include_router(settings_router)
 app.include_router(store_router)
 app.include_router(course_router)
+app.include_router(program_router)
 app.include_router(referral_router)
 app.include_router(doctor_router)
 app.include_router(environment_router)

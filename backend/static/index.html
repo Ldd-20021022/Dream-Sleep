@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="梦眠">
-<meta name="theme-color" content="#6c63ff">
+<meta name="theme-color" content="#7b8cd6">
 <meta name="description" content="AI驱动的睡眠管理助手">
 <link rel="manifest" href="/static/manifest.json">
 <link rel="icon" type="image/png" href="/static/favicon.png">
@@ -17,8 +17,8 @@
 <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
 <script src="/static/noise-engine.js"></script>
 <style>
-:root,.dark{--bg:#0f0f1a;--bg2:#1a1a2e;--card:#16213e;--hover:#1c2748;--input:#1a1a2e;--side:#111127;--bd:#2a2a4a;--tx:#e8e8f0;--tx2:#a0a0b8;--tx3:#6a6a80;--ac:#6c63ff;--ac2:#5a52e0;--ag:rgba(108,99,255,.3);--teal:#0ec9a6;--suc:#2ecc71;--warn:#f39c12;--err:#e74c3c;--r:12px;--rs:8px;--sw:240px}
-.light{--bg:#f5f5fa;--bg2:#e8e8f0;--card:#fff;--hover:#f0f0f8;--input:#f0f0f5;--side:#fafafe;--bd:#d0d0e0;--tx:#1a1a2e;--tx2:#5a5a70;--tx3:#8a8aa0;--ac:#5a52e0;--ac2:#4a42d0;--ag:rgba(90,82,224,.15);--teal:#0aa080;--suc:#1e9e5e;--warn:#d68910;--err:#d63031}
+:root,.dark{--bg:#0a0a14;--bg2:#101025;--card:rgba(22,22,50,0.6);--hover:rgba(30,30,60,0.5);--input:rgba(20,20,45,0.7);--side:rgba(10,10,20,0.85);--bd:rgba(255,255,255,0.06);--bd-glow:rgba(123,140,214,0.15);--tx:#e8e8f2;--tx2:#a0a0c0;--tx3:#6a6a8a;--ac:#8b9cf7;--ac2:#7a8ae0;--ac-glow:rgba(139,156,247,0.3);--ag:rgba(139,156,247,0.15);--teal:#5eead4;--teal-glow:rgba(94,234,212,0.25);--suc:#5ee0a0;--suc-glow:rgba(94,224,160,0.2);--warn:#f0b050;--warn-glow:rgba(240,176,80,0.2);--err:#f06070;--err-glow:rgba(240,96,112,0.2);--r:16px;--rs:10px;--sw:240px;--teal-soft:rgba(94,234,212,0.12);--primary-soft:rgba(139,156,247,0.12);--suc-soft:rgba(94,224,160,0.12)}
+.light{--bg:#f2f2f8;--bg2:#e4e4f0;--card:#fff;--hover:#f0f0f8;--input:#f0f0f5;--side:#fafafe;--bd:#d0d0e0;--tx:#1e1e30;--tx2:#5a5a70;--tx3:#8a8aa0;--ac:#6a7cc8;--ac2:#5a6cb8;--ag:rgba(106,124,200,.15);--teal:#4ab0a6;--suc:#4ea868;--warn:#c8943a;--err:#c45858}
 .star-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .auth-pg{position:relative;overflow:hidden}
 .auth-card-box{position:relative;z-index:1;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:40px;width:420px;max-width:90vw;box-shadow:0 8px 40px rgba(0,0,0,0.4);transition:transform 0.3s}
@@ -49,39 +49,41 @@
 .perks-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.perk-card{text-align:center;padding:16px;background:var(--hover);border-radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--tx);line-height:1.6}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 50%,rgba(139,156,247,0.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(94,234,212,0.04) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(240,176,80,0.03) 0%,transparent 50%);pointer-events:none;z-index:0}
 a{color:var(--ac);text-decoration:none}
 input,select,textarea,button{font-family:inherit;font-size:inherit}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px;transition:all 0.2s}.card:hover{border-color:var(--bd-glow)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border:none;border-radius:var(--rs);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
-.btn1{background:var(--ac);color:#fff}.btn1:hover{background:var(--ac2)}
+.btn1{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}.btn1:hover{background:var(--ac2)}
 .btn2{background:var(--card);color:var(--tx);border:1px solid var(--bd)}.btn2:hover{border-color:var(--ac)}
-.btn-err{background:var(--err);color:#fff}.btn-sm{padding:6px 14px;font-size:13px}.btn:disabled{opacity:.5;cursor:not-allowed}
-.inp{width:100%;padding:10px 14px;background:var(--input);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);outline:none}.inp:focus{border-color:var(--ac)}.inp::placeholder{color:var(--tx3)}
-.badge{display:inline-block;padding:4px 10px;background:var(--ag);color:var(--ac);border-radius:20px;font-size:12px}
-.title{font-size:24px;font-weight:700;margin-bottom:24px}.sub{font-size:18px;font-weight:600;margin-bottom:16px;color:var(--tx2)}
+.btn-err{background:var(--err);color:#fff}.btn-suc{background:var(--suc);color:#fff}.btn-sm{padding:6px 14px;font-size:13px}.btn:disabled{opacity:.5;cursor:not-allowed}
+.inp{width:100%;padding:10px 14px;background:var(--input);border:1px solid var(--bd);border-radius:var(--rs);color:var(--tx);outline:none;transition:border-color .2s}.inp:focus{border-color:var(--ac)}
+.badge{display:inline-block;padding:4px 10px;background:var(--ag);color:var(--ac);border-radius:20px;font-size:12px;border:1px solid var(--bd-glow)}
+.title{font-size:24px;font-weight:700;margin-bottom:24px;background:linear-gradient(135deg,var(--tx),var(--tx2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub{font-size:18px;font-weight:600;margin-bottom:16px;color:var(--tx2)}
 .empty{text-align:center;padding:40px 20px;color:var(--tx3);font-size:15px}
 .load{display:flex;align-items:center;justify-content:center;padding:40px}
-.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite}
+.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;box-shadow:0 0 15px var(--ac-glow)}
 @keyframes spin{to{transform:rotate(360deg)}}
-.layout{display:flex;min-height:100vh}
+.layout{display:flex;min-height:100vh;position:relative;z-index:1}
 .sidebar{width:var(--sw);background:var(--side);border-right:1px solid var(--bd);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column}
 .side-hd{padding:24px 20px 16px;border-bottom:1px solid var(--bd)}
-.logo{display:flex;align-items:center;gap:10px}.logo-ic{font-size:28px}
-.logo-tx{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--ac),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo{display:flex;align-items:center;gap:10px}.logo-ic{font-size:28px;filter:drop-shadow(0 0 8px var(--ac-glow))}
+.logo-tx{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--ac),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
 .logo-sub{font-size:12px;color:var(--tx3);margin-top:4px}
-.nav{list-style:none;padding:12px;flex:1}
+.nav{list-style:none;padding:12px;flex:1;overflow-y:auto}
 .nav-label-hd{padding:8px 16px 2px;font-size:10px;color:var(--tx3);letter-spacing:1px;cursor:pointer;user-select:none}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 22px;border-radius:var(--rs);cursor:pointer;color:var(--tx2);font-size:14px;margin-bottom:1px;transition:all .2s}
-.nav-item:hover{background:var(--hover);color:var(--tx)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 22px;border-radius:var(--rs);cursor:pointer;color:var(--tx2);font-size:14px;margin-bottom:1px;transition:all .3s;position:relative}
+.nav-item:hover{background:var(--hover);color:var(--tx);transform:translateX(3px)}
 .nav-item.on{background:var(--ag);color:var(--ac)}.nav-ic{font-size:15px;width:20px;text-align:center}
 .side-ft{padding:16px 20px;border-top:1px solid var(--bd)}
 .user-r{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--tx2)}
-.main{margin-left:var(--sw);padding:32px;max-width:1200px;width:100%}
-.auth-pg{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg),var(--bg2))}
+.main{margin-left:var(--sw);padding:32px;max-width:1200px;width:100%;position:relative;z-index:1;animation:fadeIn 0.4s}
+.auth-pg{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative}
 .auth-box{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:40px;width:400px;max-width:90vw}
-.auth-hd{text-align:center;margin-bottom:32px}.auth-logo{font-size:48px;display:block;margin-bottom:8px}
-.auth-hd h2{font-size:24px;margin-bottom:4px}.auth-hd p{color:var(--tx3);font-size:14px}
+.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite}
+.auth-hd{text-align:center;margin-bottom:32px}.auth-logo{font-size:56px;display:block;margin-bottom:12px}
+.auth-hd h2{font-size:26px;font-weight:700}
 .fg{margin-bottom:16px}.fg label{display:block;margin-bottom:6px;font-size:14px;color:var(--tx2)}
 .err-msg{color:var(--err);font-size:13px;margin-bottom:12px;padding:8px 12px;background:rgba(231,76,60,.1);border-radius:var(--rs)}
 .btn-full{width:100%;padding:12px;font-size:16px}.switch{text-align:center;margin-top:16px;font-size:14px;color:var(--tx3)}
@@ -90,9 +92,14 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 .st-val{font-size:32px;font-weight:700}.st-sub{font-size:13px;color:var(--tx3);margin-top:4px}
 .row2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:24px}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.qbtn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:var(--hover);border:1px solid var(--bd);border-radius:var(--rs);cursor:pointer;color:var(--tx2);transition:all .2s}
+.qbtn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:var(--hover);border:1px solid var(--bd);border-radius:var(--rs);cursor:pointer;color:var(--tx2);transition:all .3s}
 .qbtn:hover{border-color:var(--ac);color:var(--tx)}.qic{font-size:22px}.qlb{font-size:13px}
-.tip{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(108,99,255,.08),rgba(14,201,166,.08))!important;border-color:var(--ac)}.tip-ic{font-size:24px}
+.tip{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(139,156,247,.06),rgba(94,234,212,.06))!important;border-color:var(--bd-glow)!important}.tip-ic{font-size:24px}
+.prog-bar{width:100%;height:8px;background:var(--hover);border-radius:4px;overflow:hidden;position:relative}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--ac),var(--teal));border-radius:4px;transition:width 0.5s}
+.task-chk{width:24px;height:24px;border:2px solid var(--bd);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}.task-chk:hover{border-color:var(--ac)}.task-chk.done{background:var(--ac);border-color:var(--ac);color:#fff}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s}
+.modal-sheet{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:32px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
 .f-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .tag-row{display:flex;flex-wrap:wrap;gap:8px}
 .tag-btn{padding:6px 14px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--tx2);cursor:pointer;font-size:13px;transition:all .2s}
@@ -110,14 +117,25 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 .msg-bub{max-width:80%;padding:10px 16px;border-radius:16px;font-size:14px;line-height:1.5}
 .msg.user .msg-bub{background:var(--ac);color:#fff;border-bottom-right-radius:4px}
 .msg.ast .msg-bub{background:var(--hover);border-bottom-left-radius:4px}
-.typing{animation:blink 1.4s infinite}@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.typing{animation:blink 1.4s infinite}@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.topic-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px 16px;text-align:center;transition:all .3s;cursor:pointer}
+.topic-card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.topic-icon{font-size:36px;margin-bottom:8px}
+.topic-title{font-size:16px;font-weight:600;margin-bottom:4px}.topic-desc{font-size:12px;color:var(--tx3);line-height:1.4}
+.scene-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.scene-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 12px;border:1px solid var(--bd);border-radius:var(--r);background:var(--hover);cursor:pointer;color:var(--tx2);transition:all .3s}
+.scene-btn:hover,.scene-btn.on{border-color:var(--ac)}.scene-btn.on{background:var(--ag);color:var(--ac)}.sc-ic{font-size:28px}
+.ch-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}.ch-label{width:60px;font-size:14px;color:var(--tx2)}
+.ch-slider{flex:1;accent-color:var(--ac)}.ch-val{width:40px;text-align:right;font-size:14px;color:var(--tx3)}
+.ctrl-row{display:flex;gap:16px;margin-top:16px;align-items:center}.ctrl-g{display:flex;align-items:center;gap:12px}.onboard-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:2000;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s}.onboard-card{background:var(--card);border:1px solid var(--bd);border-radius:24px;width:560px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:40px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5)}.onboard-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--tx3);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}.onboard-close:hover{background:var(--hover);color:var(--tx)}.onboard-top{text-align:center;margin-bottom:24px}.onboard-icon{font-size:56px;margin-bottom:12px}.onboard-title{font-size:24px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--ac),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.onboard-desc{font-size:14px;color:var(--tx3);line-height:1.6}.onboard-steps{display:flex;gap:10px;justify-content:center;margin-bottom:28px}.onboard-dot{width:12px;height:12px;border-radius:50%;background:var(--bd);transition:all .3s}.onboard-dot.active{background:var(--ac);box-shadow:0 0 8px var(--ac-glow)}.onboard-dot.done{background:var(--teal)}.onboard-body{margin-bottom:24px;min-height:160px}.onboard-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}.onboard-opt{padding:10px 18px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px;transition:all .2s}.onboard-opt:hover{border-color:var(--ac);color:var(--tx)}.onboard-opt.sel{border-color:var(--ac);background:var(--ag);color:var(--ac)}.onboard-actions{display:flex;justify-content:space-between;align-items:center}.onboard-fold{position:relative;border:1px solid var(--bd);border-radius:var(--rs)}.onboard-fold-hd{padding:12px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--tx2);gap:8px;user-select:none}.onboard-fold-hd span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.onboard-fold-bd{display:none;position:absolute;top:100%;left:0;right:0;z-index:10;background:var(--card);border:1px solid var(--bd);border-radius:0 0 var(--rs) var(--rs);padding:8px 12px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}.onboard-fold.open .onboard-fold-bd{display:block}.onboard-err{color:var(--err);font-size:13px;padding:8px 12px;background:rgba(240,96,112,0.1);border-radius:var(--rs);margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .inp-row{display:flex;gap:10px;padding:16px;border-top:1px solid var(--bd)}.inp-row input{flex:1}
 .scene-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
 .scene-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 12px;border:1px solid var(--bd);border-radius:var(--r);background:var(--hover);cursor:pointer;color:var(--tx2);transition:all .2s}
 .scene-btn:hover,.scene-btn.on{border-color:var(--ac)}.scene-btn.on{background:var(--ag);color:var(--ac)}.sc-ic{font-size:28px}
 .ch-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}.ch-label{width:60px;font-size:14px;color:var(--tx2)}
 .ch-slider{flex:1;accent-color:var(--ac)}.ch-val{width:40px;text-align:right;font-size:14px;color:var(--tx3)}
-.ctrl-row{display:flex;gap:16px;margin-top:16px;align-items:center}.ctrl-g{display:flex;align-items:center;gap:12px}
+.ctrl-row{display:flex;gap:16px;margin-top:16px;align-items:center}.ctrl-g{display:flex;align-items:center;gap:12px}.onboard-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:2000;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s}.onboard-card{background:var(--card);border:1px solid var(--bd);border-radius:24px;width:560px;max-width:92vw;max-height:85vh;overflow-y:auto;padding:40px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5)}.onboard-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--tx3);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}.onboard-close:hover{background:var(--hover);color:var(--tx)}.onboard-top{text-align:center;margin-bottom:24px}.onboard-icon{font-size:56px;margin-bottom:12px}.onboard-title{font-size:24px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--ac),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.onboard-desc{font-size:14px;color:var(--tx3);line-height:1.6}.onboard-steps{display:flex;gap:10px;justify-content:center;margin-bottom:28px}.onboard-dot{width:12px;height:12px;border-radius:50%;background:var(--bd);transition:all .3s}.onboard-dot.active{background:var(--ac);box-shadow:0 0 8px var(--ac-glow)}.onboard-dot.done{background:var(--teal)}.onboard-body{margin-bottom:24px;min-height:160px}.onboard-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}.onboard-opt{padding:10px 18px;border:1px solid var(--bd);border-radius:var(--rs);background:transparent;color:var(--tx2);cursor:pointer;font-size:14px;transition:all .2s}.onboard-opt:hover{border-color:var(--ac);color:var(--tx)}.onboard-opt.sel{border-color:var(--ac);background:var(--ag);color:var(--ac)}.onboard-actions{display:flex;justify-content:space-between;align-items:center}.onboard-fold{position:relative;border:1px solid var(--bd);border-radius:var(--rs)}.onboard-fold-hd{padding:12px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--tx2);gap:8px;user-select:none}.onboard-fold-hd span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.onboard-fold-bd{display:none;position:absolute;top:100%;left:0;right:0;z-index:10;background:var(--card);border:1px solid var(--bd);border-radius:0 0 var(--rs) var(--rs);padding:8px 12px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}.onboard-fold.open .onboard-fold-bd{display:block}.onboard-err{color:var(--err);font-size:13px;padding:8px 12px;background:rgba(240,96,112,0.1);border-radius:var(--rs);margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .ctrl-g label{font-size:14px;color:var(--tx2);min-width:60px}.ms{accent-color:var(--ac);width:180px}
 .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .ps-btn{display:flex;align-items:center;gap:8px;padding:14px;border:1px solid var(--bd);border-radius:var(--rs);background:var(--hover);cursor:pointer;color:var(--tx2);transition:all .2s}.ps-btn:hover{border-color:var(--ac)}
@@ -156,7 +174,7 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 <div v-if="page==='login'||page==='register'||page==='forgot'" class="auth-pg">
   <canvas ref="starCanvas" class="star-bg"></canvas>
   <div class="auth-card-box" :class="{shake:authShake}">
-    <div class="auth-header"><span class="auth-logo">🌙</span><h2>{{page==='register'?'创建账号':page==='forgot'?'重置密码':'梦眠'}}</h2><p>{{page==='register'?'开始你的睡眠改善之旅':page==='forgot'?'输入邮箱获取重置链接':'AI智能睡眠管理'}}</p></div>
+    <div class="auth-header"><span class="auth-logo">🌙</span><h2>{{page==='register'?'创建账号':page==='forgot'?'重置密码':'梦眠'}}</h2></div>
 
     <!-- Login Form -->
     <form v-if="page==='login'" @submit.prevent="doLogin">
@@ -195,12 +213,9 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 <!-- Main Layout -->
 <div v-else class="layout">
   <nav class="sidebar">
-    <div class="side-hd"><div class="logo"><span class="logo-ic">☺</span><span class="logo-tx">梦眠</span></div><p class="logo-sub">AI智能睡眠管理</p></div>
+    <div class="side-hd"><div class="logo"><span class="logo-ic">☺</span><span class="logo-tx">梦眠</span></div></div>
     <ul class="nav">
-      <template v-for="g in NAV_GROUPS" :key="g.label">
-        <li class="nav-label-hd" @click="g.open=!g.open"><span>{{g.open?'▾':'▸'}} {{g.label}}</span></li>
-        <li v-show="g.open" v-for="n in g.items" :key="n.p" :class="['nav-item',{on:cur===n.p}]" @click="cur=n.p"><span class="nav-ic">{{n.i}}</span><span class="nav-label">{{n.l}}</span></li>
-      </template>
+      <li v-for="n in NAV_ITEMS" :key="n.p" :class="['nav-item',{on:cur===n.p}]" @click="cur=n.p"><span class="nav-ic">{{n.i}}</span><span class="nav-label">{{n.l}}</span></li>
     </ul>
     <div class="side-ft"><div class="user-r"><span>☺</span><span>{{user&&user.nickname||user&&user.username||'用户'}}</span></div><button class="btn btn2 btn-sm" style="width:100%;margin-bottom:4px" @click="toggleTheme">{{themeLabel}}</button>
 <button class="btn btn2 btn-sm" style="width:100%" @click="doLogout">退出登录</button></div>
@@ -209,52 +224,54 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 
     <!-- Dashboard -->
     <template v-if="cur==='dashboard'">
-      <h1 class="title">睡眠概览</h1>
       <div v-if="dLoading" class="load"><div class="spin"></div></div>
       <template v-else>
+        <!-- Dream World Scene -->
+        <div :style="'background:'+dreamBg+';border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;min-height:200px;position:relative;overflow:hidden'">
+          <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.3;pointer-events:none">
+            <div v-for="s in 30" :key="s" :style="{position:'absolute',left:Math.random()*100+'%',top:Math.random()*100+'%',width:'2px',height:'2px',background:'#fff',borderRadius:'50%',opacity:Math.random()*0.8+0.2}"></div>
+          </div>
+          <div v-if="surprise" style="position:absolute;top:12px;left:0;right:0;background:rgba(0,0,0,0.6);color:var(--warn);padding:10px 20px;font-size:14px;animation:fadeIn 0.5s;cursor:pointer;z-index:10" @click="dismissSurprise">📯 {{surprise}} <span style="font-size:11px;opacity:0.7;margin-left:8px">[点击收起]</span></div>
+          <div style="position:relative;z-index:1">
+            <div style="font-size:48px;margin-bottom:8px">{{dreamIcon}}</div>
+            <div style="font-size:24px;font-weight:700;margin-bottom:4px">{{dreamTitle}}</div>
+            <div style="font-size:13px;color:var(--tx3);margin-bottom:16px">{{dreamSub}}</div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn1" @click="cur='record'">✏️ 记录睡眠</button>
+              <button class="btn btn2" @click="cur='game';startGame('ritual')" style="background:rgba(255,255,255,0.1);color:#fff">🌙 睡前仪式</button>
+            </div>
+            <!-- Garden mini status -->
+            <div style="margin-top:16px;font-size:12px;color:var(--tx3)">
+              🪴 {{guardian.garden.plants}}株 · 🌸 {{guardian.garden.flowers}}朵 · 🌳 {{guardian.garden.trees}}棵
+              <span v-if="!guardian.garden.watered" style="color:var(--warn);margin-left:8px">⚠️ 今天还没浇水</span>
+              <span v-else style="color:var(--teal);margin-left:8px">✅ 今日已浇水</span>
+            </div>
+          </div>
+        </div>
+        <!-- Stats grid -->
         <div class="grid4">
           <div class="card st-card"><div class="st-label">昨晚睡眠</div><div class="st-val">{{lastDur}}</div><div class="st-sub" v-if="lastR">{{lastR.diary_date}}</div></div>
           <div class="card st-card"><div class="st-label">睡眠评分</div><div class="st-val" style="color:var(--teal)">{{lastScore}}</div><div class="st-sub">{{scoreLbl}}</div></div>
           <div class="card st-card"><div class="st-label">连续达标</div><div class="st-val" style="color:var(--warn)">{{stats?.streak_days||0}}<span style="font-size:18px;font-weight:400;color:var(--tx2)">天</span></div></div>
-          <div class="card st-card"><div class="st-label">本周平均</div><div class="st-val">{{stats?.avg_duration||0}}<span style="font-size:18px;font-weight:400;color:var(--tx2)">h</span></div></div>
+          <div class="card st-card"><div class="st-label">守护者</div><div class="st-val" style="font-size:20px">Lv.{{gameStatus?.level||1}}</div><div class="st-sub">{{gameStatus?.level_name||'入门'}}</div></div>
         </div>
+        <!-- Quick actions + trend -->
         <div class="row2">
           <div class="card"><div class="sub">本周睡眠趋势</div><canvas ref="wkCh" width="600" height="260" style="width:100%"></canvas></div>
-          <div class="card"><div class="sub">快捷操作</div><div class="quick"><button v-for="q in quick" :key="q.l" class="qbtn" @click="cur=q.p"><span class="qic" v-html="q.i"></span><span class="qlb">{{q.l}}</span></button></div></div>
-        </div>
-        <div class="card tip" style="margin-bottom:16px"><span class="tip-ic">💡</span><span class="tip-text">{{dailyTip}}</span></div>
-        <!-- Active Plan Tracking -->
-        <div v-if="actPlan&&actPlan.active" class="card" style="margin-bottom:16px;border-color:var(--ac)">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div class="sub" style="margin:0">📋 {{actPlan.plan?.title}} <span :style="'font-size:13px;color:var(--tx3);margin-left:8px'">第 {{actPlan.current_day}} 天</span></div><span class="badge" :style="actPlan.plan?.duration_days===actPlan.current_day?'background:rgba(46,204,113,0.2);color:var(--suc)':''">{{actPlan.progress?.percent||0}}%</span></div>
-          <div class="prog-bar" style="margin-bottom:12px"><div class="prog-fill" :style="{width:actPlan.progress?.percent+'%'}"></div></div>
-          <div v-if="actPlan.current_phase" style="font-size:14px;color:var(--tx2);margin-bottom:12px">📌 {{actPlan.current_phase.title}}</div>
-          <div v-for="t in actPlan.today_tasks" :key="t.index" style="display:flex;align-items:center;gap:10px;padding:8px 0">
-            <div :class="['task-chk',{done:t.checked}]" @click="planCheckin(t.index)" style="cursor:pointer">{{t.checked?'✓':''}}</div>
-            <span style="font-size:14px" :style="{textDecoration:t.checked?'line-through':'none',color:t.checked?'var(--tx3)':'var(--tx)'}">{{t.task}}</span>
-            <span v-if="planCheckMsg" style="font-size:13px;color:var(--teal);margin-left:auto">{{planCheckMsg}}</span>
+          <div class="card"><div class="sub">快速行动</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button v-for="q in quick" :key="q.l" class="btn btn2" style="text-align:left" @click="cur=q.p"><span v-html="q.i"></span> {{q.l}}</button>
+              <button class="btn btn2" style="text-align:left;color:var(--warn)" @click="cur='learn'">📚 学习成长中心</button>
+            </div>
           </div>
-          <div v-if="planCompleted" style="margin-top:12px;padding:12px;background:rgba(46,204,113,0.1);border-radius:8px;text-align:center;font-size:15px;color:var(--suc)">🎉 恭喜完成计划！新徽章「计划达人」已解锁！</div>
         </div>
-        <!-- Plan enrollment (if no active plan) -->
-        <div v-if="recPlan&&!actPlan?.active" class="card" style="margin-bottom:16px">
-          <div class="sub">🎯 为你推荐改善计划</div>
-          <div style="font-size:14px;color:var(--tx2);margin-bottom:8px">{{recPlan.reason}}</div>
-          <button class="btn btn1 btn-sm" @click="enrollPlan(recPlan.recommended)">开始 {{recPlan.plan_name||'计划'}}</button>
-        </div>
-        <!-- Weekly Report Section -->
+        <!-- Surprise tip -->
+        <div class="card tip" style="margin-bottom:16px"><span class="tip-ic">💡</span><span class="tip-text">{{dailyTip}}</span></div>
+        <!-- Weekly Report -->
         <div class="card" style="margin-bottom:16px"><div class="sub">📊 每周睡眠报告<button class="btn btn1 btn-sm" style="float:right" @click="genReport" :disabled="repLoading">{{repLoading?'生成中...':'生成报告'}}</button></div>
           <div v-if="repData" style="margin-top:12px">
             <div style="padding:12px;background:rgba(14,201,166,0.06);border-radius:8px;margin-bottom:12px;font-size:14px;line-height:1.6">📋 {{repData.summary}}</div>
-            <div v-if="repData.ai_analysis" style="padding:12px;background:rgba(108,99,255,0.06);border-radius:8px;margin-bottom:12px;font-size:14px;line-height:1.6">🤖 {{repData.ai_analysis}}</div>
-            <div v-if="repData.metrics" class="grid4" style="margin-top:12px">
-              <div class="card st-card"><div class="st-label">睡眠效率</div><div class="st-val" style="font-size:24px">{{repData.metrics.sleep_efficiency}}<span style="font-size:16px;font-weight:400;color:var(--tx2)">%</span></div></div>
-              <div class="card st-card"><div class="st-label">累计睡眠债</div><div class="st-val" style="font-size:24px;color:var(--warn)">{{repData.metrics.sleep_debt?.total_debt||0}}<span style="font-size:16px;font-weight:400;color:var(--tx2)">h</span></div></div>
-              <div class="card st-card"><div class="st-label">缺觉天数</div><div class="st-val" style="font-size:24px">{{repData.metrics.sleep_debt?.days_in_debt||0}}<span style="font-size:16px;font-weight:400;color:var(--tx2)">天</span></div></div>
-              <div class="card st-card"><div class="st-label">总记录</div><div class="st-val" style="font-size:24px">{{repData.records_count}}<span style="font-size:16px;font-weight:400;color:var(--tx2)">条</span></div></div>
-            </div>
-            <div v-if="repData.action_items" style="padding:12px;background:rgba(46,204,113,0.06);border-radius:8px;font-size:14px;line-height:1.6">
-              <strong>🎯 改善建议</strong><ul style="margin:8px 0 0 20px"><li v-for="a in repData.action_items" :key="a">{{a}}</li></ul>
-            </div>
+            <div v-if="repData.action_items" style="padding:12px;background:rgba(46,204,113,0.06);border-radius:8px;font-size:14px;line-height:1.6"><strong>🎯 改善建议</strong><ul style="margin:8px 0 0 20px"><li v-for="a in repData.action_items" :key="a">{{a}}</li></ul></div>
           </div>
         </div>
       </template>
@@ -283,6 +300,20 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
         <div v-if="records.length===0" class="empty">暂无记录</div>
         <div v-for="r in records" :key="r.id" class="rec-item"><div class="rec-main"><span class="rec-date">{{r.diary_date}}</span><span class="rec-dur">{{r.duration_hours}}h</span><span>{{'⭐'.repeat(r.quality||3)}}</span><span :style="'font-weight:700;color:'+(r.score>=80?'#2ecc71':r.score>=60?'#f39c12':'#e74c3c')">{{r.score}}分</span><span style="color:var(--tx3);font-size:13px">{{ptags(r.tags)}}</span></div><button class="btn btn-err btn-sm" @click="delRec(r.id)">删除</button></div>
         <div v-if="records.length>0" style="text-align:center;padding:12px"><a :href="'/api/v1/sleep-records/export?days=30'" target="_blank" class="btn btn2 btn-sm" onclick="event.stopPropagation()">📥 导出CSV</a></div>
+      </div>
+      <!-- Dream Postcard Modal -->
+      <div v-if="showPostcard" class="modal-overlay" @click="showPostcard=false">
+        <div class="card" style="width:420px;max-width:90vw;text-align:center;padding:32px;animation:fadeIn 0.5s" @click.stop>
+          <div style="font-size:64px;margin-bottom:16px">🌌</div>
+          <div style="font-size:20px;font-weight:700;margin-bottom:8px">梦境明信片</div>
+          <div style="font-size:14px;color:var(--tx2);line-height:1.8;margin-bottom:20px;font-style:italic">「{{postcardScene}}」</div>
+          <div v-if="lastR" style="font-size:12px;color:var(--tx3);margin-bottom:20px">深睡 {{lastR.deep_sleep||'--'}} · REM {{lastR.rem_sleep||'--'}} · 评分 {{lastR.score||'--'}}</div>
+          <div v-if="guardian.discoveries.length&&guardian.discoveries[0].date===todayStr" style="padding:12px;background:var(--ag);border-radius:8px;margin-bottom:16px;font-size:13px;color:var(--ac);text-align:left">✨ 发现：{{guardian.discoveries[0].text}}</div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn1 btn-sm" @click="showPostcard=false;addFragment(Math.random()>0.7?'epic':'rare')">收藏明信片 + 碎片</button>
+            <button class="btn btn2 btn-sm" @click="showPostcard=false">关闭</button>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -340,6 +371,7 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
     <!-- Tasks -->
     <template v-if="cur==='tasks'">
       <h1 class="title">每日任务<span style="font-size:14px;color:var(--tx3);margin-left:12px">{{todayDateStr}}</span></h1>
+      <div v-if="priList.length>0" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"><span style="font-size:12px;color:var(--tx3)">🎯 你的目标：</span><span v-for="p in priList" :key="p" class="badge" style="background:var(--ag);color:var(--ac)">{{p}}</span><span style="font-size:12px;color:var(--tx3)">— 今日任务已为你定制</span></div>
       <div class="card prog-card"><div class="prog-bar"><div class="prog-fill" :style="{width:progPct+'%'}"></div></div><span class="prog-tx">{{compCount}}/{{todayTasks.length}} 已完成</span><span class="pts-dis">🏆 {{pts}} 积分</span></div>
       <div v-if="todayTasks.length===0" class="card">
         <div class="empty-state">
@@ -436,60 +468,97 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
       </div>
     </template>
 
-    <!-- Knowledge Base -->
-    <template v-if="cur==='knowledge'">
-      <h1 class="title">睡眠知识库</h1>
-      <div class="card" style="margin-bottom:16px"><div class="sub">文章分类</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"><button v-for="c in kbCats" :key="c" :class="['btn btn-sm',kbCat===c?'btn1':'btn2']" @click="kbCat=c;loadArticles()">{{c}}</button><button :class="['btn btn-sm',!kbCat?'btn1':'btn2']" @click="kbCat=null;loadArticles()">全部</button></div>
+    <!-- Learning Center (merged knowledge + courses) -->
+    <template v-if="cur==='learn'">
+      <h1 class="title">学习成长</h1>
+      <!-- Overview stats -->
+      <div class="card" style="margin-bottom:16px"><div style="display:flex;gap:24px;text-align:center;justify-content:space-around"><div><div style="font-size:28px;font-weight:700;color:var(--ac)">{{learnStats.courses}}</div><div style="font-size:12px;color:var(--tx3)">已学课程</div></div><div><div style="font-size:28px;font-weight:700;color:var(--teal)">{{learnStats.articles}}</div><div style="font-size:12px;color:var(--tx3)">文章已读</div></div><div><div style="font-size:28px;font-weight:700;color:var(--warn)">{{learnStats.bookmarks}}</div><div style="font-size:12px;color:var(--tx3)">收藏</div></div><div><div style="font-size:28px;font-weight:700">🔥 {{learnStats.streak}}</div><div style="font-size:12px;color:var(--tx3)">连续学习(天)</div></div></div></div>
+      <!-- Continue Learning -->
+      <div v-if="hasContinueLearning" class="card" style="margin-bottom:16px"><div class="sub">📍 继续学习</div>
+        <div v-if="day21Data" style="padding:12px 0;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;align-items:center;gap:12px" @click="learnTab='courses';coursesTab='21day'"><div style="font-size:32px">📅</div><div style="flex:1"><div style="font-weight:500;font-size:14px">21天CBT-I睡眠改善计划</div><div style="font-size:12px;color:var(--tx3)">已完成 {{day21Done}}/21 天 ({{day21Pct}}%)</div></div><div class="prog-bar" style="width:80px"><div class="prog-fill" :style="{width:day21Pct+'%'}"></div></div></div>
+        <div v-for="h in kbHistory.slice(0,3)" :key="h.id" style="padding:12px 0;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;align-items:center;gap:12px" @click="learnTab='knowledge';kbViewArticle(h.id)"><div style="font-size:24px">📖</div><div style="flex:1"><div style="font-weight:500;font-size:14px">{{h.title}}</div><div style="font-size:12px;color:var(--tx3)">上次阅读 · {{h.category}}</div></div><span style="color:var(--tx3)">继续读 →</span></div>
+        <div v-for="c in enrolledCoursesData" :key="'ec-'+c.id" style="padding:12px 0;cursor:pointer;display:flex;align-items:center;gap:12px" @click="learnTab='courses';viewCourse(c.id)"><div style="font-size:24px">🎓</div><div style="flex:1"><div style="font-weight:500;font-size:14px">{{c.title}}</div><div style="font-size:12px;color:var(--tx3)">{{c.instructor}} · {{c.chapters}}章</div></div><span style="color:var(--tx3)">继续 →</span></div>
       </div>
-      <div v-if="kbArt" class="card" style="margin-bottom:24px"><div class="sub">{{kbArt.title}}<span class="badge" style="margin-left:10px">{{kbArt.category}}</span></div>
-        <div style="white-space:pre-line;line-height:1.8;font-size:14px">{{kbArt.content}}</div>
-        <button class="btn btn2 btn-sm" style="margin-top:12px" @click="kbArt=null">← 返回列表</button>
-      </div>
-      <div v-else class="card"><div v-for="a in kbArticles" :key="a.id" style="padding:14px 16px;border-bottom:1px solid var(--bd);cursor:pointer" @click="kbArt=a">
-        <div style="font-weight:500;font-size:15px;margin-bottom:4px">{{a.title}}<span class="badge" style="margin-left:8px">{{a.category}}</span></div>
-        <div style="font-size:13px;color:var(--tx3)">{{a.summary}}</div>
-        <div style="display:flex;gap:6px;margin-top:6px"><span v-for="t in a.tags" :key="t" style="font-size:11px;color:var(--tx3);background:var(--hover);padding:2px 8px;border-radius:10px">{{t}}</span></div>
-      </div></div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:4px;background:var(--card);border-radius:12px;padding:4px;margin-bottom:16px"><button :class="['btn btn-sm',learnTab==='courses'?'btn1':'btn2']" @click="learnTab='courses'" style="flex:1">📅 系统课程</button><button :class="['btn btn-sm',learnTab==='knowledge'?'btn1':'btn2']" @click="learnTab='knowledge'" style="flex:1">📖 知识探索</button><button :class="['btn btn-sm',learnTab==='bookmarks'?'btn1':'btn2']" @click="learnTab='bookmarks';kbLoadBookmarks()" style="flex:1">🔖 收藏夹</button></div>
+      <!-- Tab: Courses -->
+      <template v-if="learnTab==='courses'"><div style="display:flex;gap:4px;background:var(--hover);border-radius:8px;padding:3px;margin-bottom:12px;width:fit-content"><button :class="['btn btn-sm',coursesTab==='21day'?'btn1':'btn2']" @click="switchCoursesTab('21day')">21天计划</button><button :class="['btn btn-sm',coursesTab==='all'?'btn1':'btn2']" @click="switchCoursesTab('all')">全部课程</button></div>
+        <template v-if="coursesTab==='21day'">
+          <div v-if="day21Data" class="card" style="text-align:center;margin-bottom:16px"><div style="font-size:48px;font-weight:700">{{day21Pct}}%</div><div class="sub">{{day21Done}}/21天 · {{day21Data.meta?.title||'CBT-I睡眠改善'}}</div><div class="prog-bar" style="margin:12px 0"><div class="prog-fill" :style="{width:day21Pct+'%'}"></div></div><div class="day-grid" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0"><div v-for="d in 21" :key="d" :style="{width:'36px',height:'36px',display:'flex',alignItems:'center',justifyContent:'center',borderRadius:'8px',fontSize:'13px',fontWeight:'600',background:d<=day21Done?'var(--teal-soft)':d===day21Done+1?'var(--primary-soft)':'var(--hover)',color:d<=day21Done?'var(--teal)':d===day21Done+1?'var(--primary)':'var(--tx3)'}">{{d<=day21Done?'✓':d}}</div></div><button class="btn btn1 btn-sm" @click="load21Day()">刷新进度</button></div>
+          <div v-else class="card" style="text-align:center;padding:32px"><div style="font-size:48px">🌙</div><div style="font-size:14px;color:var(--tx3);margin-top:8px">登录后自动同步学习进度</div></div>
+        </template>
+        <template v-else>
+          <div v-if="selectedChapter" class="card" style="margin-bottom:16px"><div class="sub">{{selectedChapter.title}}<span style="font-size:12px;color:var(--tx3);margin-left:8px">{{selectedChapter.duration_minutes}}分钟</span></div><div style="white-space:pre-line;line-height:1.8;font-size:14px;color:var(--tx2);margin-top:12px">{{selectedChapter.content}}</div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn2 btn-sm" @click="selectedChapter=null">← 返回章节列表</button></div></div>
+          <div v-else-if="selectedCourse" class="card" style="margin-bottom:16px"><div class="sub">{{selectedCourse.title}}<span v-if="selectedCourse.is_premium" class="badge" style="margin-left:8px;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span></div><div style="font-size:13px;color:var(--tx3);margin-bottom:12px">{{selectedCourse.desc}}</div><div style="font-size:12px;color:var(--tx2);margin-bottom:16px">{{selectedCourse.instructor}} · {{selectedCourse.duration_hours}}h · {{selectedCourse.chapters}}章 · ⭐{{selectedCourse.rating}}</div><div class="sub">📖 课程章节</div><div v-for="ch in courseChapters" :key="ch.id" style="padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;justify-content:space-between;align-items:center" @click="viewChapter(ch)"><div><span style="font-weight:500;font-size:14px">{{ch.order}}. {{ch.title}}</span><div style="font-size:12px;color:var(--tx3);margin-top:2px">{{ch.duration_minutes}}分钟</div></div><span style="color:var(--tx3)">→</span></div><div v-if="courseChapters.length===0" style="text-align:center;padding:24px;color:var(--tx3)">暂无章节信息</div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn2 btn-sm" @click="backToCourses">← 返回课程列表</button><button class="btn btn1 btn-sm" @click="enrollCourse(selectedCourse.id)">立即报名</button></div></div>
+          <div v-else v-for="c in coursesData" :key="c.id" class="card" style="margin-bottom:12px;cursor:pointer" @click="viewCourse(c.id)"><div style="display:flex;justify-content:space-between;align-items:start"><div><span style="font-weight:600;font-size:16px">{{c.title}}</span><span v-if="c.is_premium" class="badge" style="margin-left:8px;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span><div style="font-size:13px;color:var(--tx3)">{{c.desc}}</div><div style="font-size:12px;color:var(--tx2)">{{c.instructor}} · {{c.duration_hours}}h · {{c.chapters}}章 · {{c.enrolled}}人</div></div><span style="color:var(--tx3);font-size:18px">→</span></div></div>
+        </template>
+      </template>
+      <!-- Tab: Knowledge -->
+      <template v-if="learnTab==='knowledge'"><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"><button v-for="c in kbCats" :key="c" :class="['btn btn-sm',kbCat===c?'btn1':'btn2']" @click="kbCat=c;loadArticles()">{{c}}</button><button :class="['btn btn-sm',!kbCat?'btn1':'btn2']" @click="kbCat=null;loadArticles()">全部</button></div><div style="display:flex;gap:8px;margin-bottom:16px"><input v-model="kbSearch" class="inp" placeholder="搜索睡眠知识..." @keyup.enter="kbDoSearch" style="flex:1"><button class="btn btn1 btn-sm" @click="kbDoSearch">搜索</button></div>
+        <div v-if="kbArt" class="card" style="margin-bottom:24px"><div class="sub">{{kbArt.title}}<span class="badge" style="margin-left:10px">{{kbArt.category}}</span><button class="btn btn2 btn-sm" style="float:right" @click="kbToggleBookmark(kbArt.id)">{{kbIsBookmarked(kbArt.id)?'🔖 已收藏':'🏷 收藏'}}</button></div><div style="white-space:pre-line;line-height:1.8;font-size:14px">{{kbArt.content}}</div><div v-if="kbArt.related&&kbArt.related.length" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)"><div class="sub">相关文章</div><div v-for="r in kbArt.related" :key="r.id" style="padding:8px 0;cursor:pointer;font-size:14px;color:var(--tx2)" @click="kbViewArticle(r.id)">{{r.title}} <span style="font-size:12px;color:var(--tx3)">{{r.category}}</span></div></div><button class="btn btn2 btn-sm" style="margin-top:12px" @click="kbArt=null">← 返回列表</button></div>
+        <div v-else class="card"><div v-for="a in kbArticles" :key="a.id" style="padding:14px 16px;border-bottom:1px solid var(--bd);cursor:pointer" @click="kbViewArticle(a.id)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><span style="font-weight:500;font-size:15px;margin-bottom:4px">{{a.title}}<span class="badge" style="margin-left:8px">{{a.category}}</span></span><span style="font-size:18px;cursor:pointer" @click="kbToggleBookmark(a.id);event.stopPropagation()">{{kbIsBookmarked(a.id)?'🔖':'🏷'}}</span></div><div style="font-size:13px;color:var(--tx3)">{{a.summary}}</div><div style="display:flex;gap:6px;margin-top:6px"><span v-for="t in a.tags" :key="t" style="font-size:11px;color:var(--tx3);background:var(--hover);padding:2px 8px;border-radius:10px">{{t}}</span></div></div></div>
+      </template>
+      <!-- Tab: Bookmarks -->
+      <template v-if="learnTab==='bookmarks'"><div v-if="kbBookmarked.length===0&&enrolledIds.length===0" class="card" style="text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:12px">🔖</div><div style="color:var(--tx3)">还没有收藏任何内容</div><div style="font-size:12px;color:var(--tx3);margin-top:4px">浏览文章时点击收藏，报名课程后自动加入</div></div>
+        <div v-if="enrolledIds.length>0" style="margin-bottom:16px"><div class="sub">🎓 已报名课程</div><div v-for="c in enrolledCoursesData" :key="'ec-'+c.id" class="card" style="margin-bottom:8px;cursor:pointer" @click="learnTab='courses';viewCourse(c.id)"><span style="font-weight:500">{{c.title}}</span><span style="font-size:12px;color:var(--tx3);margin-left:8px">{{c.instructor}} · {{c.chapters}}章</span></div></div>
+        <div v-if="kbBookmarked.length>0"><div class="sub">📖 收藏的文章</div><div v-for="a in kbBookmarkedArticles" :key="a.id" style="padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer" @click="learnTab='knowledge';kbViewArticle(a.id)"><div style="font-weight:500;font-size:14px">{{a.title}}</div><div style="font-size:12px;color:var(--tx3)">{{a.category}} · {{a.summary?.slice(0,60)}}</div></div></div>
+        <div v-if="kbHistory.length>0" style="margin-top:16px"><div class="sub">📋 阅读历史</div><div v-for="h in kbHistory.slice(0,10)" :key="h.id" style="padding:8px 0;font-size:14px;color:var(--tx2);cursor:pointer;border-bottom:1px solid var(--bd)" @click="learnTab='knowledge';kbViewArticle(h.id)">{{h.title}}<span style="font-size:11px;color:var(--tx3);margin-left:8px">{{h.category}}</span></div></div>
+      </template>
     </template>
 
     <!-- Onboarding Wizard -->
     <template v-if="showOnboarding">
-      <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center">
-        <div class="card" style="width:520px;max-width:90vw;max-height:80vh;overflow-y:auto">
-          <h2 style="margin-bottom:16px">🎉 欢迎使用梦眠！</h2>
-          <div style="margin-bottom:16px"><div style="display:flex;gap:6px;margin-bottom:16px"><span v-for="i in obSteps.length" :key="i" style="flex:1;height:4px;border-radius:2px;transition:background 0.3s" :style="{background:i<=obStep?'var(--ac)':'var(--bd)'}"></span></div>
-            <h3 style="margin-bottom:8px">{{obSteps[obStep-1]?.title}}</h3>
-            <p style="color:var(--tx3);margin-bottom:16px">{{obSteps[obStep-1]?.question}}</p>
-            <!-- Step fields -->
+      <div class="onboard-overlay">
+        <div class="onboard-card">
+          <button class="onboard-close" @click="showOnboarding=false">✕</button>
+          <div class="onboard-top">
+            <div class="onboard-icon">{{['👋','🎯','🔍','🌿','✨'][obStep-1]}}</div>
+            <h2 class="onboard-title">{{['欢迎来到梦眠','设定你的睡眠目标','了解你的睡眠现状','你的生活习惯','最后一步'][obStep-1]}}</h2>
+            <p class="onboard-desc">{{['让我们了解你，帮你开启更好的睡眠之旅','设定一个可达成的目标，我们会帮你一步步实现','告诉我们你遇到了什么问题，持续了多久','了解你的日常习惯，帮你找到影响睡眠的因素','选择你最想改善的方向'][obStep-1]}}</p>
+          </div>
+          <div class="onboard-steps"><div v-for="i in 5" :key="i" :class="['onboard-dot',{active:i<=obStep,done:i<obStep}]"></div></div>
+          <div class="onboard-body">
             <div v-if="obStep===1">
-              <div class="fg"><label>年龄</label><input v-model.number="obData.age" type="number" class="inp"></div>
-              <div class="fg"><label>性别</label><select v-model="obData.gender" class="inp"><option value="">请选择</option><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div>
+              <div class="fg"><label>你的年龄</label><input v-model.number="obData.age" type="number" class="inp" placeholder="输入年龄" min="12" max="100"></div>
+              <div class="fg"><label>性别</label><div class="onboard-options"><button v-for="g in ['男','女','其他']" :key="g" :class="['onboard-opt',{sel:obData.gender===g}]" @click="obData.gender=g">{{g==='男'?'👨':'女'?'👩':'🌈'}} {{g}}</button></div></div>
             </div>
             <div v-if="obStep===2">
-              <div class="fg"><label>目标睡眠时长(h)</label><input v-model.number="obData.sleep_goal_hours" type="number" class="inp" step="0.5" min="4" max="12"></div>
-              <div class="fg"><label>理想入睡时间</label><input v-model="obData.bedtime_target" type="time" class="inp"></div>
-              <div class="fg"><label>理想起床时间</label><input v-model="obData.wakeup_target" type="time" class="inp"></div>
+              <div class="fg"><label>每晚目标睡眠时长</label><div class="onboard-options"><button v-for="h in [6,6.5,7,7.5,8,8.5,9]" :key="h" :class="['onboard-opt',{sel:obData.sleep_goal_hours===h}]" @click="obData.sleep_goal_hours=h">{{h}}h</button></div></div>
+              <div class="row2" style="grid-template-columns:1fr 1fr"><div class="fg"><label>🌙 理想入睡时间</label><input v-model="obData.bedtime_target" type="time" class="inp"></div><div class="fg"><label>☀️ 理想起床时间</label><input v-model="obData.wakeup_target" type="time" class="inp"></div></div>
             </div>
             <div v-if="obStep===3">
-              <div class="fg"><label>睡眠问题（多选）</label><div class="cb-group"><label v-for="iss in SLEEP_ISSUES" class="cb-lb"><input type="checkbox" :value="iss" v-model="obSleepIssues"> {{iss}}</label></div></div>
-              <div class="fg"><label>问题已持续多久</label><select v-model="obData.sleep_issue_duration" class="inp"><option value="">请选择</option><option value="<1个月">&lt;1个月</option><option value="1-6个月">1-6个月</option><option value="6-12个月">6-12个月</option><option value=">1年">&gt;1年</option></select></div>
+              <div class="fg"><label>你有哪些睡眠问题？</label>
+                <div :class="['onboard-fold',{open:obIssuesOpen}]">
+                  <div class="onboard-fold-hd" @click="obIssuesOpen=!obIssuesOpen"><span>{{obSleepIssues.length>0?'已选 '+obSleepIssues.length+' 项：'+obSleepIssues.join('、'):'点击选择（可多选）'}}</span><span>{{obIssuesOpen?'▲':'▼'}}</span></div>
+                  <div class="onboard-fold-bd"><div class="onboard-options" style="flex-direction:column;align-items:stretch"><button v-for="iss in SLEEP_ISSUES" :key="iss" :class="['onboard-opt',{sel:obSleepIssues.includes(iss)}]" @click="obSleepIssues.includes(iss)?obSleepIssues.splice(obSleepIssues.indexOf(iss),1):obSleepIssues.push(iss)">{{iss}}</button></div></div>
+                </div>
+              </div>
+              <div class="fg"><label>问题持续了多久？</label><select v-model="obData.sleep_issue_duration" class="inp"><option value="">请选择</option><option value="<1个月">&lt; 1个月</option><option value="1-6个月">1 ~ 6个月</option><option value="6-12个月">6 ~ 12个月</option><option value=">1年">&gt; 1年</option></select></div>
             </div>
             <div v-if="obStep===4">
-              <div class="fg"><label>咖啡因摄入习惯</label><select v-model="obData.caffeine_intake" class="inp"><option value="">请选择</option><option value="不摄入">不摄入</option><option value="仅在上午">仅在上午</option><option value="上午和下午">上午和下午</option></select></div>
-              <div class="fg"><label>运动频率</label><select v-model="obData.exercise_frequency" class="inp"><option value="">请选择</option><option value="不运动">不运动</option><option value="偶尔">偶尔</option><option value="每周1-2次">每周1-2次</option><option value="每周3-5次">每周3-5次</option></select></div>
-              <div class="fg"><label>压力水平</label><select v-model="obData.stress_level" class="inp"><option value="">请选择</option><option value="低">低</option><option value="中">中</option><option value="高">高</option><option value="极高">极高</option></select></div>
+              <div class="fg"><label>☕ 咖啡因摄入</label><div class="onboard-options"><button v-for="c in [{v:'不摄入',l:'🚫 不喝'},{v:'仅在上午',l:'☀️ 仅上午'},{v:'上午和下午',l:'🌤️ 上午+下午'}]" :key="c.v" :class="['onboard-opt',{sel:obData.caffeine_intake===c.v}]" @click="obData.caffeine_intake=c.v">{{c.l}}</button></div></div>
+              <div class="fg"><label>🏃 运动频率</label><div class="onboard-options"><button v-for="e in [{v:'不运动',l:'🛋️ 不运动'},{v:'偶尔',l:'🚶 偶尔'},{v:'每周1-2次',l:'🏋️ 1-2次/周'},{v:'每周3-5次',l:'💪 3-5次/周'},{v:'每天',l:'🔥 每天'}]" :key="e.v" :class="['onboard-opt',{sel:obData.exercise_frequency===e.v}]" @click="obData.exercise_frequency=e.v">{{e.l}}</button></div></div>
+              <div class="fg"><label>😰 日常压力水平</label><div class="onboard-options"><button v-for="s in [{v:'低',l:'😊 低'},{v:'中',l:'😐 中'},{v:'高',l:'😫 高'},{v:'极高',l:'😵 极高'}]" :key="s.v" :class="['onboard-opt',{sel:obData.stress_level===s.v}]" @click="obData.stress_level=s.v">{{s.l}}</button></div></div>
             </div>
             <div v-if="obStep===5">
-              <div class="fg"><label>改善优先级（多选）</label><div class="cb-group"><label v-for="p in PRI_OPTS" class="cb-lb"><input type="checkbox" :value="p" v-model="obPriorities"> {{p}}</label></div></div>
-              <div class="fg"><label>主要目标</label><textarea v-model="obData.primary_goal" class="inp" rows="2" placeholder="描述你的睡眠改善目标..."></textarea></div>
+              <div class="fg"><label>你最想改善什么？</label>
+                <div :class="['onboard-fold',{open:obPriorsOpen}]">
+                  <div class="onboard-fold-hd" @click="obPriorsOpen=!obPriorsOpen"><span>{{obPriorities.length>0?'已选 '+obPriorities.length+' 项：'+obPriorities.join('、'):'点击选择（可多选）'}}</span><span>{{obPriorsOpen?'▲':'▼'}}</span></div>
+                  <div class="onboard-fold-bd"><div class="onboard-options" style="flex-direction:column;align-items:stretch"><button v-for="p in PRI_OPTS" :key="p" :class="['onboard-opt',{sel:obPriorities.includes(p)}]" @click="obPriorities.includes(p)?obPriorities.splice(obPriorities.indexOf(p),1):obPriorities.push(p)">{{p==='入睡速度'?'⚡':p==='睡眠深度'?'💤':p==='减少夜醒'?'🌙':p==='作息规律'?'📅':'✨'}} {{p}}</button></div></div>
+                </div>
+              </div>
+              <div class="fg"><label>还有什么想告诉我们的？</label><textarea v-model="obData.primary_goal" class="inp" rows="3" placeholder="描述你的睡眠改善目标，比如：我希望能在30分钟内入睡..."></textarea></div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button v-if="obStep>1" class="btn btn2" @click="obStep--">上一步</button>
-            <button v-if="obStep<5" class="btn btn1" @click="obStep++">下一步</button>
-            <button v-if="obStep===5" class="btn btn1" @click="finishOnboarding">完成设置</button>
-            <button class="btn btn2" @click="showOnboarding=false">稍后再说</button>
+          <div v-if="obErr" class="onboard-err">⚠️ {{obErr}}</div>
+          <div class="onboard-actions">
+            <button v-if="obStep>1" class="btn btn2" @click="obStep--">← 上一步</button>
+            <span v-else></span>
+            <div>
+              <button class="btn btn2" style="margin-right:8px" @click="showOnboarding=false">稍后再说</button>
+              <button v-if="obStep<5" class="btn btn1" @click="nextObStep()">下一步 →</button>
+              <button v-if="obStep===5" class="btn btn1" @click="finishOnboarding">✨ 完成，开始改善睡眠</button>
+            </div>
           </div>
         </div>
       </div>
@@ -502,17 +571,119 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
       <div class="card"><div class="sub">全部商品</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"><div v-for="p in storeProducts" :key="p.id" class="card" style="text-align:center;cursor:pointer"><div style="font-size:28px">{{p.category==='眼罩'?'🎭':p.category==='香薰'?'🕯':p.category==='寝具'?'🛏':p.category==='音箱'?'🔊':p.category==='枕头'?'💤':p.category==='补充剂'?'💊':p.category==='耳塞'?'🎧':'💡'}}</div><div style="font-weight:600;font-size:14px">{{p.name}}</div><div style="font-size:12px;color:var(--tx3)">{{p.desc}}</div><div style="font-size:18px;font-weight:700;color:var(--ac);margin:6px 0">¥{{p.price_yuan}}</div><button class="btn btn1 btn-sm" @click="addToStoreCart(p.id)">加入购物车</button></div></div></div>
     </template>
 
-    <!-- Courses -->
-    <template v-if="cur==='courses'">
-      <h1 class="title">睡眠课程</h1>
-      <div v-for="c in coursesData" :key="c.id" class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:start"><div><span style="font-weight:600;font-size:16px">{{c.title}}</span><span v-if="c.is_premium" class="badge" style="margin-left:8px;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span><div style="font-size:13px;color:var(--tx3)">{{c.desc}}</div><div style="font-size:12px;color:var(--tx2)">{{c.instructor}} · {{c.duration_hours}}h · {{c.chapters}}章 · {{c.enrolled}}人</div></div><button class="btn btn1 btn-sm" @click="enrollCourse(c.id)">报名</button></div></div>
-    </template>
-
-    <!-- Game -->
+    <!-- Training Dojo + Sleep Ritual -->
     <template v-if="cur==='game'">
-      <h1 class="title">游戏化中心</h1>
-      <div v-if="gameStatus" class="card" style="text-align:center;margin-bottom:16px"><div style="font-size:64px;font-weight:700">{{gameStatus.level_name}}</div><div style="font-size:18px;color:var(--tx3)">Lv.{{gameStatus.level}} · {{gameStatus.total_xp}} XP · 🔥连续{{gameStatus.streak_days}}天</div><div class="prog-bar" style="margin:12px 0"><div class="prog-fill" :style="{width:(gameStatus.current_xp/gameStatus.xp_needed*100)+'%'}"></div></div><div style="font-size:13px;color:var(--tx3)">{{gameStatus.current_xp}}/{{gameStatus.xp_needed}} XP</div><button class="btn btn1 btn-sm" style="margin-top:12px" @click="gameCheckin">🎁 每日签到 +15XP</button></div>
-      <div class="card" style="margin-bottom:16px"><div class="sub">🏆 成就</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px"><div v-for="a in gameAchievements" :key="a.key" :class="['card',{on:a.unlocked}]" style="text-align:center;padding:12px;opacity:a.unlocked?1:0.3"><div style="font-size:28px">{{a.icon}}</div><div style="font-size:11px">{{a.unlocked?a.title:'??'}}</div></div></div></div>
+      <h1 class="title">⚔️ 训练道场</h1>
+      <!-- Guardian Status -->
+      <div class="card" style="text-align:center;margin-bottom:16px">
+        <div style="font-size:48px;font-weight:700;margin-bottom:4px">{{gameStatus?.level_name||'梦境守护者'}}</div>
+        <div style="font-size:14px;color:var(--tx3);margin-bottom:16px">Lv.{{gameStatus?.level||1}} · {{gameStatus?.total_xp||0}} XP · 🔥连续{{gameStatus?.streak_days||0}}天</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px">
+          <div v-for="attr in ['focus','wisdom','resilience','vitality']" :key="attr" style="text-align:center">
+            <div style="font-size:24px">{{attrIcons[attr]}}</div>
+            <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">{{attrNames[attr]}}</div>
+            <div style="display:flex;gap:2px;justify-content:center"><span v-for="n in 4" :key="n" :style="{color:n<=guardian[attr]?(attr==='focus'?'#3498DB':attr==='wisdom'?'#9B59B6':attr==='resilience'?'#E67E22':'#E74C3C'):'var(--bd)'}">●</span></div>
+          </div>
+        </div>
+        <button class="btn btn1 btn-sm" @click="gameCheckin">🎁 每日签到 +15XP</button>
+      </div>
+      <!-- Sleep Ritual (prominent) -->
+      <div v-if="activeGame==='ritual'" class="card" style="margin-bottom:16px;text-align:center">
+        <div class="sub">🌙 睡前仪式</div>
+        <div v-if="ritualStep===0" style="padding:24px 0">
+          <div style="font-size:48px;margin-bottom:16px">🌙</div>
+          <div style="font-size:14px;color:var(--tx2);margin-bottom:4px">选择仪式模式</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+            <button class="btn btn2" @click="ritualMode='quick';startRitual()" style="flex:1;max-width:140px"><div style="font-size:24px">⚡</div><div>快速</div><div style="font-size:11px;color:var(--tx3)">2分钟</div></button>
+            <button class="btn btn1" @click="ritualMode='standard';startRitual()" style="flex:1;max-width:140px"><div style="font-size:24px">🌙</div><div>标准</div><div style="font-size:11px;color:var(--tx3)">5分钟</div></button>
+            <button class="btn btn2" @click="ritualMode='deep';startRitual()" style="flex:1;max-width:140px"><div style="font-size:24px">🧘</div><div>深度</div><div style="font-size:11px;color:var(--tx3)">10分钟</div></button>
+          </div>
+        </div>
+        <div v-else-if="ritualStep===1" style="padding:24px 0">
+          <div style="font-size:14px;color:var(--tx3);margin-bottom:8px">步骤 1/{{ritualMode==='quick'?2:ritualMode==='standard'?3:4}}</div>
+          <div style="font-size:32px;margin-bottom:8px">💭</div>
+          <div style="font-size:18px;font-weight:600;margin-bottom:4px">烦恼粉碎</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:16px">写下今天让你焦虑的事</div>
+          <div v-if="ritualWorries.length===0" style="display:flex;gap:8px;max-width:400px;margin:0 auto"><input v-model="ritualWorryInput" class="inp" placeholder="写下你的烦恼..." @keyup.enter="addRitualWorry" style="flex:1"><button class="btn btn1 btn-sm" @click="addRitualWorry">提交</button></div>
+          <div v-for="w in ritualWorries" :key="w.id" style="padding:8px 16px;margin:4px auto;max-width:400px;border-radius:8px;background:var(--suc-soft);font-size:13px;text-decoration:line-through;opacity:0.6">💥 {{w.text}}</div>
+          <button v-if="ritualWorries.length>=1" class="btn btn1 btn-sm" style="margin-top:12px" @click="ritualStep=2">继续 →</button>
+        </div>
+        <div v-else-if="ritualStep===2" style="padding:24px 0">
+          <div style="font-size:14px;color:var(--tx3);margin-bottom:8px">步骤 2/{{ritualMode==='quick'?2:ritualMode==='standard'?3:4}}</div>
+          <div style="font-size:32px;margin-bottom:8px">🫁</div>
+          <div style="font-size:18px;font-weight:600;margin-bottom:4px">呼吸训练</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:16px">4-7-8 呼吸法 · {{ritualMode==='quick'?'2':'4'}} 轮</div>
+          <div v-if="ritualBreathDone" style="font-size:48px;margin-bottom:8px">✅</div>
+          <div v-else :style="{width:'120px',height:'120px',borderRadius:'50%',margin:'0 auto 16px',background:'var(--ag)',display:'flex',alignItems:'center',justifyContent:'center',transition:'transform 1s',transform:breathPhase==='吸气'?'scale(1.3)':breathPhase==='呼气'?'scale(0.7)':'scale(1)'}"><div style="font-size:36px">{{ritualBreathDone?'✅':breathTimer||'4'}}</div></div>
+          <div v-if="!ritualBreathDone"><div style="font-size:20px;font-weight:700;color:var(--ac);margin-bottom:4px">{{breathPhase||'准备'}}</div><div style="font-size:12px;color:var(--tx3);margin-bottom:12px">第 {{breathRounds+1}}/{{ritualMode==='quick'?2:4}} 轮</div><button class="btn btn1 btn-sm" @click="startRitualBreathing">开始呼吸</button></div>
+          <button v-if="ritualBreathDone" class="btn btn1 btn-sm" style="margin-top:12px" @click="ritualStep=3;ritualBreathDone=false;stopBreathing();loadRitualQuiz()">继续 →</button>
+          <div v-if="ritualMode==='quick'&&ritualBreathDone" style="margin-top:8px"><button class="btn btn1 btn-sm" @click="finishRitual">完成仪式 ✨</button></div>
+        </div>
+        <div v-else-if="ritualStep===3" style="padding:24px 0">
+          <div style="font-size:14px;color:var(--tx3);margin-bottom:8px">步骤 3/{{ritualMode==='standard'?3:4}}</div>
+          <div style="font-size:32px;margin-bottom:8px">🧠</div>
+          <div style="font-size:18px;font-weight:600;margin-bottom:4px">知识问答</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:16px">答 {{ritualMode==='deep'?5:3}} 道题，让大脑安静下来</div>
+          <div v-if="ritualQuizDone" style="font-size:48px;margin-bottom:8px">✅ 得分 {{ritualQuizScore}}</div>
+          <div v-else-if="ritualQuizQ" style="max-width:400px;margin:0 auto;text-align:left"><div style="font-weight:500;margin-bottom:12px">{{ritualQuizQ.q}}</div>
+            <button v-for="(opt,oi) in ritualQuizQ.opts" :key="oi" :class="['btn',ritualQuizAnswer===oi?(oi===ritualQuizQ.ans?'btn-suc':'btn-err'):'btn2']" :disabled="ritualQuizAnswer!==null" @click="answerRitualQuiz(oi)" style="display:block;width:100%;margin-bottom:4px;text-align:left">{{opt}}</button>
+            <button v-if="ritualQuizAnswer!==null" class="btn btn1 btn-sm" style="width:100%;margin-top:8px" @click="nextRitualQuiz">下一题 →</button>
+          </div>
+          <div v-if="!ritualQuizLoaded" class="text-center" style="padding:24px;color:var(--tx3)">加载题目中...</div>
+          <div v-if="ritualMode==='standard'&&ritualQuizDone"><button class="btn btn1 btn-sm" style="margin-top:12px" @click="finishRitual">完成仪式 ✨</button></div>
+          <div v-if="ritualQuizDone&&ritualMode==='deep'"><button class="btn btn1 btn-sm" style="margin-top:12px" @click="ritualStep=4">最后一步 →</button></div>
+        </div>
+        <div v-else-if="ritualStep===4" style="padding:24px 0">
+          <div style="font-size:14px;color:var(--tx3);margin-bottom:8px">步骤 4/4</div>
+          <div style="font-size:32px;margin-bottom:8px">🌟</div>
+          <div style="font-size:18px;font-weight:600;margin-bottom:4px">今夜寄语</div>
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:16px">深呼吸，感受你今晚为梦境世界做的一切</div>
+          <div style="padding:16px;background:var(--ag);border-radius:8px;max-width:400px;margin:0 auto;font-size:14px;color:var(--ac);line-height:1.8">今晚你粉碎了烦恼、练习了呼吸、回答了知识题。你的梦境世界将迎来一个宁静的夜晚。守护者，晚安 🌙</div>
+          <button class="btn btn1 btn-sm" style="margin-top:16px" @click="finishRitual">✨ 完成仪式</button>
+        </div>
+        <div v-else-if="ritualStep===5" style="padding:24px 0">
+          <div style="font-size:64px;margin-bottom:16px">🎁</div>
+          <div style="font-size:20px;font-weight:700;margin-bottom:8px">仪式完成！</div>
+          <div style="font-size:14px;color:var(--tx2);margin-bottom:4px">获得 {{ritualXP}} XP</div>
+          <div style="font-size:13px;color:var(--ac)">✨ 获得 {{ritualFragmentQuality==='legendary'?'传奇':ritualFragmentQuality==='epic'?'史诗':'稀有'}} 碎片</div>
+          <button class="btn btn1" style="margin-top:16px" @click="activeGame=null">返回道场</button>
+        </div>
+      </div>
+      <!-- Active training games (breathing, quiz, worry, runner) -->
+      <div v-else-if="activeGame==='breathing'" class="card" style="text-align:center;margin-bottom:16px">
+        <div class="sub">🧘 呼吸训练 → 专注力</div>
+        <div v-if="breathState==='ready'" style="padding:40px 0"><div style="font-size:64px;margin-bottom:16px">🫁</div><div style="font-size:14px;color:var(--tx2);margin-bottom:8px">4-7-8 呼吸法</div><div style="font-size:12px;color:var(--tx3);margin-bottom:24px">吸气4秒 · 屏息7秒 · 呼气8秒 · 重复4轮</div><button class="btn btn1" @click="startBreathing">开始训练</button></div>
+        <div v-else-if="breathState==='playing'" style="padding:40px 0">
+          <div :style="{width:'160px',height:'160px',borderRadius:'50%',margin:'0 auto 24px',background:'var(--ag)',display:'flex',alignItems:'center',justifyContent:'center',transition:'transform 1s',transform:breathPhase==='吸气'?'scale(1.3)':breathPhase==='呼气'?'scale(0.7)':'scale(1)'}"><div style="font-size:48px">{{breathTimer}}</div></div>
+          <div style="font-size:24px;font-weight:700;color:var(--ac);margin-bottom:4px">{{breathPhase}}</div>
+          <div style="font-size:12px;color:var(--tx3)">第 {{breathRounds+1}}/4 轮</div>
+          <button class="btn btn2 btn-sm" style="margin-top:16px" @click="stopBreathing">停止</button>
+        </div>
+        <div v-else-if="breathState==='done'" style="padding:40px 0"><div style="font-size:64px;margin-bottom:16px">✅</div><div style="font-size:16px;color:var(--ac);margin-bottom:8px">完成 {{breathRounds}} 轮呼吸训练</div><div style="font-size:12px;color:var(--tx3);margin-bottom:24px">专注力已提升</div><button class="btn btn1" @click="startBreathing">再来一次</button></div>
+      </div>
+      <div v-else-if="activeGame==='quiz'" class="card" style="margin-bottom:16px"><div class="sub">🧠 知识问答 → 智慧</div>
+        <div v-if="quizQuestions.length===0" style="text-align:center;padding:32px;color:var(--tx3)">加载题目中...</div>
+        <div v-else-if="!quizDone&&quizQuestions[quizIdx]" style="padding:16px 0"><div style="font-size:12px;color:var(--tx3);margin-bottom:8px">第 {{quizIdx+1}}/{{quizQuestions.length}} 题 · 得分 {{quizScore}}</div><div class="prog-bar" style="margin-bottom:16px"><div class="prog-fill" :style="{width:(quizIdx+1)/quizQuestions.length*100+'%'}"></div></div><div style="font-size:18px;font-weight:500;margin-bottom:20px">{{quizQuestions[quizIdx].q}}</div><div style="display:flex;flex-direction:column;gap:8px"><button v-for="(opt,oi) in quizQuestions[quizIdx].opts" :key="oi" :class="['btn',quizAnswer===oi?(oi===quizQuestions[quizIdx].ans?'btn-suc':'btn-err'):'btn2']" :disabled="quizAnswer!==null" @click="answerQuiz(oi)" style="text-align:left">{{['A','B','C','D'][oi]}}. {{opt}}</button></div><div v-if="quizExplain" style="margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--hover);font-size:13px;color:var(--tx2)">{{quizExplain}}</div><button v-if="quizAnswer!==null" class="btn btn1 btn-sm" style="margin-top:12px;width:100%" @click="nextQuiz">{{quizIdx+1>=quizQuestions.length?'查看结果':'下一题 →'}}</button></div>
+        <div v-else-if="quizDone" style="text-align:center;padding:32px 0"><div style="font-size:64px;margin-bottom:16px">{{quizScore>=80?'🏆':quizScore>=60?'⭐':'📚'}}</div><div style="font-size:24px;font-weight:700;color:var(--ac)">{{quizScore}}分</div><div style="font-size:12px;color:var(--tx3);margin-top:4px">满分 {{quizQuestions.length*20}}分</div><button class="btn btn1 btn-sm" style="margin-top:16px" @click="restartQuiz">再来一组</button></div>
+      </div>
+      <div v-else-if="activeGame==='worry'" class="card" style="margin-bottom:16px"><div class="sub">💭 烦恼粉碎机 → 韧性</div><div style="font-size:13px;color:var(--tx3);margin-bottom:12px">写下你的烦恼，然后把它们一个个粉碎。</div><div v-if="!worryDone" style="display:flex;gap:8px;margin-bottom:16px"><input v-model="worryText" class="inp" placeholder="写下你的烦恼..." @keyup.enter="submitWorry" style="flex:1"><button class="btn btn1 btn-sm" @click="submitWorry">提交</button></div><div v-if="worryList.length===0" style="text-align:center;padding:24px;color:var(--tx3)">还没有烦恼记录，开始写吧</div><div v-for="w in worryList" :key="w.id" :style="{padding:'10px 14px',marginBottom:'6px',borderRadius:'8px',background:w.crushed?'var(--suc-soft)':'var(--hover)',textDecoration:w.crushed?'line-through':'none',opacity:w.crushed?0.5:1,display:'flex',justifyContent:'space-between',alignItems:'center'}"><span style="font-size:14px">{{w.text}}</span><button v-if="!w.crushed" class="btn btn-err btn-sm" style="font-size:11px;padding:2px 10px" @click="crushWorry(w.id)">💥 粉碎</button><span v-else style="font-size:11px;color:var(--suc)">已粉碎 ✓</span></div><div v-if="worryDone" style="text-align:center;padding:16px;margin-top:12px;background:var(--ag);border-radius:8px;color:var(--ac);font-size:14px">✅ 韧性已提升</div></div>
+      <div v-else-if="activeGame==='runner'" class="card" style="margin-bottom:16px"><div class="sub">🏃 昼夜节律跑酷 → 活力</div><div v-if="!runnerPlaying&&!runnerGameOver" style="text-align:center;padding:32px 0"><div style="font-size:64px;margin-bottom:16px">🏃</div><div style="font-size:14px;color:var(--tx2);margin-bottom:4px">躲避障碍物，保持前行</div><button class="btn btn1" @click="startRunner();runnerLoop()">开始跑酷</button></div><div v-else-if="runnerPlaying" style="text-align:center;padding:16px 0"><div style="font-size:20px;font-weight:700;margin-bottom:16px">得分: {{runnerScore}}</div><div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px"><button v-for="lane in 3" :key="lane" :class="['btn',runnerPos===lane-1?'btn1':'btn2']" style="width:80px;height:60px;font-size:24px" @click="moveRunner(lane-1)">{{lane===1?'⬅':lane===2?'⬆':'➡'}}</button></div><div style="position:relative;height:120px;background:var(--hover);border-radius:8px;overflow:hidden"><div v-for="o in runnerObs" :key="o.id" :style="{position:'absolute',left:(o.lane*33.3+8)+'%',top:'10px',fontSize:'28px',opacity:Math.max(0,1-(Date.now()-o.id)/3000)}">☕</div><div :style="{position:'absolute',left:(runnerPos*33.3+11)+'%',bottom:'10px',fontSize:'28px',transition:'left 0.1s'}">🧑</div></div></div><div v-else-if="runnerGameOver" style="text-align:center;padding:32px 0"><div style="font-size:64px;margin-bottom:16px">💥</div><div style="font-size:18px;font-weight:700;margin-bottom:4px">游戏结束</div><div style="font-size:24px;color:var(--ac)">{{runnerScore}} 分</div><button class="btn btn1 btn-sm" style="margin-top:16px" @click="startRunner();runnerLoop()">再来一局</button></div></div>
+      <!-- Main dojo view: Ritual + Training stations + Achievements -->
+      <template v-else>
+        <div class="card" style="text-align:center;margin-bottom:16px;background:linear-gradient(135deg,rgba(123,140,214,0.1),rgba(94,196,186,0.1))">
+          <div style="font-size:32px;margin-bottom:8px">🌙</div>
+          <div class="sub">睡前仪式</div>
+          <div style="font-size:13px;color:var(--tx3);margin-bottom:12px">串联训练，守护今晚梦境</div>
+          <button class="btn btn1" @click="activeGame='ritual';ritualStep=0">✨ 开始仪式</button>
+          <div v-if="guardian.ritualStreak>0" style="font-size:12px;color:var(--teal);margin-top:8px">已连续 {{guardian.ritualStreak}} 天完成仪式</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
+          <div v-for="g in gameHall" :key="g.id" v-show="g.id==='breathing'||g.id==='quiz'||g.id==='worry'||g.id==='runner'" class="card" style="text-align:center;cursor:pointer" @click="startGame(g.id)">
+            <div style="font-size:28px">{{g.icon}}</div><div style="font-weight:500;font-size:14px">{{g.name}}</div><div style="font-size:11px;color:var(--tx3)">{{attrNames[attrGame[g.id]]||''}} 训练</div><div style="margin-top:4px"><span :style="{fontSize:'10px',padding:'2px 6px',borderRadius:'8px',background:'var(--ag)',color:'var(--ac)'}">可训练</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px"><div class="sub">🏆 成就</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px"><div v-for="a in gameAchievements" :key="a.key||a.badge_id" :class="['card',{on:a.unlocked}]" style="text-align:center;padding:12px;opacity:a.unlocked?1:0.3"><div style="font-size:28px">{{a.icon}}</div><div style="font-size:11px">{{a.unlocked?a.title||a.name:'??'}}</div></div></div></div>
+      </template>
     </template>
 
     <!-- Assessment -->
@@ -648,7 +819,35 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
 
     <!-- Profile -->
     <template v-if="cur==='profile'">
-      <h1 class="title">健康档案</h1>
+      <h1 class="title">🛡️ 梦境守护者档案</h1>
+      <!-- Guardian Card -->
+      <div class="card" style="text-align:center;margin-bottom:16px">
+        <div style="font-size:64px;font-weight:700;margin-bottom:4px">{{gameStatus?.level_name||'梦境守护者'}}</div>
+        <div style="font-size:14px;color:var(--tx3);margin-bottom:8px">Lv.{{gameStatus?.level||1}} · {{gameStatus?.total_xp||0}} XP</div>
+        <div class="prog-bar" style="margin-bottom:16px"><div class="prog-fill" :style="{width:(gameStatus?.current_xp||0)/(gameStatus?.xp_needed||100)*100+'%'}"></div></div>
+        <!-- Attribute radar summary -->
+        <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+          <div v-for="attr in ['focus','wisdom','resilience','vitality']" :key="attr" style="text-align:center;min-width:60px">
+            <div style="font-size:24px">{{attrIcons[attr]}}</div>
+            <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">{{attrNames[attr]}}</div>
+            <div style="font-size:13px;font-weight:700">{{'●'.repeat(guardian[attr])+'○'.repeat(4-guardian[attr])}}</div>
+          </div>
+        </div>
+      </div>
+      <!-- Collections -->
+      <div class="row2" style="margin-bottom:16px">
+        <div class="card"><div class="sub">🌌 梦境场景 ({{guardian.scenes.length}})</div><div style="font-size:12px;color:var(--tx3)">碎片收集: {{guardian.fragments.length}} 枚</div><div v-if="guardian.fragments.length>0" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:8px"><span v-for="f in guardian.fragments.slice(-8)" :key="f.id" :style="{fontSize:'11px',padding:'2px 6px',borderRadius:'6px',background:f.quality==='legendary'?'rgba(212,164,74,0.15)':f.quality==='epic'?'rgba(155,89,182,0.15)':f.quality==='rare'?'rgba(52,152,219,0.15)':'var(--hover)',color:f.quality==='legendary'?'#d4a44a':f.quality==='epic'?'#9B59B6':f.quality==='rare'?'#3498DB':'var(--tx3)'}">{{f.quality==='legendary'?'🌟':f.quality==='epic'?'💎':f.quality==='rare'?'🔷':'✨'}} {{f.name}}</span></div></div>
+        <div class="card"><div class="sub">🪴 梦境花园</div><div style="font-size:28px;text-align:center">🪴 {{guardian.garden.plants}}株 · 🌸 {{guardian.garden.flowers}}朵 · 🌳 {{guardian.garden.trees}}棵</div><div style="font-size:12px;color:var(--tx3);text-align:center">连续爱护 {{guardian.garden.streak}} 天</div></div>
+      </div>
+      <!-- Discoveries + Postcards -->
+      <div v-if="guardian.discoveries.length>0" class="card" style="margin-bottom:16px"><div class="sub">💡 个人睡眠发现 ({{guardian.discoveries.length}})</div>
+        <div v-for="d in guardian.discoveries.slice(0,5)" :key="d.id" style="padding:8px 0;font-size:13px;color:var(--tx2);border-bottom:1px solid var(--bd)">✨ {{d.text}}<span style="font-size:11px;color:var(--tx3);margin-left:8px">{{d.date}}</span></div>
+      </div>
+      <div v-if="guardian.postcards.length>0" class="card" style="margin-bottom:16px"><div class="sub">📮 梦境明信片册 ({{guardian.postcards.length}}张)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><div v-for="pc in guardian.postcards.slice(0,6)" :key="pc.id" :style="{padding:'8px 12px',background:'var(--hover)',borderRadius:'8px',fontSize:'12px',maxWidth:'200px'}"><div style="color:var(--tx2)">「{{pc.scene.slice(0,20)}}...」</div><div style="color:var(--tx3);font-size:10px">{{pc.date}} · {{pc.score}}分</div></div></div>
+      </div>
+      <!-- Health Profile -->
+      <h2 class="sub" style="margin-bottom:12px">📋 健康档案</h2>
       <form @submit.prevent="saveProfile" style="max-width:900px">
         <div class="card section-card"><div class="sub">基本信息</div><div class="f-grid3"><div class="fg"><label>年龄</label><input v-model.number="pf.age" type="number" class="inp"></div><div class="fg"><label>性别</label><select v-model="pf.gender" class="inp"><option value="">请选择</option><option value="男">男</option><option value="女">女</option><option value="其他">其他</option></select></div><div class="fg"><label>身高(cm)</label><input v-model.number="pf.height" type="number" class="inp" step="0.1"></div><div class="fg"><label>体重(kg)</label><input v-model.number="pf.weight" type="number" class="inp" step="0.1"></div><div class="fg"><label>职业</label><input v-model="pf.occupation" class="inp"></div><div class="fg"><label>问题持续</label><select v-model="pf.sleep_issue_duration" class="inp"><option value="">请选择</option><option value="<1个月">&lt;1个月</option><option value="1-6个月">1-6个月</option><option value="6-12个月">6-12个月</option><option value=">1年">&gt;1年</option></select></div></div></div>
         <div class="card section-card"><div class="sub">睡眠目标</div><div class="f-grid3"><div class="fg"><label>目标时长(h)</label><input v-model.number="pf.sleep_goal_hours" type="number" class="inp" step="0.5" min="4" max="12"></div><div class="fg"><label>目标入睡</label><input v-model="pf.bedtime_target" type="time" class="inp"></div><div class="fg"><label>目标起床</label><input v-model="pf.wakeup_target" type="time" class="inp"></div><div class="fg"><label>典型入睡</label><input v-model="pf.typical_bedtime" class="inp" placeholder="22:30"></div><div class="fg"><label>典型起床</label><input v-model="pf.typical_waketime" class="inp" placeholder="07:00"></div></div></div>
@@ -669,6 +868,7 @@ input,select,textarea,button{font-family:inherit;font-size:inherit}
     </template>
 
   </main>
+  <div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--card);color:var(--tx);padding:10px 24px;border-radius:20px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.4)"></div>
 </div>
 </div>
 
@@ -680,7 +880,7 @@ const SLEEP_ISSUES=['入睡困难','夜间醒来','早醒','睡眠浅','噩梦',
 const PRI_OPTS=['入睡速度','睡眠深度','减少夜醒','作息规律','减少做梦','精力恢复']
 const QUICK_QS=['如何改善失眠问题？','什么是最佳睡眠时间？','睡前应该做什么？','分析一下我的睡眠数据']
 const PERIODS=[{d:7,l:'近7天'},{d:14,l:'近14天'},{d:30,l:'近30天'}]
-const NAV_GROUPS=reactive([{label:'核心',open:true,items:[{p:'dashboard',l:'睡眠概览',i:'📊'}]},{label:'睡眠',open:true,items:[{p:'record',l:'睡眠记录',i:'✏️'},{p:'analysis',l:'睡眠分析',i:'📈'},{p:'alarm',l:'智能闹钟',i:'⏰'},{p:'noise',l:'白噪音',i:'🎵'}]},{label:'AI',open:true,items:[{p:'chat',l:'AI助手',i:'🤖'},{p:'tasks',l:'每日任务',i:'✅'},{p:'assessment',l:'睡眠评估',i:'📋'}]},{label:'发现',open:true,items:[{p:'knowledge',l:'知识库',i:'📚'},{p:'courses',l:'睡眠课程',i:'🎓'},{p:'store',l:'助眠商城',i:'🛒'},{p:'community',l:'社区',i:'💬'}]},{label:'我的',open:true,items:[{p:'vip',l:'会员中心',i:'💎'},{p:'game',l:'游戏中心',i:'🎮'},{p:'profile',l:'健康档案',i:'👤'}]}])
+const NAV_ITEMS=[{p:'dashboard',l:'睡眠概览',i:'📊'},{p:'record',l:'睡眠记录',i:'✏️'},{p:'analysis',l:'睡眠分析',i:'📈'},{p:'alarm',l:'智能闹钟',i:'⏰'},{p:'noise',l:'白噪音',i:'🎵'},{p:'chat',l:'AI助手',i:'🤖'},{p:'tasks',l:'每日任务',i:'✅'},{p:'assessment',l:'睡眠评估',i:'📋'},{p:'learn',l:'学习成长',i:'📚'},{p:'store',l:'助眠商城',i:'🛒'},{p:'community',l:'社区',i:'💬'},{p:'vip',l:'会员中心',i:'💎'},{p:'game',l:'游戏中心',i:'🎮'},{p:'profile',l:'个人中心',i:'🛡️'}]
 
 function dk(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 const api=axios.create({baseURL:'/api/v1',timeout:30000})
@@ -754,10 +954,34 @@ const themeLabel=ref('☀️');const currentTheme=ref(localStorage.getItem('them
 function toggleTheme(){currentTheme.value=currentTheme.value==='dark'?'light':'dark';document.documentElement.className=currentTheme.value;themeLabel.value=currentTheme.value==='dark'?'☀️':'🌙';localStorage.setItem('theme',currentTheme.value)}
 document.documentElement.className=currentTheme.value;themeLabel.value=currentTheme.value==='dark'?'☀️':'🌙'
 
-// Dashboard
+// Dream Guardian global state
+const guardian=reactive(JSON.parse(localStorage.getItem('guardian')||'{"focus":0,"wisdom":0,"resilience":0,"vitality":0,"fragments":[],"scenes":["default"],"garden":{"plants":0,"flowers":0,"trees":0,"watered":false,"streak":0},"postcards":[],"discoveries":[],"ritualStreak":0,"lastRitual":"","lastLogin":""}'))
+function saveGuardian(){localStorage.setItem('guardian',JSON.stringify(guardian))}
+function addAttr(attr,amt){guardian[attr]=Math.min(4,guardian[attr]+amt);saveGuardian();if(guardian[attr]>=4)toast('🌟 '+{focus:'专注力',wisdom:'智慧',resilience:'韧性',vitality:'活力'}[attr]+' 已满级！解锁了新能力')}
+function addFragment(quality){const names=['梦境尘埃','星河碎片','极光之晶','龙鳞','凤凰羽毛','月光石','深海珍珠','彩虹棱镜'];const qNames={common:'普通',rare:'稀有',epic:'史诗',legendary:'传奇'};const f={id:Date.now(),name:names[Math.floor(Math.random()*names.length)],quality:quality||'common',date:new Date().toISOString().slice(0,10)};guardian.fragments.push(f);saveGuardian();toast('✨ 获得 '+qNames[f.quality]+' · '+f.name)}
+function addPostcard(scene){guardian.postcards.unshift({id:Date.now(),scene:scene||'神秘梦境',date:new Date().toISOString().slice(0,10),score:lastR.value?.score||0});if(guardian.postcards.length>50)guardian.postcards.length=50;saveGuardian()}
+function addDiscovery(text,articleId){guardian.discoveries.unshift({id:Date.now(),text:text,articleId:articleId||'',date:new Date().toISOString().slice(0,10)});if(guardian.discoveries.length>20)guardian.discoveries.length=20;saveGuardian()}
+function waterGarden(){if(guardian.garden.watered)return;guardian.garden.watered=true;guardian.garden.streak++;guardian.garden.plants=Math.max(guardian.garden.plants,guardian.garden.streak);if(guardian.garden.streak%7===0){guardian.garden.flowers++;toast('🌸 一朵新花绽放了！')}if(guardian.garden.streak%30===0){guardian.garden.trees++;toast('🌳 一棵梦境之树长成了！')}saveGuardian()}
+function checkGardenWilt(){const today=new Date().toISOString().slice(0,10);if(guardian.lastLogin!==today&&guardian.garden.watered){const daysSince=Math.floor((Date.now()-new Date(guardian.lastRitual||guardian.lastLogin).getTime())/86400000);if(daysSince>=3&&guardian.garden.flowers>0){guardian.garden.flowers--;guardian.garden.streak=Math.max(0,guardian.garden.streak-3);toast('🥀 一朵花因缺水凋零了...今晚记录睡眠可以救活它');saveGuardian()}}}
+// Daily reset
+function dailyReset(){const today=new Date().toISOString().slice(0,10);if(guardian.lastLogin!==today){guardian.garden.watered=false;guardian.lastLogin=today;checkGardenWilt();saveGuardian()}}
+const attrNames={focus:'专注力',wisdom:'智慧',resilience:'韧性',vitality:'活力'}
+const attrIcons={focus:'🧘',wisdom:'📚',resilience:'💪',vitality:'⚡'}
+const attrGame={breathing:'focus',quiz:'wisdom',worry:'resilience',runner:'vitality'}
+// Surprise engine
+const surprise=ref(null)
+const dreamScenes=['梦鲸跃出海面，溅起一片星辉','一只夜莺停在花园，唱了一首只有你能听见的歌','梦境边界出现了一扇发光的门','天空飘下彩色的雪花，落在手心是温热的','一座倒悬的塔从云层中缓缓降下','整个梦境世界变成了秋天的金黄色','远处传来鲸歌，低沉而悠长','一群发光的蝴蝶从花园飞过','月亮变成了你守护者的模样','海面上浮现出银河的倒影']
+function rollSurprise(){if(Math.random()<0.2){surprise.value=dreamScenes[Math.floor(Math.random()*dreamScenes.length)];setTimeout(()=>{if(surprise.value)surprise.value=null},5000)}}
+function dismissSurprise(){surprise.value=null}
+const todayStr=new Date().toISOString().slice(0,10)
 const dLoading=ref(true);const lastR=ref(null);const records=ref([]);const stats=ref(null);const prof=ref(null);const wkCh=ref(null)
-const dailyTip=TIPS[new Date().getDate()%TIPS.length]
-const quick=[{i:'&#9998;',l:'记录睡眠',p:'record'},{i:'&#9835;',l:'白噪音',p:'noise'},{i:'&#9749;',l:'AI助手',p:'chat'},{i:'&#9733;',l:'每日任务',p:'tasks'}]
+const GOAL_TIPS={入睡速度:['今晚试试4-7-8呼吸法，帮你的大脑快速切换到睡眠模式','睡前1小时放下手机，蓝光会推迟你的入睡时间','泡个热水澡能帮你快速降温入睡——核心体温下降是入睡信号','今天试试渐进式肌肉放松法：从脚趾到额头，逐一收紧再放松'],睡眠深度:['今天增加30分钟有氧运动，深睡时长可能增加20%','保持卧室凉爽(18-22°C)能让深睡阶段更稳定','镁元素帮助神经系统放松，多吃菠菜、杏仁','今天减少咖啡因摄入，它在体内停留长达6小时'],减少夜醒:['睡前2小时不要大量饮水，减少夜起次数','检查卧室是否有微光或噪音干扰——微觉醒往往来自环境','酒精会让你半夜醒来——今晚试试不喝酒','压力是夜醒的头号原因，试试在烦恼粉碎机里写下来'],作息规律:['明天设一个固定闹钟，即使是周末也同一时间起床','今天试着比昨天早睡15分钟，小步子更容易坚持','固定起床时间比固定入睡时间更重要——从早晨开始','午睡不要超过30分钟，下午2点后小睡会影响晚上'],减少做梦:['睡前避免恐怖电影或刺激内容，给大脑一个平静的过渡','写日记把烦心事倒出来，减少夜间思维反刍','保持卧室通风——氧气不足会导致睡眠不安','睡前一小时听白噪音，屏蔽环境干扰'],精力恢复:['白天晒15分钟太阳，帮助校准生物钟','今天记录午后的精力状态，看看和昨晚睡眠有没有关联','晚餐不要吃太饱，消化负担会影响睡眠修复效率','睡前一小时远离电子屏幕，让你的大脑真正休息']}
+const dailyTip=computed(()=>{const goals=priList.value.length>0?priList.value:['入睡速度'];const tips=goals.flatMap(g=>GOAL_TIPS[g]||[]).filter(Boolean);if(tips.length===0)return TIPS[new Date().getDate()%TIPS.length];return tips[new Date().getDate()%tips.length]})
+const quick=[{i:'&#9998;',l:'记录睡眠',p:'record'},{i:'&#9835;',l:'白噪音',p:'noise'},{i:'&#9749;',l:'AI助手',p:'chat'},{i:'&#9733;',l:'守护者档案',p:'profile'}]
+const dreamBg=computed(()=>{const s=lastScore.value;if(s>=80)return'linear-gradient(135deg, #0a1628, #0d2137, #111d3a)';if(s>=60)return'linear-gradient(135deg, #1a1a2e, #16213e, #1a1a2e)';if(s>=40)return'linear-gradient(135deg, #1e1e30, #252540, #1e1e30)';return'linear-gradient(135deg, #1a1520, #201825, #1a1520)'})
+const dreamIcon=computed(()=>{const s=lastScore.value;if(s>=85)return'🌟';if(s>=70)return'🌤️';if(s>=50)return'☁️';if(s)return'🌧️';return'🌙'})
+const dreamTitle=computed(()=>{const s=lastScore.value;if(s>=85)return'梦境海 · 晴朗星空';if(s>=70)return'梦境海 · 微风多云';if(s>=50)return'梦境海 · 薄雾笼罩';if(s)return'梦境海 · 需要守护';return'梦境海 · 等待记录'})
+const dreamSub=computed(()=>{const s=lastScore.value;if(s>=85)return'你的梦境世界今天格外明亮';if(s>=70)return'守护者在安静地巡视着这片海域';if(s>=50)return'迷雾中隐约能看到花园的轮廓';if(s)return'今晚做一次睡前仪式可以驱散迷雾';return'记录昨晚的睡眠，开启你的梦境世界'})
 const lastDur=computed(()=>lastR.value?`${lastR.value.duration_hours||0}h`:'--')
 const lastScore=computed(()=>lastR.value?.score??'--')
 const scoreLbl=computed(()=>{const s=lastR.value?.score;if(s==null)return'';return s>=80?'优秀':s>=60?'良好':s>=40?'一般':'待改善'})
@@ -769,7 +993,8 @@ const submitting=ref(false);const subRes=ref('');const allTags=ALL_TAGS;const vo
 async function voiceToDiary(){if(!voiceText.value.trim())return;voiceLoading.value=true;voiceResult.value='';try{const{data}=await api.post('/voice/diary',{transcript:voiceText.value});if(data.parsed){const p=data.parsed;rec.diary_date=p.diary_date||rec.diary_date;rec.bedtime=p.bedtime?rec.diary_date+'T'+p.bedtime+':00':rec.bedtime;rec.wake_time=p.wake_time?rec.diary_date+'T'+p.wake_time+':00':rec.wake_time;rec.quality=p.quality||rec.quality;rec.notes=p.notes||rec.notes;rec.tags=p.tags||[];voiceResult.value='✅ AI解析成功！已填入表单 - '+p.summary}else{voiceResult.value='已保存语音记录'}voiceText.value=''}catch{voiceResult.value='解析失败'}finally{voiceLoading.value=false}}
 function togTag(t){const i=rec.tags.indexOf(t);i>=0?rec.tags.splice(i,1):rec.tags.push(t)}
 function ptags(t){if(!t)return'';try{return JSON.parse(t).join(' ')}catch{return t}}
-async function submitRec(){if(!rec.bedtime||!rec.wake_time)return;submitting.value=true;subRes.value='';try{const{data}=await A.sleep.create({...rec});subRes.value=data.ai_feedback||'保存成功';rec.tags=[];rec.notes='';rec.quality=null;await loadRecs()}catch(e){subRes.value='保存失败'}finally{submitting.value=false}}
+const showPostcard=ref(false);const postcardScene=ref('')
+async function submitRec(){if(!rec.bedtime||!rec.wake_time)return;submitting.value=true;subRes.value='';try{const{data}=await A.sleep.create({...rec});subRes.value=data.ai_feedback||'保存成功';rec.tags=[];rec.notes='';rec.quality=null;await loadRecs();waterGarden();const scenes=['你梦见了一座漂浮在云端的图书馆，书页翻动的声音像海浪','梦境海里出现了一群发光的鲸鱼，它们游过的轨迹是银河','你沿着一条由星光铺成的小路，走到了梦境海的深处','昨晚的梦境里有一只猫，它说了一句你醒来后怎么也想不起来的话','你梦见自己站在一面巨大的镜子前，镜中的你穿着守护者的铠甲','梦境海下了一场糖果色的雨，每一滴落在地上都变成一朵小花','你在一座倒悬的塔里遇到了另一个守护者，他给了你一枚硬币','一颗流星坠入了你的花园，植物们窃窃私语了一整夜','你梦见自己变成了一条鱼，在梦境海里游了一整晚','一扇门凭空出现在梦境海上空，你推开门，看到了一片草原'];postcardScene.value=scenes[Math.floor(Math.random()*scenes.length)];showPostcard.value=true;addPostcard(postcardScene.value);if(Math.random()<0.25){const insights=['过去7天有'+Math.floor(Math.random()*5+2)+'天做呼吸训练，入睡平均快'+(15+Math.floor(Math.random()*30))+'分钟','你的深睡时长在运动后的夜晚平均增加'+(10+Math.floor(Math.random()*20))+'分钟','烦恼粉碎后，你的焦虑性夜醒次数减少了'+(30+Math.floor(Math.random()*50))+'%','周末赖床超过1小时后，周一评分平均低'+(5+Math.floor(Math.random()*10))+'分'];addDiscovery(insights[Math.floor(Math.random()*insights.length)])}dailyReset()}catch(e){subRes.value='保存失败'}finally{submitting.value=false}}
 async function loadRecs(){try{const{data}=await A.sleep.list({days:30});records.value=data.records||data}catch{}}
 async function delRec(id){await A.sleep.del(id);await loadRecs()}
 
@@ -841,20 +1066,34 @@ async function joinGroup(id){await C.joinGroup(id);loadComGroups()}
 async function leaveGroup(id){await C.leaveGroup(id);loadComGroups()}
 async function joinChallenge(id){await C.joinChallenge(id);loadComChallenges()}
 async function createPost(){if(!comPostContent.value.trim())return;await C.createPost({content:comPostContent.value,is_anonymous:comAnonymous.value?1:0});comPostContent.value='';comAnonymous.value=false;loadComPosts()}
-async function likePost(p){await C.likePost(p.id);loadComPosts()}
+async function likePost(p){try{const{data}=await C.likePost(p.id);p.is_liked=data.liked!==false;p.like_count=data.liked?((p.like_count||0)+1):Math.max(0,(p.like_count||0)-1)}catch{}}
 async function toggleComments(p){p.showComments=!p.showComments;if(p.showComments){try{const{data}=await C.getComments(p.id);p.comments=data.comments||[]}catch{}}}
-async function addComment(p){if(!p.commentInput||!p.commentInput.trim())return;await C.addComment(p.id,{content:p.commentInput});p.commentInput='';await toggleComments(p);await toggleComments(p);loadComPosts()}
+async function addComment(p){if(!p.commentInput||!p.commentInput.trim())return;try{await C.addComment(p.id,{content:p.commentInput});p.commentInput='';p.comment_count=(p.comment_count||0)+1;p.showComments=true;const{data}=await C.getComments(p.id);p.comments=data.comments||[]}catch{}}
 
 // Knowledge base
-const kbCat=ref(null);const kbArticles=ref([]);const kbArt=ref(null);const kbCats=ref([])
+const kbCat=ref(null);const kbArticles=ref([]);const kbArt=ref(null);const kbCats=ref([]);const kbSearch=ref('');const kbBookmarked=ref([]);const kbHistory=ref([])
 async function loadArticles(){try{const p=kbCat.value?`?category=${encodeURIComponent(kbCat.value)}`:'';const{data}=await api.get('/wellness/knowledge/articles'+p);kbArticles.value=data.articles;kbCats.value=data.categories||[]}catch{}}
-onMounted(()=>{loadArticles();api.get('/wellness/knowledge/categories').then(r=>{kbCats.value=r.data.categories||[]}).catch(()=>{})})
+async function kbDoSearch(){const q=kbSearch.value.trim();if(!q){loadArticles();return};try{const{data}=await api.get('/wellness/knowledge/search?q='+encodeURIComponent(q));kbArticles.value=data.articles||[]}catch{}}
+async function kbToggleBookmark(id){try{const{data}=await api.post('/wellness/knowledge/'+id+'/bookmark');if(data.bookmarked){kbBookmarked.value.push(id)}else{kbBookmarked.value=kbBookmarked.value.filter(b=>b!==id)}}catch{}}
+function kbIsBookmarked(id){return kbBookmarked.value.includes(id)}
+async function kbLoadBookmarks(){try{const{data}=await api.get('/wellness/knowledge/bookmarks');kbBookmarked.value=(data.articles||[]).map(a=>a.id)}catch{}}
+async function kbLoadHistory(){try{const{data}=await api.get('/wellness/knowledge/reading-history');kbHistory.value=data.articles||[]}catch{}}
+async function kbViewArticle(id){const a=kbArticles.value.find(x=>x.id===id)||kbHistory.value.find(x=>x.id===id);if(!a)return;kbArt.value=a;api.post('/wellness/knowledge/'+id+'/read').catch(()=>{});try{const{data}=await api.get('/wellness/knowledge/related/'+id);a.related=data.articles||[]}catch{}}
+onMounted(()=>{loadArticles();kbLoadBookmarks();kbLoadHistory();api.get('/wellness/knowledge/categories').then(r=>{kbCats.value=r.data.categories||[]}).catch(()=>{})})
 
 // Onboarding
 const showOnboarding=ref(false);const obStep=ref(1);const obSteps=ref([])
 const obData=reactive({age:null,gender:'',sleep_goal_hours:8.0,bedtime_target:'22:30',wakeup_target:'07:00',sleep_issue_duration:'',caffeine_intake:'',exercise_frequency:'',stress_level:'',primary_goal:''})
-const obSleepIssues=ref([]);const obPriorities=ref([])
-async function finishOnboarding(){obData.sleep_issues=obSleepIssues.value.join(',');obData.improvement_priority=obPriorities.value.join(',');await A.profile.upsert({...obData});showOnboarding.value=false}
+const obSleepIssues=ref([]);const obPriorities=ref([]);const obErr=ref('');const obIssuesOpen=ref(false);const obPriorsOpen=ref(false)
+function nextObStep(){obErr.value='';const s=obStep.value;
+  if(s===1){if(!obData.age||obData.age<12||obData.age>100){obErr.value='请输入有效的年龄 (12-100)';return}if(!obData.gender){obErr.value='请选择性别';return}}
+  if(s===2){if(!obData.sleep_goal_hours||obData.sleep_goal_hours<4){obErr.value='请选择目标睡眠时长';return}}
+  if(s===3){if(obSleepIssues.value.length===0){obErr.value='请至少选择一个睡眠问题';return}}
+  if(s===4){if(!obData.caffeine_intake){obErr.value='请选择咖啡因摄入习惯';return}if(!obData.exercise_frequency){obErr.value='请选择运动频率';return}if(!obData.stress_level){obErr.value='请选择压力水平';return}}
+  if(s===5){if(obPriorities.value.length===0){obErr.value='请至少选择一个改善方向';return}}
+  obStep.value++
+}
+async function finishOnboarding(){if(obPriorities.value.length===0){obErr.value='请至少选择一个改善方向';return};obData.sleep_issues=obSleepIssues.value.join(',');obData.improvement_priority=obPriorities.value.join(',');await A.profile.upsert({...obData});showOnboarding.value=false}
 async function checkOnboarding(){try{const{data}=await A.auth.hasProfile();if(!data.has_profile){showOnboarding.value=true;try{const{data:od}=await api.get('/wellness/onboarding');obSteps.value=od.steps}catch{}}}catch{}}
 
 // Store
@@ -865,15 +1104,69 @@ async function addToStoreCart(pid){await api.post('/store/cart',{product_id:pid}
 async function removeCart(id){await api.delete('/store/cart/'+id);loadCart()}
 async function createStoreOrder(){await api.post('/store/orders',{address:'Web订单'});loadCart();alert('下单成功')}
 
+// Learning Center (merged knowledge + courses)
+const learnTab=ref('courses');const enrolledIds=ref(JSON.parse(localStorage.getItem('enrolled')||'[]'))
+const learnStats=computed(()=>({
+  courses:enrolledIds.value.length+(day21Done.value>0?1:0),
+  articles:kbHistory.value.length,
+  bookmarks:kbBookmarked.value.length,
+  streak:gameStatus.value?.streak_days||0
+}))
+const hasContinueLearning=computed(()=>day21Data.value||kbHistory.value.length>0||enrolledIds.value.length>0)
+const enrolledCoursesData=computed(()=>coursesData.value.filter(c=>enrolledIds.value.includes(c.id)))
+const kbBookmarkedArticles=computed(()=>kbArticles.value.filter(a=>kbBookmarked.value.includes(a.id)))
 // Courses
-const coursesData=ref([])
+const coursesData=ref([]);const coursesTab=ref('21day');const day21Data=ref(null);const day21Pct=ref(0);const day21Done=ref(0)
+const selectedCourse=ref(null);const courseChapters=ref([]);const selectedChapter=ref(null)
 async function loadCourses(){try{const r=await api.get('/courses');coursesData.value=r.data.courses||[]}catch{}}
-async function enrollCourse(id){await api.post('/courses/'+id+'/enroll');alert('报名成功');loadCourses()}
+async function enrollCourse(id){await api.post('/courses/'+id+'/enroll');if(!enrolledIds.value.includes(id)){enrolledIds.value.push(id);localStorage.setItem('enrolled',JSON.stringify(enrolledIds.value))};toast('报名成功');loadCourses()}
+async function load21Day(){try{const[d,p]=await Promise.all([api.get('/program/21day'),api.get('/program/21day/progress')]);day21Data.value=d.data;day21Pct.value=p.data.progress_pct||0;day21Done.value=p.data.completed||0}catch{}}
+function switchCoursesTab(tab){coursesTab.value=tab;if(tab==='21day')load21Day();if(tab==='all')loadCourses()}
+async function viewCourse(id){selectedChapter.value=null;const c=coursesData.value.find(x=>x.id===id);if(!c)return;selectedCourse.value=c;try{const{data}=await api.get('/courses/'+id+'/chapters');courseChapters.value=data.chapters||[]}catch{courseChapters.value=[]}}
+function backToCourses(){selectedCourse.value=null;selectedChapter.value=null}
+function viewChapter(ch){selectedChapter.value=ch}
+const storeOrders=ref([]);async function loadStoreOrders(){try{const r=await api.get('/store/orders');storeOrders.value=r.data.orders||[]}catch{}}
+let toastTimer=null;function toast(msg){const el=document.getElementById('toast');if(el){el.textContent=msg;el.style.opacity='1';clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.style.opacity='0'},2000)}}
+function setCurAndLoad(v){page.value=v;dailyReset();if(v==='dashboard'){rollSurprise()}if(v==='learn'){load21Day();loadCourses();loadArticles();kbLoadBookmarks();kbLoadHistory()}if(v==='store')loadStoreOrders();if(v==='game')loadGame();if(v==='community'){loadComGroups();loadComChallenges();loadLeaderboard();loadComPosts()}if(v==='vip'){loadPremium();loadPayOrders()}cur.value=v}
 
 // Game
 const gameStatus=ref(null);const gameAchievements=ref([])
-async function loadGame(){try{const[s,a]=await Promise.all([api.get('/game/status'),api.get('/game/achievements')]);gameStatus.value=s.data;gameAchievements.value=a.data.achievements||[]}catch{}}
-async function gameCheckin(){const r=await api.post('/game/checkin');alert(r.data.message);loadGame()}
+const gameHall=ref([]);const activeGame=ref(null)
+async function loadGame(){try{const[s,a,h]=await Promise.all([api.get('/game/dashboard'),api.get('/game/achievements'),api.get('/game/hall')]);gameStatus.value=s.data.user||s.data;gameAchievements.value=a.data.achievements||[];gameHall.value=h.data.games||[]}catch{}}
+async function gameCheckin(){const r=await api.post('/game/checkin');toast(r.data.message);loadGame()}
+function startGame(id){if(id==='ritual'){ritualStep.value=0;return}activeGame.value=id;if(id==='breathing'){breathState.value='ready';breathPhase.value='';breathRounds.value=0;breathTimer.value=0;clearInterval(breathIv);breathIv=null}if(id==='quiz'){quizQuestions.value=[];quizIdx.value=0;quizScore.value=0;quizDone.value=false;loadQuiz()}if(id==='worry'){worryText.value='';worryList.value=[];worryDone.value=false}if(id==='runner'){runnerScore.value=0;runnerPlaying.value=false;runnerGameOver.value=false}}
+function stopGame(){activeGame.value=null;if(breathIv)clearInterval(breathIv);breathIv=null}
+// Breathing game
+const breathState=ref('ready');const breathPhase=ref('');const breathRounds=ref(0);const breathTimer=ref(0);let breathIv=null
+function startBreathing(){breathState.value='playing';breathRounds.value=0;runBreathCycle()}
+function runBreathCycle(){if(breathState.value!=='playing')return;const phases=[{p:'吸气',d:4},{p:'屏息',d:7},{p:'呼气',d:8}];let i=0,total=0;function tick(){if(breathState.value!=='playing')return;if(i>=phases.length){breathRounds.value++;if(breathRounds.value>=4){breathState.value='done';clearInterval(breathIv);breathIv=null;api.post('/game/breathing/complete',{rounds:breathRounds.value,score:90+Math.floor(Math.random()*10)}).then(r=>toast(r.data.message)).catch(()=>{});return}i=0;total=0};const ph=phases[i];breathPhase.value=ph.p;breathTimer.value=ph.d;let t=ph.d;const iv=setInterval(()=>{t--;breathTimer.value=t;if(t<=0){clearInterval(iv);i++;total+=ph.d;tick()}},1000);breathIv=iv}tick()}
+function stopBreathing(){breathState.value='ready';breathPhase.value='';breathTimer.value=0;breathRounds.value=0;clearInterval(breathIv);breathIv=null}
+// Quiz game
+const quizQuestions=ref([]);const quizIdx=ref(0);const quizScore=ref(0);const quizDone=ref(false);const quizAnswer=ref(null);const quizExplain=ref('')
+async function loadQuiz(){try{const{data}=await api.get('/game/quiz/questions');quizQuestions.value=data.questions||[];quizIdx.value=0;quizScore.value=0;quizAnswer.value=null;quizExplain.value=''}catch{toast('加载题目失败')}}
+function answerQuiz(idx){if(quizAnswer.value!==null)return;quizAnswer.value=idx;const q=quizQuestions.value[quizIdx.value];const correct=q.opts[q.ans]||idx===q.ans;if(q.ans!==undefined){if(idx===q.ans){quizScore.value+=20;quizExplain.value='✅ '+((q.explain||'').slice(0,100))}else{quizExplain.value='❌ 正确答案: '+(q.opts[q.ans]||'')+' — '+(q.explain||'').slice(0,80)}}}
+function nextQuiz(){if(quizIdx.value+1>=quizQuestions.value.length){quizDone.value=true;api.post('/game/quiz/submit',{score:quizScore.value,total:quizQuestions.value.length*20}).then(r=>toast(r.data.message)).catch(()=>{})}else{quizIdx.value++;quizAnswer.value=null;quizExplain.value=''}}
+function restartQuiz(){quizDone.value=false;quizAnswer.value=null;quizExplain.value='';loadQuiz()}
+// Worry game
+const worryText=ref('');const worryList=ref([]);const worryDone=ref(false)
+function submitWorry(){if(!worryText.value.trim())return;worryList.value.unshift({text:worryText.value,id:Date.now(),crushed:false});worryText.value=''}
+function crushWorry(id){const w=worryList.value.find(x=>x.id===id);if(w)w.crushed=true;const cnt=worryList.value.filter(x=>x.crushed).length;if(cnt>=3&&!worryDone.value){worryDone.value=true;api.post('/game/worry/submit',{count:cnt}).then(r=>toast(r.data.message)).catch(()=>{})}}
+// Runner game
+const runnerScore=ref(0);const runnerPlaying=ref(false);const runnerGameOver=ref(false);const runnerPos=ref(1);const runnerObs=ref([]);let runnerIv=null;let runnerSpd=2000
+function startRunner(){runnerScore.value=0;runnerPlaying.value=true;runnerGameOver.value=false;runnerPos.value=1;runnerObs.value=[];runnerSpd=2000;spawnObstacle()}
+function spawnObstacle(){if(!runnerPlaying.value)return;runnerObs.value.push({id:Date.now(),lane:Math.floor(Math.random()*3)});if(runnerObs.value.length>8)runnerObs.value.shift();runnerSpd=Math.max(600,2000-runnerScore.value*20);runnerIv=setTimeout(spawnObstacle,runnerSpd)}
+function moveRunner(lane){if(!runnerPlaying.value)return;runnerPos.value=lane}
+function runnerLoop(){if(!runnerPlaying.value)return;runnerObs.value=runnerObs.value.filter(o=>o.id>Date.now()-3000);const hit=runnerObs.value.some(o=>o.lane===runnerPos.value&&Date.now()-o.id<runnerSpd&&Date.now()-o.id>runnerSpd-400);if(hit){runnerPlaying.value=false;runnerGameOver.value=true;clearTimeout(runnerIv);api.post('/game/runner/complete',{score:runnerScore.value}).then(r=>{toast(r.data.message);addAttr('vitality',1)}).catch(()=>{})}else{runnerScore.value+=10;setTimeout(runnerLoop,200)}}
+// Sleep Ritual
+const ritualMode=ref('standard');const ritualStep=ref(0);const ritualWorries=ref([]);const ritualWorryInput=ref('');const ritualBreathDone=ref(false);const ritualQuizLoaded=ref(false);const ritualQuizQuestions=ref([]);const ritualQuizIdx=ref(0);const ritualQuizScore=ref(0);const ritualQuizDone=ref(false);const ritualQuizAnswer=ref(null);const ritualQuizQ=computed(()=>ritualQuizQuestions.value[ritualQuizIdx.value]||null);const ritualXP=ref(0);const ritualFragmentQuality=ref('rare')
+function startRitual(){ritualStep.value=1;ritualWorries.value=[];ritualWorryInput.value='';ritualBreathDone.value=false;ritualQuizLoaded.value=false;ritualQuizQuestions.value=[];ritualQuizIdx.value=0;ritualQuizScore.value=0;ritualQuizDone.value=false;ritualQuizAnswer.value=null;breathState.value='ready';breathPhase.value='';breathRounds.value=0;breathTimer.value=0}
+function addRitualWorry(){if(!ritualWorryInput.value.trim())return;ritualWorries.value.unshift({id:Date.now(),text:ritualWorryInput.value});ritualWorryInput.value='';addAttr('resilience',0.5)}
+function startRitualBreathing(){const rounds=ritualMode.value==='quick'?2:4;breathState.value='playing';breathRounds.value=0;let cycleCount=0;function runCycle(){if(breathState.value!=='playing')return;const phases=[{p:'吸气',d:4},{p:'屏息',d:7},{p:'呼气',d:8}];let i=0;function tick(){if(breathState.value!=='playing')return;if(i>=phases.length){breathRounds.value++;cycleCount++;if(cycleCount>=rounds){ritualBreathDone.value=true;breathState.value='ready';addAttr('focus',1);api.post('/game/breathing/complete',{rounds:cycleCount,score:90}).catch(()=>{});return};i=0};const ph=phases[i];breathPhase.value=ph.p;breathTimer.value=ph.d;let t=ph.d;const iv=setInterval(()=>{t--;breathTimer.value=t;if(t<=0){clearInterval(iv);i++;tick()}},1000)}tick()}runCycle()}
+async function loadRitualQuiz(){try{const{data}=await api.get('/game/quiz/questions');ritualQuizQuestions.value=data.questions||[];ritualQuizLoaded.value=true;ritualQuizIdx.value=0;ritualQuizScore.value=0;ritualQuizDone.value=false;ritualQuizAnswer.value=null}catch{toast('加载失败')}}
+function answerRitualQuiz(idx){if(ritualQuizAnswer.value!==null)return;ritualQuizAnswer.value=idx;const q=ritualQuizQuestions.value[ritualQuizIdx.value];if(idx===q.ans)ritualQuizScore.value+=20}
+function nextRitualQuiz(){const total=ritualMode.value==='deep'?5:3;if(ritualQuizIdx.value+1>=Math.min(total,ritualQuizQuestions.value.length)){ritualQuizDone.value=true;if(ritualQuizScore.value>=40)addAttr('wisdom',1);api.post('/game/quiz/submit',{score:ritualQuizScore.value,total:total*20}).catch(()=>{});if(ritualMode.value==='standard')setTimeout(()=>finishRitual(),500)}else{ritualQuizIdx.value++;ritualQuizAnswer.value=null}}
+function finishRitual(){const qs=['common','common','common','rare','rare','epic','legendary'];const q=qs[Math.min(qs.length-1,Math.floor(guardian.ritualStreak/3)+Math.floor(Math.random()*3))];ritualFragmentQuality.value=q;ritualXP.value=ritualMode.value==='deep'?50:ritualMode.value==='standard'?30:15;ritualStep.value=5;addFragment(q);guardian.ritualStreak++;guardian.lastRitual=new Date().toISOString().slice(0,10);saveGuardian();waterGarden()}
+
 
 // Assessment
 const assessScales=ref([]);const assessSelected=ref(null);const assessResult=ref(null)
@@ -943,7 +1236,7 @@ const {watch}=Vue
 watch(page,(newPage)=>{if(['login','register','forgot'].includes(newPage)){nextTick(()=>drawStars())}else stopStars()})
 watch(cur,(newCur)=>{
   if(newCur==='store'){loadStore();loadCart()}
-  if(newCur==='courses')loadCourses()
+  if(newCur==='learn'){loadCourses();loadArticles()}
   if(newCur==='game')loadGame()
   if(newCur==='assessment')loadAssessScales()
   if(newCur==='vip'){loadPremium();loadPayOrders()}
@@ -968,7 +1261,7 @@ onMounted(async()=>{
 
 onUnmounted(()=>stopNoise())
 
-return{page,user,NAV_GROUPS,cur,lf,lerr,lLoading,showPwd,rememberMe,lockCountdown,doLogin,rf,rerr,rLoading,showPwdReg,regValid,pwStrength,authShake,checkRegValid,doRegister,forgotEmail,forgotMsg,forgotOk,forgotLoading,doForgotPassword,socialLogin,starCanvas,doLogout,themeLabel,toggleTheme,dLoading,lastR,lastDur,lastScore,scoreLbl,dailyTip,quick,wkCh,stats,rec,submitting,subRes,allTags,records,togTag,ptags,submitRec,delRec,voiceText,voiceLoading,voiceResult,voiceToDiary,actScene,playing,mVol,timerMin,chans,scenes,presets,noiseViz,setVol,startNoise,stopNoise,selScene,applyPreset,onTimerChange,aiScape,aiScapeLoading,aiSoundscape,applyAiScape,stories,loadStories,playStory,sessions,actSes,msgs,inputMsg,sending,msgEl,quickQs,loadSes,openSes,newChat,sendMsg,delSes,todayTasks,compIds,badges,pts,compCount,progPct,todayDateStr,unlockedBadgeCount,togTask,period,durCh,scrCh,sugs,periods,tagEnt,maxTag,conLabel,chPeriod,pf,issList,priList,sleepIssues,priOpts,saving,svMsg,svOk,saveProfile,upIss,upPri,premium,premiumMsg,premiumOk,loadPremium,payPlans,selectedPlan,payOrder,payLoading,createPayOrder,confirmPay,storeProducts,cart,cartTotal,loadStore,addToStoreCart,removeCart,createStoreOrder,coursesData,loadCourses,enrollCourse,gameStatus,gameAchievements,loadGame,gameCheckin,assessScales,assessSelected,assessResult,assessQuestions,assessQIdx,assessAnswers,assessScaleName,assessNumberInput,loadAssessScales,startAssess,nextAssessQ,submitAssessment,tierFeatures,vipBilling,payMethod,payOrders,referralCode,referralCount,referralReward,vipDaysLeft,vipCompareRows,vipPerks,loadPayOrders,loadReferral,scrollToPlans,calcVipDays,alarmData,alarmSuggestions,saveAlarm,getSmartAlarm,repData,repLoading,genReport,comGroups,comChallenges,leaderboard,lbPeriod,comPosts,comPostContent,comAnonymous,loadComGroups,loadComChallenges,loadLeaderboard,loadComPosts,joinGroup,leaveGroup,joinChallenge,createPost,likePost,toggleComments,addComment,actPlan,recPlan,planCheckMsg,planCompleted,loadPlan,enrollPlan,planCheckin,kbCat,kbArticles,kbArt,kbCats,loadArticles,showOnboarding,obStep,obSteps,obData,obSleepIssues,obPriorities,finishOnboarding,checkOnboarding}
+return{page,user,NAV_ITEMS,cur,lf,lerr,lLoading,showPwd,rememberMe,lockCountdown,doLogin,rf,rerr,rLoading,showPwdReg,regValid,pwStrength,authShake,checkRegValid,doRegister,forgotEmail,forgotMsg,forgotOk,forgotLoading,doForgotPassword,socialLogin,starCanvas,doLogout,themeLabel,toggleTheme,dLoading,lastR,lastDur,lastScore,scoreLbl,dailyTip,quick,wkCh,stats,rec,submitting,subRes,allTags,records,togTag,ptags,submitRec,delRec,voiceText,voiceLoading,voiceResult,voiceToDiary,actScene,playing,mVol,timerMin,chans,scenes,presets,noiseViz,setVol,startNoise,stopNoise,selScene,applyPreset,onTimerChange,aiScape,aiScapeLoading,aiSoundscape,applyAiScape,stories,loadStories,playStory,sessions,actSes,msgs,inputMsg,sending,msgEl,quickQs,loadSes,openSes,newChat,sendMsg,delSes,todayTasks,compIds,badges,pts,compCount,progPct,todayDateStr,unlockedBadgeCount,togTask,period,durCh,scrCh,sugs,periods,tagEnt,maxTag,conLabel,chPeriod,pf,issList,priList,SLEEP_ISSUES,PRI_OPTS,sleepIssues,priOpts,saving,svMsg,svOk,saveProfile,upIss,upPri,premium,premiumMsg,premiumOk,loadPremium,payPlans,selectedPlan,payOrder,payLoading,createPayOrder,confirmPay,storeProducts,cart,cartTotal,loadStore,addToStoreCart,removeCart,createStoreOrder,coursesData,coursesTab,day21Data,day21Pct,day21Done,switchCoursesTab,load21Day,loadCourses,enrollCourse,selectedCourse,courseChapters,selectedChapter,viewCourse,backToCourses,viewChapter,gameStatus,gameAchievements,gameHall,loadGame,gameCheckin,activeGame,startGame,stopGame,breathState,breathPhase,breathRounds,breathTimer,startBreathing,stopBreathing,quizQuestions,quizIdx,quizScore,quizDone,quizAnswer,quizExplain,answerQuiz,nextQuiz,restartQuiz,worryText,worryList,worryDone,submitWorry,crushWorry,runnerScore,runnerPlaying,runnerGameOver,runnerPos,runnerObs,startRunner,moveRunner,runnerLoop,assessScales,assessSelected,assessResult,assessQuestions,assessQIdx,assessAnswers,assessScaleName,assessNumberInput,loadAssessScales,startAssess,nextAssessQ,submitAssessment,tierFeatures,vipBilling,payMethod,payOrders,referralCode,referralCount,referralReward,vipDaysLeft,vipCompareRows,vipPerks,loadPayOrders,loadReferral,scrollToPlans,calcVipDays,alarmData,alarmSuggestions,saveAlarm,getSmartAlarm,repData,repLoading,genReport,comGroups,comChallenges,leaderboard,lbPeriod,comPosts,comPostContent,comAnonymous,loadComGroups,loadComChallenges,loadLeaderboard,loadComPosts,joinGroup,leaveGroup,joinChallenge,createPost,likePost,toggleComments,addComment,actPlan,recPlan,planCheckMsg,planCompleted,loadPlan,enrollPlan,planCheckin,learnTab,enrolledIds,learnStats,hasContinueLearning,enrolledCoursesData,kbBookmarkedArticles,kbCat,kbArticles,kbArt,kbCats,kbSearch,kbHistory,kbBookmarked,kbDoSearch,kbToggleBookmark,kbIsBookmarked,kbViewArticle,loadArticles,showOnboarding,obStep,obSteps,obData,obSleepIssues,obPriorities,obIssuesOpen,obPriorsOpen,obErr,nextObStep,finishOnboarding,checkOnboarding,guardian,saveGuardian,addAttr,addFragment,addPostcard,addDiscovery,waterGarden,dailyReset,attrNames,attrIcons,attrGame,surprise,rollSurprise,dismissSurprise,dreamBg,dreamIcon,dreamTitle,dreamSub,showPostcard,postcardScene,todayStr,ritualMode,ritualStep,ritualWorries,ritualWorryInput,ritualBreathDone,ritualQuizLoaded,ritualQuizDone,ritualQuizAnswer,ritualQuizScore,ritualXP,ritualFragmentQuality,startRitual,addRitualWorry,startRitualBreathing,loadRitualQuiz,answerRitualQuiz,nextRitualQuiz,finishRitual}
 }}).mount('#app')
 </script>
 <script>

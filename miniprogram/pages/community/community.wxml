@@ -1,66 +1,320 @@
 <view class="container">
-  <view class="page-title">睡眠社区</view>
-
-  <view class="tabs">
-    <view class="tab {{tab==='groups'?'on':''}}" data-tab="groups" bindtap="setTab">互助小组</view>
-    <view class="tab {{tab==='challenges'?'on':''}}" data-tab="challenges" bindtap="setTab">挑战</view>
-    <view class="tab {{tab==='leaderboard'?'on':''}}" data-tab="leaderboard" bindtap="setTab">排行榜</view>
-    <view class="tab {{tab==='posts'?'on':''}}" data-tab="posts" bindtap="setTab">动态</view>
-  </view>
-
-  <!-- Groups -->
-  <view wx:if="{{tab==='groups'}}">
-    <view wx:for="{{groups}}" wx:key="id" class="card">
-      <view class="row-between">
-        <view><text class="g-icon">{{item.icon}}</text><text class="g-name">{{item.name}}</text></view>
-        <button wx:if="{{!item.is_member}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="joinGroup">加入</button>
-        <button wx:else class="btn btn-secondary btn-sm" data-id="{{item.id}}" bindtap="leaveGroup">已加入</button>
+  <view class="top-bar">
+    <view class="page-title">睡眠社区</view>
+    <view class="top-actions">
+      <view class="top-btn" bindtap="goSearch">🔍</view>
+      <view class="top-btn" bindtap="goMessages">💬</view>
+      <view class="top-btn" bindtap="goNotifications">
+        🔔<view wx:if="{{notifCount > 0}}" class="top-badge">{{notifCount}}</view>
       </view>
-      <view class="g-desc">{{item.description}} · {{item.member_count}}人</view>
     </view>
   </view>
 
-  <!-- Challenges -->
-  <view wx:if="{{tab==='challenges'}}">
-    <view wx:for="{{challenges}}" wx:key="id" class="card">
-      <view class="row-between">
-        <view><text class="g-icon">{{item.icon}}</text><text class="g-name">{{item.title}}</text></view>
-        <button wx:if="{{!item.joined}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="joinChallenge">参加</button>
-        <span wx:else class="badge">进行中</span>
+  <scroll-view scroll-x class="tab-scroll">
+    <view class="tab-row-inline">
+      <view class="tab-chip {{tab==='highlights'?'tc-on':''}}" data-tab="highlights" bindtap="setTab">🔥 精选</view>
+      <view class="tab-chip {{tab==='topics'?'tc-on':''}}" data-tab="topics" bindtap="setTab">💬 话题</view>
+      <view class="tab-chip {{tab==='recommended'?'tc-on':''}}" data-tab="recommended" bindtap="setTab">✨ 推荐</view>
+      <view class="tab-chip {{tab==='posts'?'tc-on':''}}" data-tab="posts" bindtap="setTab">📝 动态</view>
+      <view class="tab-chip {{tab==='groups'?'tc-on':''}}" data-tab="groups" bindtap="setTab">👥 小组</view>
+      <view class="tab-chip {{tab==='challenges'?'tc-on':''}}" data-tab="challenges" bindtap="setTab">🏆 挑战</view>
+      <view class="tab-chip {{tab==='leaderboard'?'tc-on':''}}" data-tab="leaderboard" bindtap="setTab">📊 排行</view>
+    </view>
+  </scroll-view>
+
+  <!-- ==================== Highlights ==================== -->
+  <view wx:if="{{tab==='highlights'}}">
+    <view wx:if="{{!highlights}}" class="empty-state">加载中...</view>
+    <block wx:else>
+      <view class="card stats-card">
+        <view class="section-title">📊 社区统计</view>
+        <view class="stats-row">
+          <view class="stat-item"><view class="stat-num">{{highlights.stats.total_posts}}</view><view class="stat-lbl">总帖子</view></view>
+          <view class="stat-item"><view class="stat-num">{{highlights.stats.total_likes}}</view><view class="stat-lbl">总点赞</view></view>
+          <view class="stat-item"><view class="stat-num">{{highlights.stats.active_users_week}}</view><view class="stat-lbl">本周活跃</view></view>
+        </view>
       </view>
-      <view class="g-desc">{{item.description}} · {{item.participant_count}}人参与</view>
+      <view class="card">
+        <view class="section-title">🔥 本周热门</view>
+        <view wx:if="{{highlights.highlights.length===0}}" class="empty-state">本周还没有热门帖子，快去发帖吧！</view>
+        <view wx:for="{{highlights.highlights}}" wx:key="id" class="hl-post" data-id="{{item.id}}" bindtap="openDetail">
+          <view class="hl-author">{{item.author}} {{item.sleep_score ? '· '+item.sleep_score+'分' : ''}}</view>
+          <view class="hl-content">{{item.content}}</view>
+          <view class="hl-meta">❤️ {{item.likes}} · 💬 {{item.comments}}</view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- ==================== Topics ==================== -->
+  <view wx:if="{{tab==='topics'}}" class="topic-grid">
+    <view wx:if="{{topics.length===0}}" class="empty-state" style="grid-column:1/-1">暂无话题</view>
+    <view wx:for="{{topics}}" wx:key="id" class="topic-card" data-id="{{item.id}}" bindtap="selectTopic">
+      <view class="topic-icon">{{item.icon}}</view>
+      <view class="topic-title">{{item.title}}</view>
+      <view class="topic-desc">{{item.desc}}</view>
+      <view class="topic-posts">{{item.posts}} 篇帖子</view>
     </view>
   </view>
 
-  <!-- Leaderboard -->
-  <view wx:if="{{tab==='leaderboard'}}">
-    <view class="period-row">
-      <button class="btn btn-sm {{lbPeriod==='weekly'?'btn-primary':'btn-secondary'}}" data-period="weekly" bindtap="setPeriod">本周</button>
-      <button class="btn btn-sm {{lbPeriod==='monthly'?'btn-primary':'btn-secondary'}}" data-period="monthly" bindtap="setPeriod">本月</button>
+  <!-- ==================== Recommended ==================== -->
+  <view wx:if="{{tab==='recommended'}}">
+    <view class="rec-hint">✨ 根据你的互动和睡眠偏好为你推荐</view>
+    <view wx:if="{{recPosts.length===0}}" class="empty-state">
+      <view class="empty-text">暂无推荐，多互动可以获得更准的推荐</view>
     </view>
-    <view wx:for="{{leaderboard}}" wx:key="user_id" class="card lb-item">
-      <text class="lb-rank">{{item.rank}}</text>
-      <text class="lb-name">{{item.nickname}}</text>
-      <text class="lb-score">{{item.avg_score}}分</text>
+    <view wx:for="{{recPosts}}" wx:key="id" class="card post-card">
+      <view class="rec-score">匹配 {{item.recommend_score}}分</view>
+      <view class="post-top" bindtap="openDetail" data-id="{{item.id}}">
+        <view class="post-avatar" style="background:{{avatarColor(item.author)}}">{{item.author ? item.author[0] : '?'}}</view>
+        <view class="post-info">
+          <view class="post-author-row">
+            <text class="post-author">{{item.author}}</text>
+            <text wx:if="{{item.sleep_score}}" class="post-score {{item.sleep_score >= 80 ? 'score-good' : 'score-ok'}}">⭐{{item.sleep_score}}</text>
+          </view>
+          <text class="post-time">{{timeAgo(item.created_at)}}</text>
+        </view>
+      </view>
+      <view class="post-body" bindtap="openDetail" data-id="{{item.id}}">
+        <view class="post-content">{{item.content}}</view>
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="widthFix" class="post-image"/>
+        <video wx:if="{{item.video_url}}" src="{{item.video_url}}" class="post-video" controls></video>
+      </view>
     </view>
-    <view wx:if="{{leaderboard.length===0}}" class="empty-state">暂无排行数据</view>
   </view>
 
-  <!-- Posts -->
+  <!-- ==================== Posts ==================== -->
   <view wx:if="{{tab==='posts'}}">
-    <view class="card">
-      <textarea class="input" value="{{postContent}}" bindinput="onPostInput" placeholder="分享你的睡眠感受..."/>
-      <view class="row-between" style="margin-top:16rpx">
-        <label class="cb"><checkbox checked="{{isAnonymous}}" bindtap="toggleAnon"/>匿名</label>
-        <button class="btn btn-primary btn-sm" bindtap="createPost">发布</button>
+    <!-- Topic filter header -->
+    <view wx:if="{{selectedTopic}}" class="topic-filter-bar">
+      <view class="filter-back" bindtap="clearTopic">← 返回</view>
+      <view class="filter-label">{{selectedTopic.icon}} {{selectedTopic.title}}</view>
+      <view class="filter-desc">{{selectedTopic.desc}}</view>
+    </view>
+
+    <!-- Reply Notifications -->
+    <view wx:if="{{notifCount > 0}}" class="notif-bar">
+      <view class="notif-title">🔔 {{notifCount}} 条新回复</view>
+      <view wx:for="{{replyNotifications}}" wx:key="id" wx:for-item="n" class="notif-item" data-post-id="{{n.post_id}}" bindtap="openNotifPost">
+        <text class="notif-author">{{n.author}}：</text>
+        <text class="notif-text">{{n.content}}</text>
+        <text class="notif-arrow">→</text>
       </view>
     </view>
-    <view wx:for="{{posts}}" wx:key="id" class="card">
-      <view class="row-between"><text class="post-author">{{item.author}}</text><text class="post-time">{{item.created_at}}</text></view>
-      <view class="post-content">{{item.content}}</view>
-      <view class="row-between" style="margin-top:12rpx">
-        <text data-id="{{item.id}}" bindtap="likePost" style="color:{{item.is_liked?'#e74c3c':'#6a6a80'}}">{{item.is_liked?'❤️':'🤍'}} {{item.like_count}}</text>
-        <text style="color:var(--tx3)">💬 {{item.comment_count}}</text>
+
+    <!-- Following / All Toggle -->
+    <view class="feed-toggle-row">
+      <view class="feed-toggle {{!showFollowing ? 'on' : ''}}" bindtap="toggleFollowing">全部</view>
+      <view class="feed-toggle {{showFollowing ? 'on' : ''}}" bindtap="toggleFollowing">关注</view>
+    </view>
+
+    <!-- Post Composer -->
+    <view class="card composer-card">
+      <text wx:if="{{editingPostId}}" class="edit-label">✏️ 正在编辑帖子...</text>
+      <view wx:if="{{selectedTopic}}" class="topic-tag">{{selectedTopic.icon}} {{selectedTopic.title}}</view>
+      <textarea placeholder="分享你的睡眠心得..." value="{{postContent}}" bindinput="onPostInput" maxlength="300"/>
+      <view wx:if="{{postContent.length > 250}}" class="char-count">{{postContent.length}}/300</view>
+      <view wx:if="{{postImage}}" class="img-preview">
+        <image src="{{postImage}}" mode="widthFix"/>
+        <view class="img-remove" bindtap="removeImage">✕</view>
+      </view>
+      <view class="composer-row">
+        <view class="composer-left">
+          <view class="anon-btn {{isAnonymous?'anon-on':''}}" bindtap="toggleAnon">👤 {{isAnonymous?'匿名':'实名'}}</view>
+          <view class="img-btn" bindtap="chooseImage">📷</view>
+        </view>
+        <view class="composer-right">
+          <button wx:if="{{editingPostId}}" class="btn-cancel" bindtap="cancelEdit">取消</button>
+          <button wx:if="{{!editingPostId}}" class="btn-send" bindtap="createPost">发布</button>
+          <button wx:else class="btn-send" bindtap="submitEdit">保存</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- Post List -->
+    <view wx:if="{{posts.length===0}}" class="empty-state">
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">{{selectedTopic ? '该话题下还没有帖子' : '还没有帖子'}}</view>
+      <view class="empty-hint">{{selectedTopic ? '成为第一个分享的人吧' : '分享你的睡眠心得'}}</view>
+    </view>
+
+    <view wx:for="{{posts}}" wx:key="id" class="card post-card" data-id="{{item.id}}">
+      <view class="post-top" bindtap="openDetail" data-id="{{item.id}}">
+        <view class="post-avatar" style="background:{{avatarColor(item.author)}}">{{item.author ? item.author[0] : '?'}}</view>
+        <view class="post-info">
+          <view class="post-author-row">
+            <text class="post-author">{{item.author}}</text>
+            <text wx:if="{{item.sleep_score}}" class="post-score {{item.sleep_score >= 80 ? 'score-good' : 'score-ok'}}">⭐{{item.sleep_score}}</text>
+            <text wx:if="{{item.topic_id}}" class="post-topic-tag">{{item.topic_id}}</text>
+          </view>
+          <text class="post-time">{{timeAgo(item.created_at)}}</text>
+        </view>
+      </view>
+      <view class="post-body" bindtap="openDetail" data-id="{{item.id}}">
+        <view class="post-content">{{item.content}}</view>
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="widthFix" class="post-image"/>
+        <video wx:if="{{item.video_url}}" src="{{item.video_url}}" class="post-video" controls></video>
+      </view>
+      <view class="post-actions-row">
+        <view class="pa-left">
+          <view class="pa-btn {{item.is_liked ? 'liked' : ''}} {{animLikeId===item.id ? 'anim-heart' : ''}}" data-id="{{item.id}}" bindtap="likePost" bindlongpress="showReactions">
+            <text>{{item.is_liked ? '❤️' : '🤍'}}</text>
+            <text>{{item.like_count || 0}}</text>
+            <!-- Reaction picker -->
+            <view wx:if="{{showReactionPicker===item.id}}" class="reaction-picker" catchtap="noop">
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="like" catchtap="sendReaction">👍</view>
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="love" catchtap="sendReaction">❤️</view>
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="laugh" catchtap="sendReaction">😄</view>
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="sleep" catchtap="sendReaction">😴</view>
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="fire" catchtap="sendReaction">🔥</view>
+              <view class="rp-item" data-post-id="{{item.id}}" data-reaction="sad" catchtap="sendReaction">😢</view>
+            </view>
+          </view>
+          <view class="pa-btn" data-id="{{item.id}}" bindtap="openDetail">
+            <text>💬</text>
+            <text>{{item.comment_count || 0}}</text>
+          </view>
+          <view class="pa-btn" data-id="{{item.id}}" bindtap="toggleBookmark">
+            <text>🔖</text>
+          </view>
+        </view>
+        <view class="pa-right">
+          <text class="pa-report" data-id="{{item.id}}" bindtap="reportPost">🚩</text>
+          <text class="pa-edit" data-id="{{item.id}}" bindtap="startEdit">✏️</text>
+          <text class="pa-del" data-id="{{item.id}}" bindtap="deletePost">🗑</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== Groups ==================== -->
+  <view wx:if="{{tab==='groups'}}">
+    <view wx:if="{{groups.length===0}}" class="empty-state">
+      <view class="empty-icon">👥</view>
+      <view class="empty-text">暂无小组</view>
+    </view>
+    <view wx:for="{{groups}}" wx:key="id" class="card group-card" data-id="{{item.id}}" bindtap="goGroup">
+      <view class="group-icon">{{item.icon}}</view>
+      <view class="group-info">
+        <view class="group-name">{{item.name}}</view>
+        <view class="group-desc">{{item.description}}</view>
+        <view class="group-meta">{{item.member_count}}人</view>
+      </view>
+      <button wx:if="{{!item.is_member}}" class="btn-join" data-id="{{item.id}}" catchtap="joinGroup">加入</button>
+      <button wx:else class="btn-leave" data-id="{{item.id}}" catchtap="leaveGroup">已加入</button>
+    </view>
+  </view>
+
+  <!-- ==================== Challenges ==================== -->
+  <view wx:if="{{tab==='challenges'}}">
+    <view wx:if="{{challenges.length===0}}" class="empty-state">
+      <view class="empty-icon">🏆</view>
+      <view class="empty-text">暂无挑战</view>
+    </view>
+    <view wx:for="{{challenges}}" wx:key="id" class="card challenge-card">
+      <view class="ch-icon">{{item.icon}}</view>
+      <view class="ch-title">{{item.title}}</view>
+      <view class="ch-desc">{{item.description}}</view>
+      <view class="ch-meta">{{item.participant_count}}人参加 · {{item.start_date}}~{{item.end_date}}</view>
+      <view wx:if="{{item.joined}}" class="ch-progress">
+        <view class="ch-progress-bar"><view class="ch-progress-fill" style="width:{{item.progress/item.target_value*100}}%"></view></view>
+      </view>
+      <button wx:if="{{!item.joined}}" class="btn-join" data-id="{{item.id}}" bindtap="joinChallenge">参加挑战</button>
+      <view wx:else class="ch-joined">✅ 已参加 · {{item.progress}}/{{item.target_value}}</view>
+    </view>
+  </view>
+
+  <!-- ==================== Leaderboard ==================== -->
+  <view wx:if="{{tab==='leaderboard'}}">
+    <view class="lb-period-row">
+      <view class="lb-ps-btn {{lbPeriod==='weekly'?'on':''}}" data-period="weekly" bindtap="setPeriod">本周</view>
+      <view class="lb-ps-btn {{lbPeriod==='monthly'?'on':''}}" data-period="monthly" bindtap="setPeriod">本月</view>
+    </view>
+    <view wx:if="{{leaderboard.length===0}}" class="empty-state">
+      <view class="empty-icon">📊</view>
+      <view class="empty-text">暂无排行数据</view>
+    </view>
+    <view wx:for="{{leaderboard}}" wx:key="user_id" class="lb-row">
+      <view class="lb-rank {{item.rank <= 3 ? 'lb-top' + item.rank : ''}}">
+        {{item.rank <= 3 ? ['','🥇','🥈','🥉'][item.rank] : item.rank}}
+      </view>
+      <view class="lb-avatar" style="background:{{avatarColor(item.nickname)}}">{{item.nickname ? item.nickname[0] : '?'}}</view>
+      <view class="lb-name">{{item.nickname}}</view>
+      <view class="lb-score">{{item.avg_score}}分</view>
+    </view>
+  </view>
+</view>
+
+<!-- ==================== Post Detail Modal ==================== -->
+<view wx:if="{{showDetail && detailPost}}" class="detail-overlay" catchtouchmove="noop">
+  <view class="detail-sheet">
+    <view class="detail-header">
+      <text class="detail-close" bindtap="closeDetail">← 返回</text>
+      <text class="detail-title">帖子详情</text>
+      <text></text>
+    </view>
+
+    <scroll-view scroll-y class="detail-body">
+      <!-- Post content -->
+      <view class="detail-post">
+        <view class="detail-author-row">
+          <view class="detail-avatar" style="background:{{avatarColor(detailPost.author)}}">{{detailPost.author ? detailPost.author[0] : '?'}}</view>
+          <view>
+            <view class="detail-author">{{detailPost.author}}</view>
+            <view class="detail-time">{{timeAgo(detailPost.created_at)}}</view>
+          </view>
+          <view wx:if="{{detailPost.sleep_score}}" class="detail-score {{detailPost.sleep_score >= 80 ? 'score-good' : 'score-ok'}}">⭐{{detailPost.sleep_score}}</view>
+        </view>
+        <view class="detail-content">{{detailPost.content}}</view>
+        <image wx:if="{{detailPost.image}}" src="{{detailPost.image}}" mode="widthFix" class="detail-image"/>
+        <view class="detail-meta-row">
+          <view class="pa-btn {{detailPost.is_liked ? 'liked' : ''}}" data-id="{{detailPost.id}}" bindtap="likePost">
+            <text>{{detailPost.is_liked ? '❤️' : '🤍'}}</text>
+            <text>{{detailPost.like_count || 0}}</text>
+          </view>
+          <text class="detail-comment-count">💬 {{detailPost.comment_count || 0}} 条评论</text>
+        </view>
+      </view>
+
+      <!-- Comments -->
+      <view class="detail-comments">
+        <view wx:if="{{detailComments.length===0}}" class="empty-state" style="padding:32rpx 0">
+          <view class="empty-text">暂无评论</view>
+          <view class="empty-hint">来写下第一条评论吧</view>
+        </view>
+        <view wx:for="{{detailComments}}" wx:key="id" class="comment-item">
+          <view class="comment-avatar" style="background:{{avatarColor(item.author)}}">{{item.author ? item.author[0] : '?'}}</view>
+          <view class="comment-body">
+            <view class="comment-author">{{item.author}} <text class="comment-time">{{timeAgo(item.created_at)}}</text></view>
+            <view class="comment-content">{{item.content}}</view>
+            <view class="comment-actions">
+              <text class="comment-like" data-comment-id="{{item.id}}" bindtap="likeComment">❤️ {{item.like_count || 0}}</text>
+              <text class="comment-reply" data-comment-id="{{item.id}}" data-author="{{item.author}}" bindtap="replyToComment">回复</text>
+            </view>
+            <!-- Nested replies -->
+            <view wx:if="{{item.replies && item.replies.length > 0}}" class="nested-replies">
+              <view wx:for="{{item.replies}}" wx:key="id" wx:for-item="reply" class="reply-item">
+                <view class="reply-avatar" style="background:{{avatarColor(reply.author)}}">{{reply.author ? reply.author[0] : '?'}}</view>
+                <view class="reply-body">
+                  <view class="reply-author">{{reply.author}} <text class="comment-time">{{timeAgo(reply.created_at)}}</text></view>
+                  <view class="reply-content">{{reply.content}}</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Comment Input -->
+    <view class="detail-input-row">
+      <view wx:if="{{replyToUser}}" class="reply-hint">
+        回复 @{{replyToUser}}
+        <text class="reply-cancel" bindtap="cancelReply">✕</text>
+      </view>
+      <view class="detail-input-wrap">
+        <input class="detail-input" placeholder="写下你的评论..." value="{{commentText}}" bindinput="onCommentInput" maxlength="200" confirm-type="send" bindconfirm="sendComment"/>
+        <button class="btn-send {{commentText ? '' : 'btn-disabled'}}" bindtap="sendComment">发送</button>
       </view>
     </view>
   </view>

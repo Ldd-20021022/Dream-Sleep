@@ -1,15 +1,10 @@
-<view class="container"><view class="page-title">智能闹钟</view>
-  <view class="card"><view class="section-title">闹钟设置</view>
-    <view class="form-group"><text class="label">目标起床时间</text><input class="input" type="time" value="{{alarm.target_time}}" data-field="target_time" bindinput="setField"/></view>
-    <view class="form-group"><text class="label">唤醒窗口 (分钟)</text><slider min="10" max="60" value="{{alarm.wake_window}}" data-field="wake_window" bindchange="setField" activeColor="#6c63ff" show-value/></view>
-    <view class="form-group"><text class="label">唤醒方式</text>
-      <view class="method-row"><view wx:for="{{['light','sound','vibration']}}" wx:key="*this" class="method-btn {{alarm.smart_method===item?'on':''}}" bindtap="setFieldTap" data-field="smart_method" data-val="{{item}}">{{item==='light'?'光照':item==='sound'?'声音':'震动'}}</view></view>
-    </view>
-    <button class="btn btn-primary" bindtap="saveAlarm">保存闹钟</button>
-  </view>
-  <view class="card"><view class="section-title">最佳睡眠时间<button class="btn btn-secondary btn-sm" style="float:right" bindtap="getSmartAlarm" loading="{{loading}}">计算</button></view>
-    <view wx:if="{{suggestions.length>0}}">
-      <view wx:for="{{suggestions}}" wx:key="cycles" class="sug-item"><view>{{item.cycles}}周期 {{item.duration_h}}h</view><view style="font-weight:700;font-size:28rpx">{{item.time}}</view><view class="badge">{{item.quality==='excellent'?'最佳':'良好'}}</view></view>
-    </view>
-  </view>
+<view class="container"><view class="page-title">⏰ 智能闹钟</view>
+  <view class="card" style="display:flex;align-items:center;justify-content:space-between"><view style="font-size:28rpx;font-weight:600;color:#fff">闹钟状态</view><view class="toggle-switch {{alarm.is_active?'ts-on':''}}" bindtap="toggleActive"><view class="toggle-dot"></view></view></view>
+  <view class="card"><view class="section-title">⏰ 起床时间</view><picker mode="time" value="{{alarm.target_time}}" bindchange="setTime"><view class="time-pick">{{alarm.target_time}}</view></picker></view>
+  <view class="card"><view class="section-title">⏱ 唤醒窗口：{{alarm.wake_window}}分钟</view><slider min="10" max="60" value="{{alarm.wake_window}}" bindchange="setWindow" activeColor="#6C63FF" block-size="18" show-value/><view style="font-size:22rpx;color:var(--tx3)">在目标时间前{{alarm.wake_window}}分钟开始监测轻睡阶段</view></view>
+  <view class="card"><view class="section-title">🔔 唤醒方式</view><view class="method-row"><view class="method-btn {{alarm.smart_method==='light'?'mb-on':''}}" data-method="light" bindtap="setMethod">💡 光照</view><view class="method-btn {{alarm.smart_method==='sound'?'mb-on':''}}" data-method="sound" bindtap="setMethod">🔔 声音</view><view class="method-btn {{alarm.smart_method==='vibration'?'mb-on':''}}" data-method="vibration" bindtap="setMethod">📳 震动</view></view></view>
+  <view class="card"><view class="section-title">📅 重复</view><view class="day-row"><view wx:for="{{dayList}}" wx:key="day" wx:for-item="d" class="day-btn {{d.enabled?'db-on':''}}" data-day="{{d.day}}" bindtap="toggleDay">{{d.name}}</view></view></view>
+  <view class="card"><view class="section-title">🧠 智能入睡建议</view><button class="btn btn-secondary btn-sm" bindtap="getSmartAlarm" loading="{{loading}}">{{loading?'计算中...':'根据起床时间计算最佳入睡时间'}}</button><view wx:if="{{suggestions.length>0}}" style="margin-top:16rpx"><view wx:for="{{suggestions}}" wx:key="cycles" style="display:flex;align-items:center;gap:16rpx;padding:12rpx 0;border-bottom:1rpx solid rgba(255,255,255,.04)"><view style="font-size:20rpx;padding:4rpx 12rpx;border-radius:12rpx;background:{{item.quality==='excellent'?'rgba(46,204,113,.15)':'rgba(52,152,219,.15)'}};color:{{item.quality==='excellent'?'#2ECC71':'#3498DB'}}">{{item.quality==='excellent'?'🏆最佳':'✅推荐'}}</view><view style="font-size:28rpx;font-weight:700;color:#fff">{{item.time}}</view><view style="font-size:22rpx;color:var(--tx3)">{{item.duration_h}}h·{{item.cycles}}周期</view></view></view></view>
+  <view class="card info-card"><view class="section-title">💡 90分钟睡眠周期</view><view wx:for="{{sleepCycles}}" wx:key="cycles" style="display:flex;justify-content:space-between;padding:8rpx 0;font-size:24rpx;color:var(--tx2)"><view>{{item.desc}}</view><view style="color:{{item.quality==='excellent'?'#2ECC71':'#3498DB'}}">{{item.quality==='excellent'?'最佳':'推荐'}}</view></view></view>
+  <button class="btn btn-primary" style="width:100%;padding:24rpx;margin-top:16rpx;border-radius:16rpx" bindtap="saveAlarm">💾 保存闹钟设置</button>
 </view>

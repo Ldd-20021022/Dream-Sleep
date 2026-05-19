@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/login/login",
     "pages/index/index",
+    "pages/login/login",
     "pages/record/record",
     "pages/noise/noise",
     "pages/chat/chat",
@@ -12,28 +12,45 @@
     "pages/store/store",
     "pages/courses/courses",
     "pages/game/game",
+    "pages/game/adventure/adventure",
+    "pages/game/breathing/breathing",
+    "pages/game/garden/garden",
+    "pages/game/quiz/quiz",
+    "pages/game/runner/runner",
+    "pages/game/sound/sound",
+    "pages/game/worry/worry",
     "pages/assessment/assessment",
     "pages/alarm/alarm",
     "pages/vip/vip",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/onboarding/onboarding",
+    "pages/report/report",
+    "pages/referral/referral",
+    "pages/search/search",
+    "pages/user-profile/user-profile",
+    "pages/notifications/notifications",
+    "pages/group-detail/group-detail",
+    "pages/messages/messages",
+    "pages/post-detail/post-detail",
+    "pages/admin/admin"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#111127",
+    "navigationBarBackgroundColor": "#161625",
     "navigationBarTitleText": "梦眠",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#0f0f1a",
+    "backgroundColor": "#0a0a12",
     "backgroundTextStyle": "light"
   },
   "tabBar": {
-    "color": "#6a6a80",
-    "selectedColor": "#6c63ff",
-    "backgroundColor": "#111127",
+    "color": "#585870",
+    "selectedColor": "#5b6abf",
+    "backgroundColor": "#1c1c30",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/index/index", "text": "概览", "iconPath": "static/home.png", "selectedIconPath": "static/home-active.png" },
-      { "pagePath": "pages/record/record", "text": "记录", "iconPath": "static/record.png", "selectedIconPath": "static/record-active.png" },
-      { "pagePath": "pages/analysis/analysis", "text": "分析", "iconPath": "static/chart.png", "selectedIconPath": "static/chart-active.png" },
-      { "pagePath": "pages/profile/profile", "text": "我的", "iconPath": "static/user.png", "selectedIconPath": "static/user-active.png" }
+      { "pagePath": "pages/index/index", "text": "🏠 概览" },
+      { "pagePath": "pages/record/record", "text": "✏️ 记录" },
+      { "pagePath": "pages/analysis/analysis", "text": "📊 分析" },
+      { "pagePath": "pages/profile/profile", "text": "👤 我的" }
     ]
   },
   "requiredBackgroundModes": ["audio"],

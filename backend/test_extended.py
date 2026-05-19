@@ -514,9 +514,16 @@ def test_premium_status():
     print(f"  PASS test_premium_status (tier={d['tier']})")
 
 def test_premium_upgrade_cancel():
-    s, d = api("POST", "/api/v1/premium/upgrade", json={"tier": "pro"}, headers=auth_headers())
-    assert_ok(s, "Premium upgrade")
-    print(f"  PASS test_premium_upgrade (tier={d['tier']})")
+    # Create and pay order first (new flow requires valid order_id)
+    s, od = api("POST", "/api/v1/payment/orders", json={"plan_id": "pro_monthly", "method": "wechat"}, headers=auth_headers())
+    assert_ok(s, "Create order for upgrade")
+    oid = od["order_id"]
+    s, pd = api("POST", f"/api/v1/payment/orders/{oid}/pay", json={"transaction_id": f"TEST_TXN_{int(time.time())}"}, headers=auth_headers())
+    assert_ok(s, "Pay order for upgrade")
+
+    s, d = api("POST", "/api/v1/premium/upgrade", json={"tier": "pro", "order_id": oid}, headers=auth_headers())
+    assert_ok(s, "Premium upgrade (with order)")
+    print(f"  PASS test_premium_upgrade (tier={d['tier']}, order_no={d.get('order_no')})")
 
     s, d = api("GET", "/api/v1/premium/status", headers=auth_headers())
     assert d["tier"] == "pro", f"Expected pro, got {d['tier']}"
@@ -525,9 +532,6 @@ def test_premium_upgrade_cancel():
     s, d = api("POST", "/api/v1/premium/cancel", headers=auth_headers())
     assert_ok(s, "Premium cancel")
     print("  PASS test_premium_cancel")
-
-    # Reset to free for other tests
-    s, d = api("POST", "/api/v1/premium/upgrade", json={"tier": "free"}, headers=auth_headers())
 
 
 # ==================== PAYMENT TESTS ====================
@@ -548,7 +552,7 @@ def test_payment_create_order():
 
     # Pay the order
     s, pd = api("POST", f"/api/v1/payment/orders/{order_id}/pay", json={
-        "transaction_id": "TEST_TXN_001",
+        "transaction_id": f"TEST_TXN_{int(time.time())}",
     }, headers=auth_headers())
     assert_ok(s, "Pay order")
     print(f"  PASS test_payment_pay_order")

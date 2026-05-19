@@ -1,15 +1,38 @@
-.scene-grid { display: flex; flex-wrap: wrap; gap: 16rpx; }
-.scene-btn { width: calc(50% - 8rpx); padding: 24rpx; background: var(--hover); border-radius: 16rpx; text-align: center; border: 2rpx solid transparent; }
-.scene-btn.on { border-color: var(--ac); background: rgba(108,99,255,0.1); }
-.scene-icon { font-size: 48rpx; }
-.scene-name { font-size: 28rpx; font-weight: 600; margin: 8rpx 0 4rpx; }
-.scene-desc { font-size: 22rpx; color: var(--tx3); }
-.ctrl-row { display: flex; align-items: center; gap: 16rpx; }
-.ctrl-label { width: 120rpx; font-size: 28rpx; color: var(--tx2); }
-.ctrl-val { width: 80rpx; text-align: right; font-size: 26rpx; color: var(--tx3); }
-.tip-card { background: rgba(108,99,255,0.06); border-color: var(--ac); font-size: 26rpx; color: var(--tx2); }
-.story-item { display: flex; align-items: center; justify-content: space-between; padding: 16rpx 0; border-bottom: 1rpx solid var(--bd); }
-.story-item:last-child { border-bottom: none; }
-.story-info { flex: 1; margin-right: 16rpx; }
-.story-title { font-size: 28rpx; font-weight: 500; }
-.story-meta { font-size: 22rpx; color: var(--tx3); margin-top: 4rpx; }
+.container { padding: 24rpx; padding-bottom: 60rpx; }
+.page-title { font-size: 40rpx; font-weight: 800; color: #fff; margin-bottom: 20rpx; }
+
+/* Presets */
+.preset-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.preset-toggle { font-size: 26rpx; color: var(--primary); padding: 10rpx 20rpx; background: rgba(108,99,255,.1); border-radius: 20rpx; }
+.timer-badge { font-size: 24rpx; color: #F39C12; padding: 8rpx 16rpx; background: rgba(243,156,18,.1); border-radius: 16rpx; }
+.preset-grid { display: flex; flex-wrap: wrap; gap: 10rpx; margin-bottom: 16rpx; }
+.preset-card { padding: 14rpx 20rpx; background: var(--bg2); border-radius: 14rpx; border: 1rpx solid var(--bd); }
+.preset-name { font-size: 26rpx; font-weight: 600; color: #fff; }
+.preset-desc { font-size: 22rpx; color: var(--tx3); margin-top: 4rpx; }
+
+/* Sound Grid */
+.sound-grid { display: flex; flex-direction: column; gap: 12rpx; margin-bottom: 20rpx; }
+.sound-card { background: var(--bg2); border-radius: 16rpx; padding: 16rpx 20rpx; border: 2rpx solid var(--bd); transition: all 0.3s; }
+.sound-card.active { background: rgba(108,99,255,.04); }
+.sound-header { display: flex; align-items: center; gap: 14rpx; }
+.sound-icon { width: 52rpx; height: 52rpx; border-radius: 14rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
+.sound-info { flex: 1; }
+.sound-name { font-size: 28rpx; font-weight: 600; color: #fff; }
+.sound-status { font-size: 22rpx; color: var(--tx3); }
+.sound-toggle { width: 52rpx; height: 52rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22rpx; background: rgba(255,255,255,.06); border: 1rpx solid var(--bd); }
+.sound-toggle.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.sound-vol { display: flex; align-items: center; margin-top: 12rpx; padding-top: 12rpx; border-top: 1rpx solid rgba(255,255,255,.04); }
+.vol-icon { font-size: 20rpx; color: var(--tx3); width: 32rpx; text-align: center; }
+
+/* Master */
+.master-card { background: var(--bg2); border-radius: 20rpx; padding: 24rpx; margin-bottom: 20rpx; border: 1rpx solid var(--bd); }
+.ctrl-row { display: flex; align-items: center; }
+.ctrl-label { width: 120rpx; font-size: 26rpx; color: var(--tx2); }
+.ctrl-val { width: 56rpx; text-align: right; font-size: 26rpx; color: #fff; font-weight: 600; }
+.timer-picker { padding: 10rpx 20rpx; background: rgba(255,255,255,.04); border-radius: 12rpx; font-size: 24rpx; color: var(--tx2); }
+
+/* Actions */
+.action-row { display: flex; gap: 12rpx; }
+.btn-stop { flex: 1; padding: 24rpx; background: rgba(231,76,60,.1); border: 1rpx solid rgba(231,76,60,.2); color: #E74C3C; border-radius: 20rpx; font-size: 28rpx; text-align: center; }
+.btn-timer { flex: 1; padding: 24rpx; background: var(--bg2); border: 1rpx solid var(--bd); color: var(--tx2); border-radius: 20rpx; font-size: 28rpx; text-align: center; }
+.btn-timer.active { background: rgba(243,156,18,.1); border-color: rgba(243,156,18,.2); color: #F39C12; }

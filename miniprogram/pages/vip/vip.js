@@ -35,11 +35,17 @@ Page({
     payMethod: 'wechat',
     payOrder: null,
     payOrders: [],
+    payPlans: [], heroPrice: '29', showCompare: false, showOrders: false,
+    proMoPrice: '--', proYrPrice: '--', premMoPrice: '--', premYrPrice: '--',
+    billingFeedback: false,
     payLoading: false,
+    couponCode: '',
+    couponApplied: false,
     referralCode: '',
     referralCount: 0,
     referralReward: 0,
     vipDaysLeft: 0,
+    orderExpireSeconds: 0,
     tierFeatures: tierFeatures,
     vipCompareRows: vipCompareRows,
     vipPerks: vipPerks
@@ -47,6 +53,7 @@ Page({
 
   onShow() {
     this.loadPremium();
+    this.loadPayPlans();
     this.loadPayOrders();
   },
 
@@ -56,6 +63,21 @@ Page({
       const days = this.calcVipDays(data);
       this.setData({ premium: data, vipDaysLeft: days });
     } catch {}
+  },
+
+  async loadPayPlans() {
+    try {
+      var data = await app.get('/api/v1/payment/plans');
+      var plans = data.plans || [];
+      var findPrice = function (id) { for (var i = 0; i < plans.length; i++) { if (plans[i].id === id) return plans[i].amount_yuan; } return '--'; };
+      var findOrig = function (id) { for (var i = 0; i < plans.length; i++) { if (plans[i].id === id) return Math.floor(plans[i].amount / 100); } return '--'; };
+      this.setData({
+        payPlans: plans,
+        heroPrice: findPrice('pro_monthly') !== '--' ? findPrice('pro_monthly') : '29',
+        proMoPrice: findPrice('pro_monthly'), proYrPrice: findPrice('pro_yearly'), proYrOrig: findOrig('pro_yearly'),
+        premMoPrice: findPrice('premium_monthly'), premYrPrice: findPrice('premium_yearly'), premYrOrig: findOrig('premium_yearly')
+      });
+    } catch (e) {}
   },
 
   async loadPayOrders() {
@@ -87,42 +109,110 @@ Page({
     return 0;
   },
 
+  noop: function () {},
+  toggleCompare: function () { this.setData({ showCompare: !this.data.showCompare }); },
+  toggleOrders: function () { this.setData({ showOrders: !this.data.showOrders }); if (!this.data.showOrders) this.loadPayOrders(); },
   setBilling(e) {
-    this.setData({ vipBilling: e.currentTarget.dataset.type });
+    var type = e.currentTarget.dataset.type;
+    this.setData({ vipBilling: type, billingFeedback: true });
+    var that = this;
+    setTimeout(function () { that.setData({ billingFeedback: false }); }, 300);
+  },
+
+  onCouponInput(e) {
+    this.setData({ couponCode: e.detail.value.trim() });
   },
 
   async createPayOrder(e) {
-    const plan = e.currentTarget.dataset.plan;
+    if (this.data.payLoading) return;
+    var plan = e.currentTarget.dataset.plan;
     this.setData({ payLoading: true });
     try {
-      const data = await app.post('/api/v1/payment/orders', { plan_id: plan, method: 'wechat' });
-      this.setData({ payOrder: data, payLoading: false });
-    } catch {
-      wx.showToast({ title: '创建订单失败', icon: 'error' });
+      const body = { plan_id: plan, method: this.data.payMethod };
+      if (this.data.couponCode) body.coupon_code = this.data.couponCode;
+      const data = await app.post('/api/v1/payment/orders', body);
+      this.setData({
+        payOrder: data,
+        payLoading: false,
+        couponApplied: (data.coupon_discount_yuan || 0) > 0,
+        orderExpireSeconds: (data.expire_minutes || 30) * 60
+      });
+      this.startExpireCountdown();
+    } catch (err) {
+      wx.showToast({ title: (err && err.detail) || '创建订单失败', icon: 'error' });
       this.setData({ payLoading: false });
     }
+  },
+
+  startExpireCountdown() {
+    clearInterval(this._expireTimer);
+    this._expireTimer = setInterval(() => {
+      const sec = this.data.orderExpireSeconds - 1;
+      if (sec <= 0) {
+        clearInterval(this._expireTimer);
+        this.closePayModal();
+        wx.showToast({ title: '订单已过期', icon: 'none' });
+        return;
+      }
+      this.setData({ orderExpireSeconds: sec });
+    }, 1000);
   },
 
   async confirmPay() {
     this.setData({ payLoading: true });
     try {
       const order = this.data.payOrder;
-      await app.post('/api/v1/payment/orders/' + order.order_id + '/pay', { transaction_id: 'SIM' + Date.now() });
+      const txnId = 'SIM' + Date.now();
+      const result = await app.post('/api/v1/payment/orders/' + order.order_id + '/pay', {
+        transaction_id: txnId
+      });
+      clearInterval(this._expireTimer);
       wx.showToast({ title: '支付成功！', icon: 'success' });
-      this.setData({ payOrder: null, payLoading: false });
+      this.setData({ payOrder: null, payLoading: false, couponCode: '', couponApplied: false });
       this.loadPremium();
       this.loadPayOrders();
-    } catch {
-      wx.showToast({ title: '支付失败', icon: 'error' });
+    } catch (err) {
+      const msg = (err && err.detail) || '支付失败';
+      wx.showToast({ title: msg, icon: 'error' });
       this.setData({ payLoading: false });
     }
   },
 
+  async cancelOrder() {
+    if (!this.data.payOrder) return;
+    try {
+      await app.post('/api/v1/payment/orders/' + this.data.payOrder.order_id + '/cancel');
+      clearInterval(this._expireTimer);
+      wx.showToast({ title: '订单已取消', icon: 'none' });
+      this.setData({ payOrder: null, couponCode: '', couponApplied: false });
+    } catch {
+      wx.showToast({ title: '取消失败', icon: 'error' });
+    }
+  },
+
   closePayModal() {
-    this.setData({ payOrder: null });
+    clearInterval(this._expireTimer);
+    this.setData({ payOrder: null, couponCode: '', couponApplied: false });
   },
 
   setPayMethod(e) {
     this.setData({ payMethod: e.currentTarget.dataset.method });
+  },
+
+  getPlanPriceYuan: function (planKey) {
+    var plans = this.data.payPlans || [];
+    var plan = null;
+    for (var i = 0; i < plans.length; i++) { if (plans[i].id === planKey) { plan = plans[i]; break; } }
+    return plan ? plan.amount_yuan : '--';
+  },
+
+  getPlanOriginalYuan: function (planKey) {
+    var plans = this.data.payPlans || [];
+    var plan = null;
+    for (var i = 0; i < plans.length; i++) { if (plans[i].id === planKey) { plan = plans[i]; break; } }
+    return plan ? Math.floor(plan.amount / 100) : '--';
+  },
+  scrollToPlans: function () {
+    wx.pageScrollTo({ selector: '#plans', duration: 300 });
   }
 });

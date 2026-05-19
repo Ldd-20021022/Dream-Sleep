@@ -1,16 +1,35 @@
 <view class="container">
   <view class="page-title">睡眠知识库</view>
 
+  <!-- Search Bar -->
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索文章..." value="{{searchQuery}}" bindinput="onSearchInput" bindconfirm="doSearch"/>
+    <view class="search-btn" bindtap="doSearch">搜索</view>
+  </view>
+
   <!-- Article Detail -->
   <block wx:if="{{viewingArticle}}">
     <view class="card">
-      <view class="article-title">{{viewingArticle.title}}</view>
+      <view class="article-header">
+        <view class="article-title">{{viewingArticle.title}}</view>
+        <view class="article-bookmark {{bookmarkedIds.indexOf(viewingArticle.id)>-1 ? 'bmed' : ''}}" data-id="{{viewingArticle.id}}" bindtap="toggleBookmark">
+          {{bookmarkedIds.indexOf(viewingArticle.id)>-1 ? '🔖 已收藏' : '🏷️ 收藏'}}
+        </view>
+      </view>
       <view class="article-meta"><span class="badge">{{viewingArticle.category}}</span></view>
       <view class="article-content">{{viewingArticle.content}}</view>
       <view class="article-tags" wx:if="{{viewingArticle.tags}}">
         <text wx:for="{{viewingArticle.tags}}" wx:key="*this" class="tag">{{item}}</text>
       </view>
       <button class="btn btn-secondary btn-sm" style="margin-top:24rpx" bindtap="backToList">← 返回列表</button>
+      <!-- Related Articles -->
+      <view wx:if="{{relatedArticles.length > 0}}" style="margin-top:24rpx">
+        <view class="section-title">📖 相关文章</view>
+        <view wx:for="{{relatedArticles}}" wx:key="id" class="related-item" data-id="{{item.id}}" bindtap="viewArticle">
+          <text>{{item.title}}</text>
+          <text class="related-cat">{{item.category}}</text>
+        </view>
+      </view>
     </view>
   </block>
 
@@ -25,9 +44,16 @@
               style="flex-shrink:0" bindtap="selectCat">全部</button>
     </scroll-view>
 
+    <view wx:if="{{isSearching}}" class="search-hint">搜索 "{{searchQuery}}" 结果：{{articles.length}}篇</view>
+
     <view wx:for="{{articles}}" wx:key="id" class="card article-card"
           data-id="{{item.id}}" bindtap="viewArticle">
-      <view class="article-title">{{item.title}}</view>
+      <view class="article-top">
+        <view class="article-title">{{item.title}}</view>
+        <view class="bm-icon {{bookmarkedIds.indexOf(item.id)>-1 ? 'bmed' : ''}}" data-id="{{item.id}}" catchtap="toggleBookmark">
+          {{bookmarkedIds.indexOf(item.id)>-1 ? '🔖' : '🏷️'}}
+        </view>
+      </view>
       <view class="article-summary">{{item.summary}}</view>
       <view class="article-meta">
         <span class="badge">{{item.category}}</span>
@@ -36,7 +62,15 @@
     </view>
 
     <view wx:if="{{articles.length===0}}" class="card">
-      <view class="empty-state">暂无文章</view>
+      <view class="empty-state">{{isSearching ? '未找到相关文章' : '暂无文章'}}</view>
+    </view>
+
+    <!-- Reading History -->
+    <view wx:if="{{!isSearching && !activeCat && readHistory.length > 0}}" class="card" style="margin-top:24rpx">
+      <view class="section-title">🕐 阅读历史</view>
+      <view wx:for="{{readHistory}}" wx:key="id" wx:for-item="a" class="history-item" data-id="{{a.id}}" bindtap="viewArticle">
+        <text>{{a.title}}</text>
+      </view>
     </view>
   </block>
 </view>

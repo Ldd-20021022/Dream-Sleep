@@ -1,16 +1,154 @@
-<view class="container"><view class="page-title">睡眠课程</view>
-  <view wx:for="{{courses}}" wx:key="id" class="card course-card">
-    <view class="course-title">{{item.title}}<span wx:if="{{item.is_premium}}" class="badge" style="margin-left:8rpx;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span></view>
-    <view class="course-desc">{{item.desc}}</view>
-    <view class="course-meta">{{item.instructor}} · {{item.duration_hours}}h · {{item.chapters}}章 · {{item.enrolled}}人报名</view>
-    <view style="display:flex;gap:12rpx;margin-top:12rpx">
-      <button class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="viewCourse">查看章节</button>
-      <button class="btn btn-secondary btn-sm" data-id="{{item.id}}" bindtap="enrollCourse">报名</button>
+<view class="container">
+  <view class="page-title">📚 学习成长</view>
+
+  <!-- Learning Stats -->
+  <view class="card" style="margin-bottom:20rpx" wx:if="{{program||articles.length>0||courses.length>0}}">
+    <view style="display:flex;justify-content:space-around;text-align:center">
+      <view><view style="font-size:44rpx;font-weight:700;color:var(--primary)">{{completedDays>0&&started?'1':'0'}}</view><view style="font-size:20rpx;color:var(--tx3)">21天计划</view></view>
+      <view><view style="font-size:44rpx;font-weight:700;color:var(--teal)">{{articles.length||0}}</view><view style="font-size:20rpx;color:var(--tx3)">知识文章</view></view>
+      <view><view style="font-size:44rpx;font-weight:700;color:var(--warn)">{{bookmarkedIds.length}}</view><view style="font-size:20rpx;color:var(--tx3)">收藏</view></view>
+      <view><view style="font-size:44rpx;font-weight:700">🔥{{completedDays}}</view><view style="font-size:20rpx;color:var(--tx3)">学习天数</view></view>
     </view>
   </view>
-  <view wx:if="{{viewing}}" class="modal" bindtap="closeView"><view class="modal-box" catchtap="">
-    <view class="course-title">{{viewing.title}}</view>
-    <view wx:for="{{chapters}}" wx:key="id" class="chapter-item"><view class="chapter-num">Ch{{item.order}}</view><view><view class="chapter-title">{{item.title}}</view><view class="chapter-meta">{{item.duration_minutes}}分钟</view></view></view>
-    <button class="btn btn-secondary" style="margin-top:16rpx" bindtap="closeView">关闭</button>
-  </view></view>
+
+  <!-- Tabs -->
+  <view class="tab-bar">
+    <view class="tab-item {{tab==='21day'?'on':''}}" data-tab="21day" bindtap="switchTab">📅 21天计划</view>
+    <view class="tab-item {{tab==='knowledge'?'on':''}}" data-tab="knowledge" bindtap="switchTab">📖 知识探索</view>
+    <view class="tab-item {{tab==='courses'?'on':''}}" data-tab="courses" bindtap="switchTab">🎓 系统课程</view>
+  </view>
+
+  <!-- ===== 21-DAY ===== -->
+  <view wx:if="{{tab==='21day'}}">
+    <view class="prog-card">
+      <view class="prog-title">21天睡眠改善计划</view>
+      <view class="prog-sub">CBT-I 认知行为疗法 · 每天进步一点点</view>
+      <view class="prog-ring-row">
+        <view class="prog-ring">
+          <view class="ring-fill-c" style="background:conic-gradient(var(--primary) {{progressPct*3.6}}deg, transparent 0deg)"></view>
+          <view class="ring-inner-c"><view class="ring-pct">{{progressPct}}%</view><view class="ring-label-c">{{completedDays}}/21天</view></view>
+        </view>
+        <view class="prog-right">
+          <view wx:if="{{!started}}"><view class="pr-icon">🚀</view><button class="btn btn-primary btn-sm" bindtap="startProgram">开始21天计划</button></view>
+          <view wx:else><view class="pr-day">Day {{currentDay}}</view><view wx:if="{{isCompleted}}" class="pr-done">🎉 全部完成！</view><view wx:else class="pr-next">继续加油！</view></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Day Grid: show all 21, lock future -->
+    <view class="day-grid-title">📅 课程日历</view>
+    <view class="day-grid">
+      <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]}}" wx:key="*this" wx:for-item="d"
+            class="day-cell {{d < currentDay ? 'done' : ''}} {{d === currentDay && started ? 'current' : ''}} {{d > currentDay ? 'locked' : ''}}"
+            data-day="{{d}}" bindtap="viewDay">
+        <view class="dc-num">{{d}}</view>
+        <view class="dc-icon">{{d < currentDay ? '✅' : d === currentDay ? '📖' : '🔒'}}</view>
+      </view>
+    </view>
+
+    <!-- Today -->
+    <view wx:if="{{today}}" class="today-card">
+      <view class="today-header">📌 今日课程 · Day {{today.day || currentDay}}</view>
+      <view class="today-title">{{today.title || ''}}</view>
+      <view wx:if="{{today.video_url}}" class="video-box"><view class="video-label">🎬 {{today.video_title}}</view></view>
+      <view class="article-box"><view class="ap-label">📖 内容</view><view class="ap-text">{{todayPreview}}</view></view>
+      <view wx:if="{{today.task}}" class="task-box"><view class="tc-label">✅ 今日任务</view><view class="tc-text">{{today.task}}</view><view class="tc-xp">+{{today.xp || 15}} XP</view></view>
+      <view wx:if="{{!isCompleted}}" class="today-actions">
+        <button class="btn btn-secondary btn-sm" style="flex:1" data-day="{{currentDay}}" bindtap="viewDay">详情</button>
+        <button class="btn btn-primary btn-sm" style="flex:1" bindtap="completeToday" loading="{{completing}}">✅ 打卡</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== KNOWLEDGE ===== -->
+  <view wx:if="{{tab==='knowledge'}}">
+    <!-- Search -->
+    <view class="search-bar">
+      <input class="search-input" placeholder="搜索睡眠知识..." value="{{searchQuery}}" bindinput="onSearchInput" bindconfirm="doSearch"/>
+      <view class="search-btn" bindtap="doSearch">搜索</view>
+    </view>
+
+    <!-- Article Detail -->
+    <block wx:if="{{viewingArticle}}">
+      <view class="card">
+        <view class="article-top-row">
+          <view class="article-title">{{viewingArticle.title}}</view>
+          <view class="article-bm {{bookmarkedIds.indexOf(viewingArticle.id)>-1 ? 'bmed' : ''}}" data-id="{{viewingArticle.id}}" bindtap="toggleBookmark">
+            {{bookmarkedIds.indexOf(viewingArticle.id)>-1 ? '🔖' : '🏷️'}}
+          </view>
+        </view>
+        <view class="article-meta"><span class="badge">{{viewingArticle.category}}</span></view>
+        <view class="article-content">{{viewingArticle.content}}</view>
+        <view wx:if="{{relatedArticles.length}}" class="related-section">
+          <view class="section-title">📖 相关文章</view>
+          <view wx:for="{{relatedArticles}}" wx:key="id" wx:for-item="ra" class="related-item" data-id="{{ra.id}}" bindtap="viewArticle">{{ra.title}} <text class="related-cat">{{ra.category}}</text></view>
+        </view>
+        <button class="btn btn-secondary btn-sm" style="margin-top:16rpx" bindtap="backToList">← 返回列表</button>
+      </view>
+    </block>
+
+    <!-- Article List -->
+    <block wx:else>
+      <scroll-view scroll-x class="cat-bar">
+        <view wx:for="{{categories}}" wx:key="*this" class="cat-chip {{activeCat===item?'on':''}}" data-cat="{{item}}" bindtap="selectCat">{{item}}</view>
+        <view class="cat-chip {{!activeCat?'on':''}}" data-cat="" bindtap="selectCat">全部</view>
+      </scroll-view>
+
+      <view wx:if="{{isSearching}}" class="search-hint">搜索 "{{searchQuery}}" 结果：{{articles.length}}篇</view>
+
+      <view wx:for="{{articles}}" wx:key="id" class="card article-card" data-id="{{item.id}}" bindtap="viewArticle">
+        <view class="article-top-row">
+          <view class="article-title">{{item.title}}</view>
+          <view class="article-bm {{bookmarkedIds.indexOf(item.id)>-1 ? 'bmed' : ''}}" data-id="{{item.id}}" catchtap="toggleBookmark">{{bookmarkedIds.indexOf(item.id)>-1 ? '🔖' : '🏷️'}}</view>
+        </view>
+        <view class="article-summary">{{item.summary}}</view>
+        <view class="article-meta"><span class="badge">{{item.category}}</span></view>
+      </view>
+
+      <view wx:if="{{articles.length===0}}" class="empty">{{isSearching ? '未找到相关文章' : '暂无文章'}}</view>
+    </block>
+  </view>
+
+  <!-- ===== COURSES ===== -->
+  <view wx:if="{{tab==='courses'}}">
+    <view wx:if="{{courses.length===0}}" class="empty">加载课程中...</view>
+    <view wx:for="{{courses}}" wx:key="id" class="course-card" data-id="{{item.id}}" bindtap="viewCourse">
+      <view class="cc-icon">📚</view>
+      <view class="cc-info">
+        <view class="cc-name">{{item.title}}</view>
+        <view class="cc-instructor">{{item.instructor}} · {{item.duration_hours || 1}}小时 · {{item.chapters || 1}}章节</view>
+        <view class="cc-meta">⭐ {{item.rating || 4.8}} · {{item.enrolled || 0}}人</view>
+      </view>
+      <button class="btn btn-primary btn-sm" data-id="{{item.id}}" catchtap="enrollCourse">报名</button>
+    </view>
+  </view>
+
+  <!-- ===== MODALS ===== -->
+  <!-- Day Detail Modal -->
+  <view wx:if="{{viewing && viewingType==='day'}}" class="modal-overlay" bindtap="closeView">
+    <view class="modal-card" catchtap="noop">
+      <view class="modal-close" bindtap="closeView">✕</view>
+      <view class="md-day">Day {{viewing.day}}</view>
+      <view class="md-title">{{viewing.title}}</view>
+      <view wx:if="{{viewing.video_url}}" class="md-video">🎬 {{viewing.video_title}}</view>
+      <scroll-view scroll-y class="md-article">{{viewing.article}}</scroll-view>
+      <view wx:if="{{viewing.task}}" class="md-task"><view class="md-task-label">✅ 今日任务</view><view>{{viewing.task}}</view><view style="color:var(--teal)">+{{viewing.xp || 15}} XP</view></view>
+      <view wx:if="{{viewing.tips}}" class="md-tips">💡 {{viewing.tips}}</view>
+      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:16rpx" bindtap="closeView">关闭</button>
+    </view>
+  </view>
+
+  <!-- Course Detail Modal -->
+  <view wx:if="{{viewing && viewingType==='course'}}" class="modal-overlay" bindtap="closeView">
+    <view class="modal-card" catchtap="noop">
+      <view class="modal-close" bindtap="closeView">✕</view>
+      <view class="md-name">{{viewing.title}}</view>
+      <view class="md-desc">{{viewing.desc}}</view>
+      <view wx:for="{{chapters}}" wx:key="id" wx:for-item="ch" class="chapter-row">
+        <view class="ch-num">{{ch.order_num || index+1}}</view>
+        <view class="ch-info"><view class="ch-title">{{ch.title}}</view><view class="ch-meta">{{ch.duration_minutes || 15}}分钟</view></view>
+      </view>
+      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:16rpx" bindtap="closeView">关闭</button>
+    </view>
+  </view>
 </view>

@@ -1,51 +1,60 @@
 <view class="container">
-  <view class="page-title">白噪音</view>
+  <view class="page-title">🎵 白噪音</view>
 
-  <view class="card">
-    <view class="section-title">音景场景</view>
-    <view class="scene-grid">
-      <view wx:for="{{scenes}}" wx:key="id"
-            class="scene-btn {{activeScene===item.id?'on':''}}"
-            data-id="{{item.id}}" bindtap="selectScene">
-        <view class="scene-icon">{{item.icon}}</view>
-        <view class="scene-name">{{item.name}}</view>
-        <view class="scene-desc">{{item.desc}}</view>
+  <!-- Presets -->
+  <view class="preset-bar">
+    <view class="preset-toggle" bindtap="togglePresets">{{showPresets ? '收起预设' : '📋 预设场景'}}</view>
+    <view wx:if="{{timerActive}}" class="timer-badge">⏱ {{timerMin}}分钟</view>
+  </view>
+
+  <view wx:if="{{showPresets}}" class="preset-grid">
+    <view wx:for="{{presets}}" wx:key="id" class="preset-card" data-id="{{item.id}}" bindtap="loadPreset">
+      <view class="preset-name">{{item.name}}</view>
+      <view class="preset-desc">{{item.description}}</view>
+    </view>
+  </view>
+
+  <!-- Sound Channels -->
+  <view class="sound-grid">
+    <view wx:for="{{sounds}}" wx:key="id" class="sound-card {{item.active ? 'active' : ''}}" style="border-color:{{item.active ? item.color : 'var(--bd)'}}">
+      <view class="sound-header">
+        <view class="sound-icon" style="background:{{item.active ? item.color : 'rgba(255,255,255,.06)'}}">{{item.icon}}</view>
+        <view class="sound-info">
+          <view class="sound-name">{{item.name}}</view>
+          <view class="sound-status">{{item.active ? '播放中...' : '已停止'}}</view>
+        </view>
+        <view class="sound-toggle {{item.active ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleSound">
+          {{item.active ? '⏸' : '▶️'}}
+        </view>
+      </view>
+      <view wx:if="{{item.active}}" class="sound-vol">
+        <text class="vol-icon">🔈</text>
+        <slider min="0" max="100" value="{{item.vol}}" data-id="{{item.id}}" bindchange="onSoundVolChange" activeColor="{{item.color}}" block-size="14" style="flex:1;margin:0 12rpx"/>
+        <text class="vol-icon">🔊</text>
       </view>
     </view>
   </view>
 
-  <view class="card">
-    <view class="section-title">控制</view>
+  <!-- Master Controls -->
+  <view class="master-card">
     <view class="ctrl-row">
-      <text class="ctrl-label">总音量</text>
-      <slider min="0" max="100" value="{{masterVol}}" bindchange="onVolumeChange" activeColor="#6c63ff" block-size="20" style="flex:1"/>
-      <text class="ctrl-val">{{masterVol}}%</text>
+      <view class="ctrl-label">主音量</view>
+      <slider min="0" max="100" value="{{masterVol}}" bindchange="onMasterVolChange" activeColor="#6C63FF" block-size="18" style="flex:1;margin:0 16rpx"/>
+      <view class="ctrl-val">{{masterVol}}</view>
     </view>
-    <view class="ctrl-row" style="margin-top:24rpx">
-      <text class="ctrl-label">定时关闭</text>
-      <picker range="{{['不限时','15分钟','30分钟','45分钟','60分钟','90分钟']}}" range-key="label" value="{{timerMin}}" bindchange="onTimerChange">
-        <view class="input">{{timerMin===0?'不限时':timerMin+'分钟'}}</view>
+    <view class="ctrl-row" style="margin-top:20rpx">
+      <view class="ctrl-label">定时关闭</view>
+      <picker mode="selector" range="{{[15,30,60,90,0]}}" bindchange="onTimerChange">
+        <view class="timer-picker">{{timerMin === 0 ? '不限时' : timerMin + '分钟'}}</view>
       </picker>
     </view>
   </view>
 
-  <button class="btn {{isPlaying?'btn-danger':'btn-primary'}}" style="width:100%;padding:28rpx" bindtap="{{isPlaying?'stopNoise':'startNoise'}}">
-    {{isPlaying?'■ 停止':'▶ 开始播放'}}
-  </button>
-
-  <!-- Sleep Stories -->
-  <view class="card" style="margin-top:24rpx">
-    <view class="section-title">📖 睡眠故事 & 冥想</view>
-    <view wx:for="{{stories}}" wx:key="id" class="story-item">
-      <view class="story-info">
-        <view class="story-title">{{item.title}}<span wx:if="{{item.is_premium}}" class="badge" style="margin-left:8rpx;background:rgba(243,156,18,0.2);color:var(--warn)">会员</span></view>
-        <view class="story-meta">{{item.description}} · {{item.duration_minutes}}分钟 · {{item.narrator}}讲述</view>
-      </view>
-      <button wx:if="{{item.accessible}}" class="btn btn-primary btn-sm" data-id="{{item.id}}" bindtap="playStory">▶</button>
-      <button wx:else class="btn btn-secondary btn-sm" disabled>🔒</button>
-    </view>
-  </view>
-  <view class="card tip-card" style="margin-top:24rpx">
-    <text>💡 完整白噪音合成引擎（13种算法 + 可视化）请使用网页版。</text>
+  <!-- Action Buttons -->
+  <view class="action-row">
+    <button wx:if="{{playing}}" class="btn-stop" bindtap="stopAll">⏹ 全部停止</button>
+    <button class="btn-timer {{timerActive ? 'active' : ''}}" bindtap="toggleTimer">
+      {{timerActive ? '取消定时' : '⏱ 定时' + timerMin + '分钟'}}
+    </button>
   </view>
 </view>

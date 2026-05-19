@@ -9,6 +9,7 @@ class UserRegister(BaseModel):
     username: str
     email: str
     password: str
+    phone: str = ""
     nickname: Optional[str] = ""
 
 
@@ -193,10 +194,6 @@ class ChatSessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class ChatSessionDetailResponse(ChatSessionResponse):
-    messages: List[ChatMessageResponse] = []
 
 
 # ===== Tasks =====

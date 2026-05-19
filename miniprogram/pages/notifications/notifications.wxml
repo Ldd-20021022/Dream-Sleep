@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="top-bar">
+    <view class="page-title">消息中心</view>
+    <view wx:if="{{unreadCount > 0}}" class="mark-all-btn" bindtap="markAllRead">全部已读</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <view wx:elif="{{notifications.length===0}}" class="empty">
+    <view class="empty-icon">🔔</view>
+    <view>暂无消息</view>
+  </view>
+
+  <view wx:for="{{notifications}}" wx:key="id" class="notif-item {{item.is_read ? 'read' : 'unread'}}" data-id="{{item.id}}" data-type="{{item.type}}" data-related-id="{{item.related_id}}" bindtap="openRelated">
+    <view class="notif-icon">
+      {{item.type === 'follow' ? '👤' : item.type === 'like' ? '❤️' : item.type === 'comment' ? '💬' : '🔔'}}
+    </view>
+    <view class="notif-body">
+      <view class="notif-title">{{item.title}}</view>
+      <view class="notif-text">{{item.body}}</view>
+      <view class="notif-time">{{item.created_at}}</view>
+    </view>
+    <view wx:if="{{!item.is_read}}" class="unread-dot"></view>
+  </view>
+</view>

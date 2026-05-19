@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="page-title">🏃 昼夜节律跑酷</view>
+
+  <!-- Game Screen -->
+  <view wx:if="{{playing}}" class="game-screen">
+    <view class="game-hud">
+      <text>⭐ {{score}}</text>
+      <text>最高 {{highScore}}</text>
+    </view>
+
+    <view class="game-track">
+      <!-- Player -->
+      <view class="player" style="left:{{playerLane * 33.3 + 16.6}}%">🏃</view>
+
+      <!-- Obstacles -->
+      <view wx:for="{{obstacles}}" wx:key="id" class="obstacle" style="left:{{item.lane * 33.3 + 16.6}}%;top:{{item.top}}%">
+        ☕
+      </view>
+    </view>
+
+    <!-- Controls -->
+    <view class="game-controls">
+      <view class="ctrl-btn left" bindtap="moveLeft">◀</view>
+      <view class="ctrl-btn right" bindtap="moveRight">▶</view>
+    </view>
+  </view>
+
+  <!-- Game Over -->
+  <view wx:elif="{{gameOver}}" class="result-card">
+    <view class="result-icon">🏁</view>
+    <view class="result-score">{{score}}</view>
+    <view class="result-label">收集能量</view>
+    <view class="result-hs">最高记录：{{highScore}}</view>
+    <button class="btn btn-primary" bindtap="restart" style="margin-top:32rpx">🔄 再来一次</button>
+  </view>
+
+  <!-- Start Screen -->
+  <view wx:else class="start-card">
+    <view class="start-icon">🏃‍♂️</view>
+    <view class="start-title">昼夜节律跑酷</view>
+    <view class="start-desc">← → 滑动躲避咖啡因陷阱\n收集阳光能量，刷新最高分</view>
+    <view class="start-hs" wx:if="{{highScore > 0}}">最高记录：{{highScore}}</view>
+    <button class="btn btn-primary" bindtap="startGame" style="margin-top:40rpx;width:80%">▶ 开始奔跑</button>
+  </view>
+</view>

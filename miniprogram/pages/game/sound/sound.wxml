@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="page-title">🎛️ 音景工坊</view>
+
+  <view class="card">
+    <view class="section-title">🎚️ 音轨混音</view>
+    <view wx:for="{{sounds}}" wx:key="id" class="slider-row">
+      <view class="sl-icon">{{item.icon}}</view>
+      <view class="sl-name">{{item.name}}</view>
+      <slider min="0" max="100" value="{{channels[item.id]||0}}" data-id="{{item.id}}" bindchange="setVol" activeColor="{{item.color}}" block-size="18" style="flex:1;margin:0 16rpx"/>
+      <view class="sl-val">{{channels[item.id]||0}}</view>
+    </view>
+
+    <view class="play-row">
+      <button class="btn btn-primary btn-sm" bindtap="togglePlay">{{playing?'⏸ 暂停':'▶ 播放'}}</button>
+      <button class="btn btn-secondary btn-sm" bindtap="savePreset">💾 保存音景</button>
+    </view>
+
+    <view wx:if="{{saved}}" class="save-notice">✅ 音景已保存！</view>
+
+    <view class="preset-input">
+      <input placeholder="音景名称" value="{{presetName}}" bindinput="onNameInput" maxlength="15"/>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">🎧 预设音景</view>
+    <view wx:for="{{presets}}" wx:key="id" class="preset-card" data-id="{{item.id}}" bindtap="loadPreset">
+      <view class="ps-name">{{item.name}}</view>
+      <view class="ps-author">by {{item.author}}</view>
+    </view>
+  </view>
+</view>
