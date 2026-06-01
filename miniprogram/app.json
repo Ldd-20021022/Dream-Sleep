@@ -9,7 +9,6 @@
     "pages/analysis/analysis",
     "pages/community/community",
     "pages/knowledge/knowledge",
-    "pages/store/store",
     "pages/courses/courses",
     "pages/game/game",
     "pages/game/adventure/adventure",
@@ -25,18 +24,11 @@
     "pages/profile/profile",
     "pages/onboarding/onboarding",
     "pages/report/report",
-    "pages/referral/referral",
-    "pages/search/search",
-    "pages/user-profile/user-profile",
-    "pages/notifications/notifications",
-    "pages/group-detail/group-detail",
-    "pages/messages/messages",
-    "pages/post-detail/post-detail",
-    "pages/admin/admin"
+    "pages/referral/referral"
   ],
   "window": {
     "navigationBarBackgroundColor": "#161625",
-    "navigationBarTitleText": "梦眠",
+    "navigationBarTitleText": "梦眠阁",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#0a0a12",
     "backgroundTextStyle": "light"
@@ -47,10 +39,10 @@
     "backgroundColor": "#1c1c30",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/index/index", "text": "🏠 概览" },
-      { "pagePath": "pages/record/record", "text": "✏️ 记录" },
-      { "pagePath": "pages/analysis/analysis", "text": "📊 分析" },
-      { "pagePath": "pages/profile/profile", "text": "👤 我的" }
+      { "pagePath": "pages/index/index", "text": "概览" },
+      { "pagePath": "pages/analysis/analysis", "text": "分析" },
+      { "pagePath": "pages/record/record", "text": "记录" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
     ]
   },
   "requiredBackgroundModes": ["audio"],

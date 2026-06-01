@@ -1,11 +1,16 @@
 var app = getApp();
 Page({
   data: {
-    period: 30, trends: null, activeTab: 'overview',
+    period: 30, trends: null, lastRecord: null, activeTab: 'overview',
     canvasReady: false,
-    guardian: null,
   },
-  onShow() { this.loadTrends(); this.setData({ guardian: app.globalData.guardian }); },
+  onShow() { this.loadTrends(); this.loadLastRecord(); },
+  async loadLastRecord() {
+    try {
+      const r = await app.get('/api/v1/sleep-records/last');
+      if (r) this.setData({ lastRecord: r });
+    } catch {}
+  },
   async loadTrends() {
     try {
       const d = await app.get('/api/v1/sleep-records/trends/full?days=' + this.data.period);

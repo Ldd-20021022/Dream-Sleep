@@ -1,7 +1,28 @@
 version: "3.8"
 
-# 梦眠 生产环境 Docker Compose
+# ============================================================
+# 梦眠阁 生产环境 Docker Compose
+# ============================================================
+#
+# 密钥注入方式 (任选其一):
+#
+#   A) .env 文件 (简单，适合单机部署):
+#      cp .env.example .env && vim .env   # 填入生产密钥
+#      docker compose -f docker-compose.prod.yml up -d
+#
+#   B) 环境变量 (CI/CD 注入，密钥不落盘):
+#      export DB_ROOT_PASSWORD="..."
+#      export SECRET_KEY="..."
+#      export DEEPSEEK_API_KEY="..."
+#      docker compose -f docker-compose.prod.yml --env-file /dev/null up -d
+#
+#   C) Docker Secrets (Swarm 模式，企业级):
+#      docker swarm init
+#      echo "your-secret" | docker secret create deepseek_api_key -
+#      docker stack deploy -c docker-compose.prod.yml mengmian
+#
 # 启动: docker compose -f docker-compose.prod.yml up -d
+# ============================================================
 
 services:
   db:
@@ -33,13 +54,22 @@ services:
     container_name: mengmian-api
     restart: unless-stopped
     environment:
-      DATABASE_URL: "mysql+pymysql://root:${DB_ROOT_PASSWORD:-changeme}@db:3306/sleep_manager"
+      DATABASE_URL: mysql+pymysql://root:${DB_ROOT_PASSWORD:-changeme}@db:3306/sleep_manager
       SECRET_KEY: ${SECRET_KEY:-changeme}
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
-      DEEPSEEK_BASE_URL: "https://api.deepseek.com"
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_SECRET: ${WECHAT_SECRET:-}
       PRODUCTION: "true"
       ACCESS_TOKEN_EXPIRE_MINUTES: "30"
       REFRESH_TOKEN_EXPIRE_MINUTES: "10080"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://your-domain.com}
+    # Docker Secrets: 密钥文件挂载到 /run/secrets/，SecretManager 自动读取
+    secrets:
+      - deepseek_api_key
+      - wechat_secret
+      - secret_key
+      - db_root_password
     ports:
       - "127.0.0.1:8000:8000"  # 仅本地回环，由 nginx 反向代理
     depends_on:
@@ -74,6 +104,17 @@ services:
 
 volumes:
   mysql_data:
+
+# Docker Secrets (仅 Swarm 模式生效，普通 compose 忽略此节)
+secrets:
+  deepseek_api_key:
+    external: true
+  wechat_secret:
+    external: true
+  secret_key:
+    external: true
+  db_root_password:
+    external: true
 
 networks:
   mengmian-net:

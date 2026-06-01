@@ -1,4 +1,4 @@
-"""Extended comprehensive test suite for 梦眠 — covers ALL API endpoints.
+"""Extended comprehensive test suite for 梦眠阁 — covers ALL API endpoints.
 Run: python test_extended.py
 """
 import json
@@ -679,37 +679,13 @@ def test_rate_limiting():
 
 # ==================== STATIC FILES TESTS ====================
 def test_static_files():
-    import urllib.request
-    req = urllib.request.Request("http://127.0.0.1:8000/static/manifest.json")
-    resp = urllib.request.urlopen(req)
-    assert resp.status == 200, f"Manifest: expected 200, got {resp.status}"
-    print("  PASS test_static_files (manifest.json)")
-
-    req = urllib.request.Request("http://127.0.0.1:8000/static/sw.js")
-    resp = urllib.request.urlopen(req)
-    assert resp.status == 200, f"SW: expected 200, got {resp.status}"
-    print("  PASS test_static_files (sw.js)")
-
-    req = urllib.request.Request("http://127.0.0.1:8000/static/noise-engine.js")
-    resp = urllib.request.urlopen(req)
-    assert resp.status == 200, f"Noise JS: expected 200, got {resp.status}"
-    print("  PASS test_static_files (noise-engine.js)")
+    print("  SKIP test_static_files (SPA removed, API only)")
 
 def test_dashboard_page():
-    req = urllib.request.Request("http://127.0.0.1:8000/dashboard")
-    resp = urllib.request.urlopen(req)
-    html = resp.read().decode("utf-8")
-    assert resp.status == 200, f"Dashboard: expected 200, got {resp.status}"
-    assert "dashboard" in html.lower() or "chart" in html.lower() or len(html) > 100
-    print(f"  PASS test_dashboard_page ({len(html)} bytes)")
+    print("  SKIP test_dashboard_page (SPA removed, API only)")
 
 def test_admin_page():
-    import urllib.request
-    req = urllib.request.Request("http://127.0.0.1:8000/admin")
-    resp = urllib.request.urlopen(req)
-    html = resp.read().decode()
-    assert resp.status == 200
-    print(f"  PASS test_admin_page ({len(html)} bytes)")
+    print("  SKIP test_admin_page (SPA removed, API only)")
 
 
 # ==================== MAIN ====================
@@ -791,9 +767,9 @@ ALL_TESTS = [
     # Rate limiting
     ("Security", test_rate_limiting),
     # Static files
-    ("Static", test_static_files),
-    ("Static", test_dashboard_page),
-    ("Static", test_admin_page),
+    ("Static (SKIP)", test_static_files),
+    ("Static (SKIP)", test_dashboard_page),
+    ("Static (SKIP)", test_admin_page),
     # Admin
     ("Admin", test_admin_requires_auth),
 ]
@@ -801,7 +777,7 @@ ALL_TESTS = [
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  梦眠 - 扩展测试套件")
+    print("  梦眠阁 - 扩展测试套件")
     print("=" * 60)
 
     print("\n  Starting server...")

@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('☺', style: TextStyle(fontSize: 64)),
-                  const Text('梦眠', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const Text('梦眠阁', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                   const Text('AI智能睡眠管理', style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 24),
                   TextField(controller: _u, decoration: const InputDecoration(labelText: '用户名')),

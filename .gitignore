@@ -22,9 +22,10 @@ env/
 htmlcov/
 .coverage
 
-# Environment
+# Environment — never commit real secrets
 .env
-!.env.production
+*.env.local
+!.env.example
 
 # OS
 .DS_Store

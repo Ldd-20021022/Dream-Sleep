@@ -218,15 +218,19 @@ Page({
   // ===== Navigation =====
   goVip() { wx.navigateTo({ url: '/pages/vip/vip' }); },
   goGame() { wx.navigateTo({ url: '/pages/game/game' }); },
-  goStore() { wx.navigateTo({ url: '/pages/store/store' }); },
+  // goStore() { wx.navigateTo({ url: '/pages/store/store' }); },  // 商城已下线
+  goStore() { wx.showToast({ title: '商城即将上线', icon: 'none' }); },
   goCommunity() { wx.navigateTo({ url: '/pages/community/community' }); },
   goKnowledge() { wx.navigateTo({ url: '/pages/courses/courses' }); },
   goBadges() { wx.navigateTo({ url: '/pages/tasks/tasks' }); },
-  goMessages() { wx.navigateTo({ url: '/pages/messages/messages' }); },
-  goNotifications() { wx.navigateTo({ url: '/pages/notifications/notifications' }); },
+  // 私信/通知页面已移除（轻量化 MVP），功能合并到社区模块
+  goMessages() { wx.navigateTo({ url: '/pages/community/community' }); },
+  goNotifications() { wx.navigateTo({ url: '/pages/community/community' }); },
   goReport() { wx.navigateTo({ url: '/pages/report/report' }); },
   goOnboarding() { wx.navigateTo({ url: '/pages/onboarding/onboarding' }); },
   goReferral() { wx.navigateTo({ url: '/pages/referral/referral' }); },
-  goAnalysis() { wx.navigateTo({ url: '/pages/analysis/analysis' }); },
+  goAnalysis() { wx.switchTab({ url: '/pages/analysis/analysis' }); },
+  goTasks() { wx.navigateTo({ url: '/pages/tasks/tasks' }); },
+  goCourses() { wx.navigateTo({ url: '/pages/courses/courses' }); },
   logout() { app.logout(); wx.reLaunch({ url: '/pages/login/login' }); },
 });

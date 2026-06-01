@@ -28,15 +28,23 @@ Page({
     if (!text || this.data.sending) return;
     this.setData({ sending: true, inputMsg: '' });
     this.data.messages.push({ id: Date.now(), role: 'user', content: text });
+    // 正在输入中占位气泡
+    const typingId = 'typing_' + Date.now();
+    this.data.messages.push({ id: typingId, role: 'assistant', content: '正在思考...', isTyping: true });
 
     try {
       const data = await app.post('/api/v1/chat/send', { session_id: this.data.activeSession, message: text });
+      // 移除占位气泡
+      const typingIdx = this.data.messages.findIndex(m => m.isTyping);
+      if (typingIdx >= 0) this.data.messages.splice(typingIdx, 1);
       this.data.messages.push({ id: data.id, role: data.role, content: data.content });
       if (!this.data.activeSession) { this.setData({ activeSession: data.session_id }); this.loadSessions(); }
     } catch {
+      const typingIdx = this.data.messages.findIndex(m => m.isTyping);
+      if (typingIdx >= 0) this.data.messages.splice(typingIdx, 1);
       this.data.messages.push({ id: Date.now() + 1, role: 'assistant', content: '抱歉，暂时无法回复。' });
     }
-    this.setData({ messages: this.data.messages, sending: false });
+    this.setData({ messages: [...this.data.messages], sending: false });
   },
 
   sendQuick(e) { this.setData({ inputMsg: e.currentTarget.dataset.q }); this.sendMessage(); },

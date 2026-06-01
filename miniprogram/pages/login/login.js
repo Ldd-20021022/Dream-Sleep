@@ -62,7 +62,7 @@ Page({
       wx.setStorageSync('refresh_token', res.refresh_token);
       wx.setStorageSync('userInfo', res.user);
 
-      wx.showToast({ title: '登录成功', icon: 'success', duration: 1000 });
+      wx.showToast({ title: '欢迎回来 🌙', icon: 'success', duration: 1000 });
 
       // Redirect: new users → onboarding, others → go back or index
       setTimeout(() => {
@@ -81,7 +81,7 @@ Page({
 
     } catch (e) {
       console.error('WX login error:', e);
-      wx.showToast({ title: '登录失败，请重试', icon: 'none' });
+      wx.showToast({ title: '网络开了小差，请重试', icon: 'none' });
     }
 
     this.setData({ loading: false });
@@ -101,7 +101,7 @@ Page({
       wx.setStorageSync('userInfo', res.user);
       wx.switchTab({ url: '/pages/index/index' });
     } catch (err) {
-      wx.showToast({ title: '登录失败', icon: 'none' });
+      wx.showToast({ title: '出了点小问题，稍后再试', icon: 'none' });
     }
     this.setData({ loading: false });
   },
@@ -146,7 +146,7 @@ Page({
       app.globalData.refreshToken = res.refresh_token;
       wx.setStorageSync('access_token', res.access_token);
       wx.setStorageSync('refresh_token', res.refresh_token);
-      wx.showToast({ title: '注册成功！', icon: 'success' });
+      wx.showToast({ title: '🎉 欢迎加入梦眠阁！', icon: 'success' });
       setTimeout(function () { wx.switchTab({ url: '/pages/index/index' }); }, 800);
     } catch (e) {
       this.setData({ regError: (e && e.message) || '注册失败，请重试' });

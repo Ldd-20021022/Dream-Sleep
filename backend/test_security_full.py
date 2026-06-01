@@ -345,7 +345,7 @@ def test_path_traversal():
     paths = [
         "/../../etc/passwd",
         "/api/v1/sleep-records/../../../etc/passwd",
-        "/static/../../../etc/passwd",
+        "/api/v1/../../../etc/passwd",
         "/api/v1/wellness/knowledge/articles/../../",
         "/api/v1/../v1/auth/me",
     ]
@@ -438,7 +438,7 @@ print("=" * 60)
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  梦眠 - 安全测试套件")
+    print("  梦眠阁 - 安全测试套件")
     print("=" * 60)
     print("\n  Starting server...")
     start_server()

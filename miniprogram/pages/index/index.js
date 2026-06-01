@@ -7,6 +7,8 @@ Page({
     programPct: 0, programDay: 0,
     greeting: '', insight: null,
     notLoggedIn: false,
+    showLoginPrompt: false,
+    showEmptyGuide: false,
     // Dream world
     dreamIcon: '🌙', dreamTitle: '梦境海 · 等待记录',
     dreamSub: '记录昨晚的睡眠，开启你的梦境世界',
@@ -20,7 +22,9 @@ Page({
     // Goals
     goalTags: [],
     // Stats
-    streakDays: 0, avgDuration: 0, weeklyAvg: '--'
+    streakDays: 0, avgDuration: 0, weeklyAvg: '--',
+    // Progressive unlock
+    daysSinceJoin: 0,
   },
 
   onShow() {
@@ -31,6 +35,8 @@ Page({
     });
     if (app.globalData.token) {
       this.loadDashboard();
+    } else {
+      this.setData({ greeting: '🌙 欢迎来到梦眠阁' });
     }
     // Guardian state
     var g = app.globalData.guardian;
@@ -64,7 +70,7 @@ Page({
   async loadDashboard() {
     try {
       var d = await app.get('/api/v1/wellness/dashboard');
-      var score = d.last_sleep ? d.last_sleep.score : 0;
+      var score = d.last_sleep ? (d.last_sleep.score || 0) : 0;
       this.setData({
         dashboard: d,
         lastScore: d.last_sleep ? score : '--',
@@ -76,7 +82,8 @@ Page({
         notLoggedIn: false,
         streakDays: d.streak_days || 0,
         avgDuration: d.avg_duration || 0,
-        weeklyAvg: d.weekly_avg ? d.weekly_avg.toFixed(1) + 'h' : '--',
+        weeklyAvg: d.weekly_avg ? d.weekly_avg.toFixed(1) + 'h' : '0.0h',
+        daysSinceJoin: (d.user && d.user.days_since_join) || 0,
       });
       this.setData({ dLoading: false });
       this.updateDreamScene();
@@ -117,7 +124,5 @@ Page({
   goGame() { wx.navigateTo({ url: '/pages/game/game' }); },
   goCourses() { wx.navigateTo({ url: '/pages/courses/courses' }); },
   goNoise() { wx.navigateTo({ url: '/pages/noise/noise' }); },
-  goAnalysis() { wx.navigateTo({ url: '/pages/analysis/analysis' }); },
   goProfile() { wx.switchTab({ url: '/pages/profile/profile' }); },
-  goRitual() { wx.navigateTo({ url: '/pages/game/game?tab=ritual' }); },
 });

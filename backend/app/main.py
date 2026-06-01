@@ -1,17 +1,27 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 
 from app.database import engine, Base
 from app.models import *  # noqa
-from app.routers import auth_router, sleep_router, profile_router, chat_router, task_router, wellness_router, admin_router, community_router, voice_router, premium_router, platform_router, payment_router, game_router, mood_router, settings_router, store_router, course_router, program_router, referral_router, doctor_router, environment_router, data_router, integration_router, competition_router, relax_router, live_router, growth_router, web3_router, dataset_router, llm_router, iot_router, watch_router
+from app.routers import auth_router, sleep_router, chat_router, task_router, wellness_router, admin_router, community_router, voice_router, premium_router, payment_router, game_router, mood_router, store_router, course_router, program_router, referral_router, doctor_router, environment_router, data_router, integration_router, competition_router, relax_router, _public_config_router
+# 空壳/无人使用，暂注释:
+from app.routers import profile_router
+# from app.routers import settings_router  # 只有 theme/language 两个字段，价值不大
+# from app.routers import platform_router
+# from app.routers import growth_router
+# from app.routers import web3_router
+# from app.routers import dataset_router
+# from app.routers import llm_router
+# from app.routers import live_router
+# from app.routers import iot_router
+# from app.routers import watch_router
 from app.config import settings as _settings
 from app.security import rate_limit, get_rate_limit_key, sanitize_input
 
 app = FastAPI(
-    title="梦眠 - AI智能睡眠管理",
+    title="梦眠阁 - AI智能睡眠管理",
     version="1.0.0",
     docs_url=None if _settings.PRODUCTION else "/docs",
     redoc_url=None if _settings.PRODUCTION else "/redoc",
@@ -60,7 +70,7 @@ async def security_headers(request: Request, call_next):
 
 app.include_router(auth_router)
 app.include_router(sleep_router)
-app.include_router(profile_router)
+app.include_router(profile_router)   # 健康档案 CRUD（routes在routers.py中定义）
 app.include_router(chat_router)
 app.include_router(task_router)
 app.include_router(wellness_router)
@@ -68,11 +78,11 @@ app.include_router(admin_router)
 app.include_router(community_router)
 app.include_router(voice_router)
 app.include_router(premium_router)
-app.include_router(platform_router)
+# app.include_router(platform_router)  # 空壳
 app.include_router(payment_router)
 app.include_router(game_router)
 app.include_router(mood_router)
-app.include_router(settings_router)
+# app.include_router(settings_router)  # 空壳 — 仅 theme/language 两个字段
 app.include_router(store_router)
 app.include_router(course_router)
 app.include_router(program_router)
@@ -83,31 +93,27 @@ app.include_router(data_router)
 app.include_router(integration_router)
 app.include_router(competition_router)
 app.include_router(relax_router)
-app.include_router(live_router)
-app.include_router(growth_router)
-app.include_router(web3_router)
-app.include_router(dataset_router)
-app.include_router(llm_router)
-app.include_router(iot_router)
-app.include_router(watch_router)
+app.include_router(_public_config_router)  # 公共配置端点 (无鉴权)
+# app.include_router(live_router)      # 无人使用
+# app.include_router(growth_router)     # 空壳
+# app.include_router(web3_router)       # 无人使用
+# app.include_router(dataset_router)    # 无人使用
+# app.include_router(llm_router)        # 无人使用
+# app.include_router(iot_router)        # 前端无入口
+# app.include_router(watch_router)      # 前端无入口
 
-STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
-@app.get("/")
-async def index():
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+# Static files removed (SPA removed, API only)
 
 
-@app.get("/admin")
-async def admin_page():
-    return FileResponse(os.path.join(STATIC_DIR, "admin.html"))
+# SPA index removed
 
 
-@app.get("/dashboard")
-async def dashboard_page():
-    return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+# 管理后台入口 — 需要时取消注释
+# @app.get("/admin")
+# async def admin_page():
+
+
+# Dashboard removed with SPA
 
 
 @app.get("/health")

@@ -316,7 +316,7 @@ print("=" * 60)
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  梦眠 - 性能测试套件")
+    print("  梦眠阁 - 性能测试套件")
     print("=" * 60)
     print("\n  Starting server...")
     start_server()

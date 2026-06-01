@@ -39,13 +39,36 @@
         <view class="tw-duration">睡眠时长：{{sleepElapsed}}</view>
       </view>
 
+      <!-- 快捷感受 -->
       <view class="card">
+        <view class="section-title">感觉怎么样？</view>
+        <view class="quick-feel-row">
+          <view class="qf-btn {{quickFeel==='great'?'qf-on':''}}" data-feel="great" bindtap="setQuickFeel">⚡ 精神饱满</view>
+          <view class="qf-btn {{quickFeel==='ok'?'qf-on':''}}" data-feel="ok" bindtap="setQuickFeel">👍 还行</view>
+          <view class="qf-btn {{quickFeel==='tired'?'qf-on':''}}" data-feel="tired" bindtap="setQuickFeel">😴 疲惫</view>
+          <view class="qf-btn {{quickFeel==='bad'?'qf-on':''}}" data-feel="bad" bindtap="setQuickFeel">😫 很累</view>
+        </view>
+        <view wx:if="{{quickFeel}}" style="margin-top:12rpx">
+          <view class="section-title">昨晚状态？</view>
+          <view class="quick-feel-row">
+            <view class="qf-btn {{quickStatus==='fast_sleep'?'qf-on':''}}" data-status="fast_sleep" bindtap="setQuickStatus">💨 倒头就睡</view>
+            <view class="qf-btn {{quickStatus==='toss'?'qf-on':''}}" data-status="toss" bindtap="setQuickStatus">🔄 翻来覆去</view>
+            <view class="qf-btn {{quickStatus==='wake_up'?'qf-on':''}}" data-status="wake_up" bindtap="setQuickStatus">🌙 半夜醒了</view>
+            <view class="qf-btn {{quickStatus==='dream'?'qf-on':''}}" data-status="dream" bindtap="setQuickStatus">💭 做梦了</view>
+          </view>
+        </view>
+        <button wx:if="{{quickFeel}}" class="btn btn-primary" style="width:100%;margin-top:20rpx" bindtap="submitTimerRecord">
+          ✅ 提交记录
+        </button>
+      </view>
+
+      <view wx:if="{{!quickFeel}}" class="card">
         <view class="section-title">睡眠感受</view>
         <slider min="1" max="5" value="{{sleepQuality}}" bindchange="onSleepQualityChange" activeColor="#6c63ff" block-size="20" show-value/>
         <view style="text-align:center;font-size:36rpx;margin-top:8rpx">{{sleepQualityStars}}</view>
       </view>
 
-      <view class="card">
+      <view wx:if="{{!quickFeel}}" class="card">
         <view class="section-title">睡眠标签</view>
         <view class="tag-row">
           <view wx:for="{{['做梦','失眠','早醒','夜醒','深睡','浅睡','午休','熬夜']}}" wx:key="*this"
@@ -131,7 +154,7 @@
           <view class="sp-time">入睡 {{shareCard.bedtime}} · 起床 {{shareCard.wakeTime}}</view>
           <view class="sp-stars">⭐{{shareCard.quality >= 2 ? '⭐' : ''}}{{shareCard.quality >= 3 ? '⭐' : ''}}{{shareCard.quality >= 4 ? '⭐' : ''}}{{shareCard.quality >= 5 ? '⭐' : ''}}</view>
           <view wx:if="{{shareCard.feedback}}" class="sp-feedback">"{{shareCard.feedback}}"</view>
-          <view class="sp-brand">梦眠 · AI智能睡眠管理</view>
+          <view class="sp-brand">梦眠阁 · AI智能睡眠管理</view>
         </view>
         <button class="btn btn-primary" bindtap="generateShareImage">📸 生成分享图片</button>
       </view>
@@ -145,6 +168,28 @@
       </view>
 
       <button class="btn btn-secondary" style="margin-top:12rpx" bindtap="closeShareModal">关闭</button>
+    </view>
+  </view>
+
+  <!-- First record celebration -->
+  <view wx:if="{{showFirstModal}}" class="modal-overlay">
+    <view class="first-modal">
+      <view class="fm-icon">🎉</view>
+      <view class="fm-title">第一晚记录完成！</view>
+      <view class="fm-scene">你的初始梦境世界已解锁 🌙</view>
+      <view class="fm-score-row">
+        <view class="fm-score-big">{{firstRecord.score}}</view>
+        <view class="fm-score-label">分</view>
+      </view>
+      <view class="fm-breakdown">
+        <text wx:if="{{firstRecord.score >= 80}}">比想象中好，继续保持！</text>
+        <text wx:elif="{{firstRecord.score >= 60}}">不错的开始，一起慢慢改善</text>
+        <text wx:else>没关系，记录本身就是进步的第一步</text>
+      </view>
+      <view class="fm-actions">
+        <button class="btn btn-primary" bindtap="closeFirstModal">查看完整分析</button>
+        <button class="btn btn-secondary" bindtap="closeFirstModal">好的</button>
+      </view>
     </view>
   </view>
 

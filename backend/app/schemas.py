@@ -89,6 +89,7 @@ class SleepRecordResponse(BaseModel):
     notes: Optional[str] = ""
     score: int = 0
     ai_feedback: Optional[str] = ""
+    score_breakdown: Optional[dict] = None
     created_at: Optional[str] = None
 
     _v_dd = validator('diary_date', pre=True, allow_reuse=True)(_to_str)

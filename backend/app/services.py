@@ -76,6 +76,8 @@ AI_MODEL = "deepseek-chat"
 
 def _ai_call(messages: list, temperature: float = 0.8, max_tokens: int = 300) -> str:
     """Unified AI call using requests — no OpenAI SDK dependency."""
+    if not settings.DEEPSEEK_API_KEY:
+        raise ValueError("AI service not configured")
     try:
         r = _requests.post(
             f"{settings.DEEPSEEK_BASE_URL}/chat/completions",
@@ -86,7 +88,9 @@ def _ai_call(messages: list, temperature: float = 0.8, max_tokens: int = 300) ->
         if r.status_code == 200:
             return r.json()["choices"][0]["message"]["content"].strip()
         return ""
-    except Exception:
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise  # re-raise AI not configured
         return ""
 
 
@@ -98,12 +102,15 @@ def _ai_chat(system_prompt: str, user_prompt: str, temperature: float = 0.8, max
 
 
 def get_sleep_feedback(diary_text: str) -> str:
-    result = _ai_chat(
-        "你是专业的睡眠陪伴助手，遵循CBT-I原则。用温柔语气给出50字以内的共情反馈，不给出诊断。",
-        f"用户睡眠记录：{diary_text}\n请给一句共情反馈：",
-        temperature=0.7, max_tokens=80,
-    )
-    return result or "我收到了你的睡眠记录。别担心，我们一起慢慢来，先保持记录习惯就是进步。"
+    try:
+        result = _ai_chat(
+            "你是专业的睡眠陪伴助手，遵循CBT-I原则。用温柔语气给出50字以内的共情反馈，不给出诊断。",
+            f"用户睡眠记录：{diary_text}\n请给一句共情反馈：",
+            temperature=0.7, max_tokens=80,
+        )
+        return result or "我收到了你的睡眠记录。别担心，我们一起慢慢来，先保持记录习惯就是进步。"
+    except Exception:
+        return "我收到了你的睡眠记录。别担心，我们一起慢慢来，先保持记录习惯就是进步。"
 
 
 def ai_generate_tasks(profile_dict: dict = None, sleep_stats: dict = None, user_name: str = "") -> list:
@@ -417,38 +424,66 @@ def ai_predict_sleep_quality(records: list, profile: dict = None) -> dict:
 
 
 # ===== Sleep Scoring =====
-def calc_score(duration: float, quality: int, tags_str: str, goal_hours: float = 8.0) -> int:
-    score = 0
+def calc_score(duration: float, quality: int, tags_str: str, goal_hours: float = 8.0) -> tuple:
+    """Calculate sleep score 0-100 and return (score, breakdown).
+    Adjusted for positive reinforcement — base raised to 20, duration widened.
+    """
+    base = 20
     ideal_min, ideal_max = goal_hours, goal_hours + 1.5
 
+    # Duration score: 0-40 points
     if ideal_min <= duration <= ideal_max:
-        score += 50
+        dur_score = 40
+        dur_label = "达标"
     elif ideal_min - 1 <= duration < ideal_min:
-        score += 35
+        dur_score = 32
+        dur_label = "接近目标"
     elif ideal_max < duration <= ideal_max + 1:
-        score += 30
-    elif 5 <= duration < ideal_min - 1:
-        score += 20
-    elif duration < 5:
-        score += 10
+        dur_score = 28
+        dur_label = "稍多"
+    elif duration >= goal_hours * 0.5:
+        dur_score = 12 + int((duration / goal_hours) * 16)
+        dur_label = "偏少"
+    elif duration > 0:
+        dur_score = 6
+        dur_label = "严重不足"
     else:
-        score += 15
+        dur_score = 0
+        dur_label = "无数据"
 
-    score += (quality or 3) * 6
+    # Quality: 0-30 points (6 per level)
+    qual_score = (quality or 3) * 6
+    qual_labels = {1: "很差", 2: "较差", 3: "一般", 4: "良好", 5: "优秀"}
+    qual_label = qual_labels.get(quality, "一般")
 
-    tag_bonus = 20
+    # Tag bonus: -10 to +15
+    tag_bonus = 15
     try:
         tags = json.loads(tags_str or "[]")
     except (json.JSONDecodeError, TypeError):
         tags = []
+    pos_tags = []
+    neg_tags = []
     for t in ["失眠", "夜醒", "早醒", "浅睡"]:
         if t in tags:
-            tag_bonus -= 5
+            tag_bonus -= 4
+            neg_tags.append(t)
     if "深睡" in tags:
-        tag_bonus += 5
-    score += min(tag_bonus, 20)
+        tag_bonus += 4
+        pos_tags.append("深睡")
+    tag_bonus = max(-10, min(tag_bonus, 15))
 
-    return min(max(round(score), 0), 100)
+    score = base + dur_score + qual_score + tag_bonus
+    score = min(max(round(score), 0), 100)
+
+    breakdown = {
+        "base": base,
+        "duration": {"score": dur_score, "max": 40, "label": dur_label, "hours": round(duration, 1)},
+        "quality": {"score": qual_score, "max": 30, "label": qual_label, "level": quality or 3},
+        "tags": {"score": tag_bonus, "max": 15, "positive": pos_tags, "negative": neg_tags},
+        "total": score,
+    }
+    return score, breakdown
 
 
 def calc_duration(bedtime: datetime, wake_time: datetime) -> float:
@@ -508,7 +543,7 @@ def generate_daily_insight(last_sleep, week_records, streak_days, avg_score):
         return {
             "priority": "info",
             "priority_label": "开始",
-            "title": "欢迎来到梦眠",
+            "title": "欢迎来到梦眠阁",
             "body": "记录你的第一晚睡眠，开启个性化睡眠改善之旅。",
             "action": {"label": "立即记录", "route": "/pages/record/record"},
         }
@@ -1853,6 +1888,7 @@ def export_records_csv(records: list) -> str:
     """Export sleep records as CSV string."""
     import io, csv
     output = io.StringIO()
+    output.write('﻿')  # UTF-8 BOM，Excel 认这个
     writer = csv.writer(output)
     writer.writerow(["日期", "入睡时间", "起床时间", "时长(h)", "质量(1-5)", "评分", "标签", "备注", "AI反馈"])
     for r in records:

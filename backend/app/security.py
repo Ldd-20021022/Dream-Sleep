@@ -139,8 +139,10 @@ def start_cache_cleanup(interval: int = 300):
     t.start()
 
 
-# Start cleanup on import
-start_cache_cleanup()
+# Start cleanup on import (only in dev — prod should use Redis)
+from app.config import settings as _sec_settings
+if not _sec_settings.PRODUCTION:
+    start_cache_cleanup()
 
 
 # ===== WeChat Push Notification =====
@@ -234,7 +236,7 @@ def start_push_scheduler(interval: int = 60):
                                             user.openid,
                                             WECHAT_TEMPLATE_ID or "",
                                             {
-                                                "thing1": {"value": "梦眠提醒"},
+                                                "thing1": {"value": "梦眠阁提醒"},
                                                 "thing2": {"value": "该准备睡觉了，好的睡眠是健康的基础"},
                                                 "time3": {"value": ns.reminder_time},
                                             },
@@ -248,5 +250,7 @@ def start_push_scheduler(interval: int = 60):
     t.start()
 
 
-start_push_scheduler()
+# 推送调度器 — 微信密钥配置后自动启用
+if _sec_settings.WECHAT_SECRET:
+    start_push_scheduler()
 

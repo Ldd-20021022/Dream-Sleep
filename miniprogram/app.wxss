@@ -1,4 +1,4 @@
-/* 梦眠 —— 梦境守护者 主题 */
+/* 梦眠阁 —— 梦境守护者 主题 */
 page {
   --bg: #0a0a14;
   --bg2: #101025;
@@ -95,3 +95,14 @@ page {
 
 /* Attribute dots */
 .attr-dot { display: inline-block; font-size: 24rpx; margin: 0 2rpx; }
+
+/* Score breakdown rows */
+.br-row { display: flex; justify-content: space-between; padding: 10rpx 0; font-size: 24rpx; color: var(--tx2); border-bottom: 1rpx solid rgba(255,255,255,0.04); }
+.br-label { display: flex; align-items: center; gap: 8rpx; }
+
+/* Profile simplified menu */
+.menu-simple { display: flex; flex-direction: column; }
+.ms-item { display: flex; align-items: center; justify-content: space-between; padding: 24rpx 8rpx; border-bottom: 1rpx solid var(--bd); font-size: 28rpx; }
+.msi-left { display: flex; align-items: center; gap: 16rpx; }
+.msi-icon { font-size: 36rpx; width: 48rpx; text-align: center; }
+.msi-arrow { color: var(--tx3); font-size: 28rpx; }

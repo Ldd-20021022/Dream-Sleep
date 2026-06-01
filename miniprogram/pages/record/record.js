@@ -8,7 +8,7 @@ Page({
     // Timer mode
     timerState: 'idle', sleepStart: null, sleepStartDisplay: '',
     sleepElapsed: '00:00:00', sleepQuality: 3, sleepQualityStars: '⭐⭐⭐',
-    sleepTags: [], sleepNotes: '', submitting: false,
+    sleepTags: [], sleepNotes: '', quickFeel: '', quickStatus: '', submitting: false,
     // Form mode
     bedHour: 22, bedMin: 0, wakeHour: 6, wakeMin: 30,
     quality: 3, qualityStars: '⭐⭐⭐', tags: [], notes: '',
@@ -18,11 +18,26 @@ Page({
     // Share
     shareCard: null,
     showShareModal: false,
+    // First record celebration
+    showFirstModal: false,
+    firstRecord: null,
     // History
     records: [],
   },
   _timer: null,
 
+  onHide() {
+    // 暂停计时器但保留状态，切回时恢复
+    if (this._timer) {
+      app.globalData._sleepTimer = {
+        state: this.data.timerState,
+        start: this.data.sleepStart,
+        elapsed: this.data.sleepElapsed,
+      };
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+  },
   onShow() {
     var d = new Date();
     var hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
@@ -33,12 +48,32 @@ Page({
       diaryDate: d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()),
       bedHours: hours, bedMins: mins, tagList: tagList, formError: ''
     });
+    // 恢复计时器
+    if (this.data.timerState === 'sleeping') {
+      this._startTicking();
+    } else if (app.globalData._sleepTimer && app.globalData._sleepTimer.state === 'sleeping') {
+      this.setData({
+        timerState: 'sleeping',
+        sleepStart: app.globalData._sleepTimer.start,
+        sleepStartDisplay: this.formatTimeStr(app.globalData._sleepTimer.start),
+      });
+      this._startTicking();
+      delete app.globalData._sleepTimer;
+    }
     this.checkExistingTimer();
     this.loadRecords();
   },
-
-  onHide() { /* keep timer running */ },
-  onUnload() { if (this._timer) clearInterval(this._timer); },
+  onUnload() {
+    if (this._timer) {
+      // 存到全局，下次回来可以恢复
+      app.globalData._sleepTimer = {
+        state: this.data.timerState,
+        start: this.data.sleepStart,
+      };
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+  },
 
   // Check if there's an ongoing sleep session from a previous app launch
   checkExistingTimer() {
@@ -109,6 +144,37 @@ Page({
     const v = parseInt(e.detail.value);
     this.setData({ sleepQuality: v, sleepQualityStars: '⭐'.repeat(v) });
   },
+
+  // Quick feel selectors — auto-fill quality + tags
+  setQuickFeel(e) {
+    const feel = e.currentTarget.dataset.feel;
+    const mapping = {
+      great: { quality: 5, tags: ['深睡'] },
+      ok: { quality: 4, tags: ['深睡'] },
+      tired: { quality: 2, tags: ['浅睡'] },
+      bad: { quality: 1, tags: ['失眠', '浅睡'] },
+    };
+    const m = mapping[feel] || { quality: 3, tags: [] };
+    this.setData({
+      quickFeel: feel,
+      sleepQuality: m.quality,
+      sleepQualityStars: '⭐'.repeat(m.quality),
+      sleepTags: m.tags,
+      quickStatus: '',
+    });
+  },
+  setQuickStatus(e) {
+    const status = e.currentTarget.dataset.status;
+    const statusTags = {
+      fast_sleep: [],
+      toss: ['失眠'],
+      wake_up: ['夜醒'],
+      dream: ['做梦'],
+    };
+    const extraTags = statusTags[status] || [];
+    const merged = [...new Set([...this.data.sleepTags, ...extraTags])];
+    this.setData({ quickStatus: status, sleepTags: merged });
+  },
   toggleSleepTag(e) {
     const tag = e.currentTarget.dataset.tag;
     let tags = [...this.data.sleepTags];
@@ -134,7 +200,7 @@ Page({
       });
 
       wx.removeStorageSync('sleep_timer');
-      wx.showToast({ title: '记录成功！' + result.duration_hours + 'h · ' + result.score + '分', icon: 'success' });
+      wx.showToast({ title: '✅ 已记录，晚安好梦', icon: 'success' });
       // Dream postcard
       var scenes = ['你梦见了一座漂浮在云端的图书馆', '梦境海里出现了一群发光的鲸鱼', '你沿着一条由星光铺成的小路走到了梦境海深处', '昨晚的梦境里有一只猫说了一句你醒来后怎么也想不起来的话', '梦境海下了一场糖果色的雨每一滴落在地上都变成一朵小花', '一颗流星坠入了你的花园植物们窃窃私语了一整夜'];
       var scene = scenes[Math.floor(Math.random() * scenes.length)];
@@ -160,16 +226,22 @@ Page({
         date: diaryDate, feedback: (result.ai_feedback || '').slice(0, 60),
         quality: this.data.sleepQuality,
       };
-      this.setData({ timerState: 'idle', sleepStart: null, sleepTags: [], sleepNotes: '', shareCard: card, showShareModal: true });
+      var wasFirst = this.data.records.length === 0;
+      this.setData({ timerState: 'idle', sleepStart: null, sleepTags: [], sleepNotes: '',
+        shareCard: card, showShareModal: !wasFirst,
+        showFirstModal: wasFirst, firstRecord: { score: result.score, duration: result.duration_hours },
+      });
+      if (wasFirst) app.waterGarden();
       this.loadRecords();
     } catch (e) {
-      wx.showToast({ title: '保存失败', icon: 'none' });
+      wx.showToast({ title: '网络开了小差，数据还在，稍后再试', icon: 'none' });
     }
     this.setData({ submitting: false });
   },
 
   // ===== Share Card =====
   closeShareModal() { this.setData({ showShareModal: false }); },
+  closeFirstModal() { this.setData({ showFirstModal: false }); },
 
   async generateShareImage() {
     const card = this.data.shareCard;
@@ -188,7 +260,7 @@ Page({
 
     // App name
     ctx.setFillStyle('#888'); ctx.setFontSize(24);
-    ctx.setTextAlign('center'); ctx.fillText('梦眠 · AI智能睡眠管理', W / 2, 60);
+    ctx.setTextAlign('center'); ctx.fillText('梦眠阁 · AI智能睡眠管理', W / 2, 60);
 
     // Score Ring (simplified)
     ctx.setFillStyle(card.score >= 80 ? '#2ECC71' : card.score >= 60 ? '#3498DB' : card.score >= 40 ? '#F39C12' : '#E74C3C');
@@ -215,7 +287,7 @@ Page({
 
     // Tags
     ctx.setFontSize(20); ctx.setFillStyle('#0EC9A6');
-    ctx.fillText('来梦眠，记录你的每一晚好睡眠 🌙', W / 2, 570);
+    ctx.fillText('来梦眠阁，记录你的每一晚好睡眠 🌙', W / 2, 570);
 
     // Bottom line
     ctx.setFillStyle('#666'); ctx.setFontSize(18);
@@ -291,7 +363,7 @@ Page({
         diary_date: this.data.diaryDate, bedtime, wake_time: waketime,
         quality: this.data.quality, tags: this.data.tags, notes: this.data.notes,
       });
-      wx.showToast({ title: '保存成功 · ' + result.score + '分', icon: 'success' });
+      wx.showToast({ title: '✅ 已记录，晚安好梦', icon: 'success' });
       app.waterGarden(); app.dailyReset();
 
       const card = {
@@ -301,7 +373,12 @@ Page({
         date: this.data.diaryDate, feedback: (result.ai_feedback || '').slice(0, 60),
         quality: this.data.quality,
       };
-      this.setData({ tags: [], notes: '', quality: 3, qualityStars: '⭐⭐⭐', shareCard: card, showShareModal: true });
+      var wasFirst = this.data.records.length === 0;
+      this.setData({ tags: [], notes: '', quality: 3, qualityStars: '⭐⭐⭐',
+        shareCard: card, showShareModal: !wasFirst,
+        showFirstModal: wasFirst, firstRecord: { score: result.score, duration: result.duration_hours },
+      });
+      if (wasFirst) app.waterGarden();
       this.loadRecords();
     } catch (e) { wx.showToast({ title: '保存失败', icon: 'none' }); }
     this.setData({ submitting: false });
@@ -318,6 +395,6 @@ Page({
 
   async deleteRecord(e) {
     const id = e.currentTarget.dataset.id;
-    try { await app.del(`/api/v1/sleep-records/${id}`); wx.showToast({ title: '已删除', icon: 'success' }); this.loadRecords(); } catch {}
+    try { await app.del(`/api/v1/sleep-records/${id}`); wx.showToast({ title: '已删除，可以重新记录', icon: 'success' }); this.loadRecords(); } catch {}
   },
 });

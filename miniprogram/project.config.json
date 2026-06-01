@@ -1,5 +1,5 @@
 {
-  "description": "梦眠 - AI智能睡眠管理",
+  "description": "梦眠阁 - AI智能睡眠管理",
   "packOptions": {
     "ignore": [],
     "include": []
@@ -44,7 +44,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "3.3.0",
+  "libVersion": "3.16.0",
   "appid": "wx551623c01821827f",
   "projectname": "mengmian",
   "condition": {},

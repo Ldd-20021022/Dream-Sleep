@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """All API routers in one module."""
 import json, time, random
 from datetime import datetime, timedelta
@@ -94,7 +95,7 @@ def wx_login(data: dict, db: Session = Depends(get_db)):
     appid = _cfg.WECHAT_APPID
     secret = _cfg.WECHAT_SECRET
     if not secret:
-        openid = f"wx_dev_{code[:16]}"
+        raise HTTPException(status_code=400, detail="微信登录未配置，请联系管理员")
     else:
         try:
             import urllib.request, json as _json
@@ -354,9 +355,39 @@ def has_profile(user_and_db: Tuple[User, Session] = Depends(current_user_and_db)
     return HasProfileResponse(has_profile=p is not None)
 
 
+# ==================== PUBLIC CONFIG ====================
+# 小程序/前端拉取的非敏感配置 — 不暴露任何密钥
+_public_config_router = APIRouter(prefix="/api/v1/public", tags=["public-config"])
+
+
+@_public_config_router.get("/config")
+def get_public_config():
+    """返回客户端可用的公共配置。不含任何密钥。"""
+    return {
+        "app_name": "梦眠阁",
+        "version": "1.0.0",
+        "features": {
+            "chat": True,
+            "tasks": True,
+            "community": True,
+            "game": True,
+            "vip": True,
+            "noise": True,
+        },
+        "limits": {
+            "sleep_record_days": 365,
+            "chat_sessions_max": 50,
+        },
+    }
+
+
 # ==================== SLEEP RECORDS ====================
 def _to_record_response(r: SleepRecord) -> SleepRecordResponse:
-    return SleepRecordResponse.model_validate(r)
+    resp = SleepRecordResponse.model_validate(r)
+    # Compute score breakdown on-the-fly
+    _, breakdown = calc_score(r.duration_hours or 0, r.quality or 3, r.tags or "[]")
+    resp.score_breakdown = breakdown
+    return resp
 
 
 @sleep_router.post("", response_model=SleepRecordResponse)
@@ -372,7 +403,7 @@ def create_sleep_record(data: SleepRecordCreate, user_and_db: Tuple[User, Sessio
 
     profile = db.query(HealthProfile).filter(HealthProfile.user_id == user.id).first()
     goal = profile.sleep_goal_hours if profile else 8.0
-    record.score = calc_score(duration, data.quality or 3, tags_str, goal)
+    record.score, _ = calc_score(duration, data.quality or 3, tags_str, goal)
 
     diary_desc = f"入睡时间：{data.bedtime}，起床时间：{data.wake_time}，睡眠质量评分：{data.quality or '未填'}，备注：{data.notes or '无'}，标签：{', '.join(data.tags) if data.tags else '无'}"
     record.ai_feedback = get_sleep_feedback(diary_desc)
@@ -493,16 +524,16 @@ def get_sleep_report(days: int = Query(default=7), user_and_db: Tuple[User, Sess
     return report
 
 
-# CSV export
+# CSV export — returns JSON-wrapped CSV for SPA compatibility
 @sleep_router.get("/export")
 def export_sleep_csv(days: int = Query(default=30), user_and_db: Tuple[User, Session] = Depends(current_user_and_db)):
-    from fastapi.responses import Response
+    from fastapi.responses import JSONResponse
     user, db = user_and_db
     cutoff = datetime.now() - timedelta(days=days)
     records = db.query(SleepRecord).filter(SleepRecord.user_id == user.id, SleepRecord.bedtime >= cutoff).order_by(SleepRecord.bedtime.desc()).all()
     csv_data = export_records_csv(records)
-    return Response(content=csv_data, media_type="text/csv; charset=utf-8",
-                    headers={"Content-Disposition": f"attachment; filename=sleep_records_{datetime.now().strftime('%Y%m%d')}.csv"})
+    filename = f"sleep_records_{datetime.now().strftime('%Y%m%d')}.csv"
+    return JSONResponse({"csv": csv_data, "count": len(records), "filename": filename})
 
 
 # ==================== HEALTH PROFILES ====================
@@ -2186,7 +2217,7 @@ def get_share_card_data(post_id: int, user_and_db: Tuple[User, Session] = Depend
         "like_count": p.like_count,
         "comment_count": p.comment_count,
         "sleep_score": p.sleep_score,
-        "share_text": f"「梦眠社区」{author.nickname if author else '用户'}的分享：{p.content[:60]}...",
+        "share_text": f"「梦眠阁社区」{author.nickname if author else '用户'}的分享：{p.content[:60]}...",
     }
 
 
@@ -3133,7 +3164,7 @@ API_VERSION = {
 def platform_info():
     """Public platform info — no auth required."""
     return {
-        "app_name": "梦眠 - AI智能睡眠管理",
+        "app_name": "梦眠阁 - AI智能睡眠管理",
         "api_version": API_VERSION,
         "platforms": PLATFORM_CONFIG,
         "openapi_docs": "/docs",
@@ -3180,7 +3211,7 @@ def test_webhook(data: dict, user_and_db: Tuple[User, Session] = Depends(current
     if not url:
         raise HTTPException(status_code=400, detail="webhook URL is required")
 
-    test_payload = {"event": "test.ping", "timestamp": datetime.now().isoformat(), "message": "This is a test webhook from 梦眠", "user_id": user_and_db[0].id}
+    test_payload = {"event": "test.ping", "timestamp": datetime.now().isoformat(), "message": "This is a test webhook from 梦眠阁", "user_id": user_and_db[0].id}
 
     try:
         resp = req.post(url, json=test_payload, headers={"X-Mengmian-Signature": "test-sig", "Content-Type": "application/json"}, timeout=5)
@@ -5706,7 +5737,7 @@ def list_lifecycle_emails():
         emails = db.query(LifecycleEmail).all()
         if not emails:
             triggers = [
-                ("welcome", "欢迎加入梦眠", "hi {nickname}, 欢迎来到梦眠！", 0),
+                ("welcome", "欢迎加入梦眠阁", "hi {nickname}, 欢迎来到梦眠阁！", 0),
                 ("inactive_3d", "你已经3天没记录了哦", "{nickname}, 最近睡得好吗？", 72),
                 ("inactive_7d", "一周不见了", "{nickname}, 坚持记录才能看到改善哦", 168),
                 ("streak_7", "连续7天达标！", "恭喜 {nickname} 连续7天达标！", 0),

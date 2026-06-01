@@ -1,4 +1,4 @@
-"""Comprehensive test suite for 梦眠 sleep management platform.
+"""Comprehensive test suite for 梦眠阁 sleep management platform.
 Run: python test_all.py
 Tests: unit tests (scoring, tokens, tasks) + integration tests (all 25+ API endpoints).
 """
@@ -549,7 +549,7 @@ def test_api_frontend():
     req = urllib.request.Request("http://127.0.0.1:8000/")
     resp = urllib.request.urlopen(req)
     html = resp.read().decode()
-    assert "梦眠" in html
+    assert "梦眠阁" in html
     assert "vue@" in html
     assert "#app" in html
     assert resp.status == 200
@@ -624,7 +624,7 @@ def run_integration_tests():
 
 if __name__ == "__main__":
     print("="*60)
-    print("  梦眠 - AI智能睡眠管理 测试套件")
+    print("  梦眠阁 - AI智能睡眠管理 测试套件")
     print("="*60)
 
     unit_fails = run_unit_tests()

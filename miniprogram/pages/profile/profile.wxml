@@ -142,30 +142,18 @@
     </view>
     <view class="ms-item" bindtap="goMessages">
       <view class="ms-num" style="color:{{summary.unread.messages > 0 ? '#E74C3C' : '#fff'}}">{{summary.unread.messages}}</view>
-      <view class="ms-label">未读私信</view>
+      <view class="ms-label">未读消息</view>
     </view>
   </view>
 
 
-  <!-- Functions Menu -->
+  <!-- Functions Menu — simplified MVP: 5 items -->
   <view class="card menu-card">
-    <view class="menu-grid">
-      <view class="menu-item" bindtap="goVip"><view class="mi-icon">💎</view><view class="mi-label">会员</view></view>
-      <view class="menu-item" bindtap="goGame"><view class="mi-icon">🎮</view><view class="mi-label">游戏</view></view>
-      <view class="menu-item" bindtap="goStore"><view class="mi-icon">🛒</view><view class="mi-label">商城</view></view>
-      <view class="menu-item" bindtap="goCommunity"><view class="mi-icon">🌐</view><view class="mi-label">社区</view></view>
-      <view class="menu-item" bindtap="goMessages"><view class="mi-icon">💬</view><view class="mi-label">私信</view>
-        <view wx:if="{{summary && summary.unread.messages > 0}}" class="mi-badge">{{summary.unread.messages}}</view>
-      </view>
-      <view class="menu-item" bindtap="goNotifications"><view class="mi-icon">🔔</view><view class="mi-label">消息</view>
-        <view wx:if="{{summary && summary.unread.notifications > 0}}" class="mi-badge">{{summary.unread.notifications}}</view>
-      </view>
-      <view class="menu-item" bindtap="goReport"><view class="mi-icon">📋</view><view class="mi-label">周报</view></view>
-      <view class="menu-item" bindtap="goKnowledge"><view class="mi-icon">📚</view><view class="mi-label">改善课程</view></view>
-      <view class="menu-item" bindtap="goReferral"><view class="mi-icon">🔗</view><view class="mi-label">邀请</view></view>
-      <view class="menu-item" bindtap="goOnboarding"><view class="mi-icon">🔄</view><view class="mi-label">重评估</view></view>
-      <view class="menu-item" bindtap="openSettings"><view class="mi-icon">⚙️</view><view class="mi-label">设置</view></view>
-      <view class="menu-item" bindtap="openEdit"><view class="mi-icon">✏️</view><view class="mi-label">编辑</view></view>
+    <view class="menu-simple">
+      <view class="ms-item" bindtap="goAnalysis"><view class="msi-left"><text class="msi-icon">📊</text><text>睡眠分析</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="goTasks"><view class="msi-left"><text class="msi-icon">🎯</text><text>每日任务</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="goCourses"><view class="msi-left"><text class="msi-icon">📚</text><text>改善课程</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="openSettings"><view class="msi-left"><text class="msi-icon">⚙️</text><text>设置</text></view><text class="msi-arrow">→</text></view>
     </view>
   </view>
 
@@ -178,7 +166,7 @@
     </view>
   </view>
 
-  <button class="btn btn-danger" style="margin-top:32rpx;width:100%" bindtap="logout">退出登录</button>
+  <button class="btn" style="margin-top:32rpx;width:100%;background:transparent;color:var(--danger);border:1rpx solid var(--danger)" bindtap="logout">退出登录</button>
 </view>
 
 <!-- Edit Profile Modal -->

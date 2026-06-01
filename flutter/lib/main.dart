@@ -24,7 +24,7 @@ class MengMianApp extends StatelessWidget {
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF5B6ABF);
     return MaterialApp(
-      title: '梦眠',
+      title: '梦眠阁',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,

@@ -1,13 +1,14 @@
 /**
- * 梦眠 - 梦境守护者 微信小程序
+ * 梦眠阁 - 梦境守护者 微信小程序
+ *
+ * 所有密钥保存在服务端，小程序不接触任何 Secret。
+ * API 域名配置见 ./config.js
  */
-const DEV_HOST = 'http://192.168.3.64:8000';
-const PROD_HOST = 'https://your-domain.com';
-const USE_PROD = false;
+const config = require('./config');
 
 App({
   globalData: {
-    apiBase: USE_PROD ? PROD_HOST : DEV_HOST,
+    apiBase: config.apiBase,
     token: '',
     refreshToken: '',
     userInfo: null,

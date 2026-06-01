@@ -498,7 +498,7 @@ def test_data_flow():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  梦眠 - 数据测试套件")
+    print("  梦眠阁 - 数据测试套件")
     print("=" * 60)
     print("\n  Starting server...")
     start_server()

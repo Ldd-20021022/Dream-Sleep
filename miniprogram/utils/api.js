@@ -1,6 +1,7 @@
 /** API path constants — mirrors FastAPI backend routes */
 const API = {
   AUTH: {
+    WX_LOGIN: '/api/v1/auth/wx-login',
     REGISTER: '/api/v1/auth/register',
     LOGIN: '/api/v1/auth/login',
     REFRESH: '/api/v1/auth/refresh',

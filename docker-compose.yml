@@ -6,7 +6,7 @@ services:
     container_name: mengmian-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: mengmian2026
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?required}
       MYSQL_DATABASE: sleep_manager
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
@@ -27,10 +27,12 @@ services:
     container_name: mengmian-api
     restart: unless-stopped
     environment:
-      DATABASE_URL: mysql+pymysql://root:mengmian2026@db:3306/sleep_manager
-      SECRET_KEY: mengmian_production_secret_change_me
+      DATABASE_URL: mysql+pymysql://root:${DB_ROOT_PASSWORD:?required}@db:3306/sleep_manager
+      SECRET_KEY: ${SECRET_KEY:-changeme}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
-      DEEPSEEK_BASE_URL: https://api.deepseek.com
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_SECRET: ${WECHAT_SECRET:-}
     ports:
       - "8000:8000"
     depends_on:

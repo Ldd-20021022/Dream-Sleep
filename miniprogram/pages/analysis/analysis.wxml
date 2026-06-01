@@ -1,30 +1,20 @@
 <view class="container">
   <view class="page-title">睡眠分析</view>
 
-  <!-- Guardian Summary -->
-  <view wx:if="{{guardian}}" class="card" style="margin-bottom:20rpx;text-align:center">
-    <view style="font-size:24rpx;color:var(--tx3);margin-bottom:8rpx">🛡️ 梦境守护者状态</view>
-    <view style="display:flex;justify-content:space-around;font-size:22rpx;color:var(--tx2)">
-      <text>🧘 专注力 Lv.{{guardian.focus||0}}</text>
-      <text>📚 智慧 Lv.{{guardian.wisdom||0}}</text>
-      <text>💪 韧性 Lv.{{guardian.resilience||0}}</text>
-      <text>⚡ 活力 Lv.{{guardian.vitality||0}}</text>
-    </view>
-    <view style="font-size:20rpx;color:var(--tx3);margin-top:8rpx">🪴 {{guardian.garden.plants}}株 🌸 {{guardian.garden.flowers}}朵 🌳 {{guardian.garden.trees}}棵 · 连续 {{guardian.garden.streak}} 天</view>
+  <!-- Score Breakdown -->
+  <view wx:if="{{lastRecord && lastRecord.score_breakdown}}" class="card" style="padding:20rpx">
+    <view class="section-title">📊 昨晚评分怎么来的</view>
+    <view class="br-row"><text class="br-label">⏱️ 时长 {{lastRecord.duration_hours}}h</text><text>{{lastRecord.score_breakdown.duration.score}}/{{lastRecord.score_breakdown.duration.max}}</text></view>
+    <view class="br-row"><text class="br-label">⭐ 质量 {{lastRecord.score_breakdown.quality.label}}</text><text>{{lastRecord.score_breakdown.quality.score}}/{{lastRecord.score_breakdown.quality.max}}</text></view>
+    <view class="br-row"><text class="br-label">🏷️ 标签 {{lastRecord.score_breakdown.tags.positive.length > 0 ? lastRecord.score_breakdown.tags.positive.join(' ') : '无'}} {{lastRecord.score_breakdown.tags.negative.length > 0 ? '· ' + lastRecord.score_breakdown.tags.negative.join(' ') : ''}}</text><text>{{lastRecord.score_breakdown.tags.score}}/{{lastRecord.score_breakdown.tags.max}}</text></view>
+    <view class="br-row" style="font-weight:700;color:var(--teal);border:none;padding-top:12rpx"><text>总分</text><text>{{lastRecord.score}} 分</text></view>
   </view>
 
-  <!-- Period + Tabs -->
-  <view class="top-bar">
-    <view class="period-row">
-      <view class="p-btn {{period===7?'p-on':''}}" data-days="7" bindtap="changePeriod">7天</view>
-      <view class="p-btn {{period===14?'p-on':''}}" data-days="14" bindtap="changePeriod">14天</view>
-      <view class="p-btn {{period===30?'p-on':''}}" data-days="30" bindtap="changePeriod">30天</view>
-    </view>
-    <view class="tab-row">
-      <view class="tab-btn {{activeTab==='overview'?'tab-on':''}}" data-tab="overview" bindtap="setTab">总览</view>
-      <view class="tab-btn {{activeTab==='daily'?'tab-on':''}}" data-tab="daily" bindtap="setTab">趋势</view>
-      <view class="tab-btn {{activeTab==='suggestions'?'tab-on':''}}" data-tab="suggestions" bindtap="setTab">建议</view>
-    </view>
+  <!-- Period -->
+  <view class="period-row" style="margin-bottom:16rpx">
+    <view class="p-btn {{period===7?'p-on':''}}" data-days="7" bindtap="changePeriod">7天</view>
+    <view class="p-btn {{period===14?'p-on':''}}" data-days="14" bindtap="changePeriod">14天</view>
+    <view class="p-btn {{period===30?'p-on':''}}" data-days="30" bindtap="changePeriod">30天</view>
   </view>
 
   <view wx:if="{{!trends || !trends.has_data}}" class="empty-hint">
