@@ -1,0 +1,209 @@
+<view class="container">
+  <view class="page-title">睡眠记录</view>
+
+  <!-- Mode Switch -->
+  <view class="mode-switch">
+    <view class="ms-btn {{mode==='timer'?'ms-on':''}}" data-mode="timer" bindtap="switchMode">⏱ 计时模式</view>
+    <view class="ms-btn {{mode==='form'?'ms-on':''}}" data-mode="form" bindtap="switchMode">📝 手动记录</view>
+  </view>
+
+  <!-- ==================== TIMER MODE ==================== -->
+  <view wx:if="{{mode==='timer'}}">
+    <!-- Idle: Not started -->
+    <view wx:if="{{timerState==='idle'}}" class="timer-idle">
+      <view class="timer-moon">🌙</view>
+      <view class="timer-hint">点击下方按钮开始记录今晚的睡眠</view>
+      <view class="timer-hint-sub">系统会自动记录入睡时间，起床后点击醒来即可</view>
+      <button class="btn btn-primary btn-lg start-sleep-btn" bindtap="startSleep">
+        💤 开始睡眠
+      </button>
+    </view>
+
+    <!-- Sleeping: Timer Running -->
+    <view wx:if="{{timerState==='sleeping'}}" class="timer-sleeping">
+      <view class="ts-moon">😴</view>
+      <view class="ts-hint">正在睡眠中...</view>
+      <view class="ts-elapsed">{{sleepElapsed}}</view>
+      <view class="ts-start">入睡时间：{{sleepStartDisplay}}</view>
+      <view class="ts-actions">
+        <button class="btn btn-primary btn-lg" bindtap="wakeUp">☀️ 我醒了</button>
+        <button class="btn btn-secondary btn-sm" bindtap="cancelSleep">取消</button>
+      </view>
+    </view>
+
+    <!-- Woke: Fill in details -->
+    <view wx:if="{{timerState==='woke'}}" class="timer-woke">
+      <view class="tw-header">
+        <view class="tw-icon">☀️</view>
+        <view class="tw-title">早上好！</view>
+        <view class="tw-duration">睡眠时长：{{sleepElapsed}}</view>
+      </view>
+
+      <!-- 快捷感受 -->
+      <view class="card">
+        <view class="section-title">感觉怎么样？</view>
+        <view class="quick-feel-row">
+          <view class="qf-btn {{quickFeel==='great'?'qf-on':''}}" data-feel="great" bindtap="setQuickFeel">⚡ 精神饱满</view>
+          <view class="qf-btn {{quickFeel==='ok'?'qf-on':''}}" data-feel="ok" bindtap="setQuickFeel">👍 还行</view>
+          <view class="qf-btn {{quickFeel==='tired'?'qf-on':''}}" data-feel="tired" bindtap="setQuickFeel">😴 疲惫</view>
+          <view class="qf-btn {{quickFeel==='bad'?'qf-on':''}}" data-feel="bad" bindtap="setQuickFeel">😫 很累</view>
+        </view>
+        <view wx:if="{{quickFeel}}" style="margin-top:12rpx">
+          <view class="section-title">昨晚状态？</view>
+          <view class="quick-feel-row">
+            <view class="qf-btn {{quickStatus==='fast_sleep'?'qf-on':''}}" data-status="fast_sleep" bindtap="setQuickStatus">💨 倒头就睡</view>
+            <view class="qf-btn {{quickStatus==='toss'?'qf-on':''}}" data-status="toss" bindtap="setQuickStatus">🔄 翻来覆去</view>
+            <view class="qf-btn {{quickStatus==='wake_up'?'qf-on':''}}" data-status="wake_up" bindtap="setQuickStatus">🌙 半夜醒了</view>
+            <view class="qf-btn {{quickStatus==='dream'?'qf-on':''}}" data-status="dream" bindtap="setQuickStatus">💭 做梦了</view>
+          </view>
+        </view>
+        <button wx:if="{{quickFeel}}" class="btn btn-primary" style="width:100%;margin-top:20rpx" bindtap="submitTimerRecord">
+          ✅ 提交记录
+        </button>
+      </view>
+
+      <view wx:if="{{!quickFeel}}" class="card">
+        <view class="section-title">睡眠感受</view>
+        <slider min="1" max="5" value="{{sleepQuality}}" bindchange="onSleepQualityChange" activeColor="#6c63ff" block-size="20" show-value/>
+        <view style="text-align:center;font-size:36rpx;margin-top:8rpx">{{sleepQualityStars}}</view>
+      </view>
+
+      <view wx:if="{{!quickFeel}}" class="card">
+        <view class="section-title">睡眠标签</view>
+        <view class="tag-row">
+          <view wx:for="{{['做梦','失眠','早醒','夜醒','深睡','浅睡','午休','熬夜']}}" wx:key="*this"
+                class="tag-btn {{sleepTags.indexOf(item)>-1?'on':''}}" data-tag="{{item}}" bindtap="toggleSleepTag">{{item}}</view>
+        </view>
+      </view>
+
+      <view class="card">
+        <view class="section-title">备注</view>
+        <textarea class="input-area" value="{{sleepNotes}}" bindinput="onSleepNotesInput" placeholder="记录昨晚的感受..." maxlength="200"/>
+      </view>
+
+      <button class="btn btn-primary btn-lg" bindtap="submitTimerRecord" loading="{{submitting}}">
+        {{submitting ? '保存中...' : '✅ 保存睡眠记录'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- ==================== FORM MODE ==================== -->
+  <view wx:if="{{mode==='form'}}">
+    <view class="card">
+      <view class="section-title">✏️ 新增记录</view>
+      <view class="ob-err-msg" wx:if="{{formError}}">⚠️ {{formError}}</view>
+
+      <view class="form-group"><view class="form-label">日期 <text class="req-star">*</text></view>
+        <picker mode="date" value="{{diaryDate}}" bindchange="onDateChange"><view class="rec-input">{{diaryDate||'选择日期'}}</view></picker>
+      </view>
+
+      <view class="form-group"><view class="form-label">🌙 入睡时间 <text class="req-star">*</text></view>
+        <view class="rec-time-row">
+          <picker range="{{bedHours}}" value="{{bedHour}}" bindchange="onBedHourChange"><view class="rec-input rec-time">{{bedHour}}时</view></picker>
+          <picker range="{{bedMins}}" value="{{bedMin}}" bindchange="onBedMinChange"><view class="rec-input rec-time">{{bedMin<10?'0'+bedMin:bedMin}}分</view></picker>
+        </view>
+      </view>
+
+      <view class="form-group"><view class="form-label">☀️ 起床时间 <text class="req-star">*</text></view>
+        <view class="rec-time-row">
+          <picker range="{{bedHours}}" value="{{wakeHour}}" bindchange="onWakeHourChange"><view class="rec-input rec-time">{{wakeHour}}时</view></picker>
+          <picker range="{{bedMins}}" value="{{wakeMin}}" bindchange="onWakeMinChange"><view class="rec-input rec-time">{{wakeMin<10?'0'+wakeMin:wakeMin}}分</view></picker>
+        </view>
+      </view>
+
+      <view class="form-group"><view class="form-label">⭐ 睡眠感受</view>
+        <slider min="1" max="5" value="{{quality}}" bindchange="onQualityChange" activeColor="#8b9cf7" block-size="22" show-value/>
+        <view style="text-align:center;font-size:36rpx;margin-top:8rpx">{{qualityStars}}</view>
+      </view>
+
+      <view class="form-group"><view class="form-label">🏷️ 睡眠标签</view>
+        <view class="rec-tag-row">
+          <view wx:for="{{tagList}}" wx:key="name" class="rec-tag {{item.on?'rec-tag-on':''}}" data-tag="{{item.name}}" bindtap="toggleTag">{{item.name}}</view>
+        </view>
+      </view>
+
+      <view class="form-group"><view class="form-label">📝 备注 <text style="font-size:20rpx;color:var(--tx3)">{{notes.length}}/200</text></view>
+        <textarea class="rec-textarea" value="{{notes}}" bindinput="onNotesInput" placeholder="记录今晚的感受..." maxlength="200"/>
+      </view>
+
+      <button class="btn btn-primary rec-submit-btn" bindtap="submitFormRecord" loading="{{submitting}}" disabled="{{submitting}}">{{submitting?'保存中...':'保存记录'}}</button>
+
+      <view class="rec-divider"></view>
+      <view class="section-title">🎤 语音日记 (AI解析)</view>
+      <textarea class="rec-textarea" value="{{voiceText}}" bindinput="onVoiceInput" placeholder="粘贴语音转文字内容，AI自动解析填入表单..."/>
+      <button class="btn btn-secondary btn-sm" style="margin-top:16rpx;width:100%" bindtap="voiceToDiary" loading="{{voiceLoading}}">{{voiceLoading?'AI解析中...':'🤖 AI解析并填入表单'}}</button>
+    </view>
+  </view>
+
+  <!-- ==================== Share Modal ==================== -->
+  <view wx:if="{{showShareModal && shareCard}}" class="share-overlay" bindtap="closeShareModal">
+    <view class="share-box" catchtap="">
+      <view class="share-title">🎉 睡眠记录成功！</view>
+
+      <!-- Canvas for image generation (hidden) -->
+      <canvas canvas-id="shareCanvas" style="width:600rpx;height:800rpx;position:fixed;left:-9999rpx;top:-9999rpx"></canvas>
+
+      <!-- Preview -->
+      <view class="share-preview" wx:if="{{!shareImagePath}}">
+        <view class="sp-card">
+          <view class="sp-score-ring" style="background:{{shareCard.score >= 80 ? '#2ECC71' : shareCard.score >= 60 ? '#3498DB' : shareCard.score >= 40 ? '#F39C12' : '#E74C3C'}}">
+            <view class="sp-score">{{shareCard.score}}</view>
+            <view class="sp-score-label">分</view>
+          </view>
+          <view class="sp-duration">{{shareCard.duration}}h</view>
+          <view class="sp-time">入睡 {{shareCard.bedtime}} · 起床 {{shareCard.wakeTime}}</view>
+          <view class="sp-stars">⭐{{shareCard.quality >= 2 ? '⭐' : ''}}{{shareCard.quality >= 3 ? '⭐' : ''}}{{shareCard.quality >= 4 ? '⭐' : ''}}{{shareCard.quality >= 5 ? '⭐' : ''}}</view>
+          <view wx:if="{{shareCard.feedback}}" class="sp-feedback">"{{shareCard.feedback}}"</view>
+          <view class="sp-brand">梦眠阁 · AI智能睡眠管理</view>
+        </view>
+        <button class="btn btn-primary" bindtap="generateShareImage">📸 生成分享图片</button>
+      </view>
+
+      <!-- Generated Image -->
+      <view wx:if="{{shareImagePath}}" class="share-image-wrap">
+        <image src="{{shareImagePath}}" mode="widthFix" style="width:100%;border-radius:16rpx"/>
+        <view class="share-actions">
+          <button class="btn btn-primary" bindtap="saveShareImage">💾 保存到相册</button>
+        </view>
+      </view>
+
+      <button class="btn btn-secondary" style="margin-top:12rpx" bindtap="closeShareModal">关闭</button>
+    </view>
+  </view>
+
+  <!-- First record celebration -->
+  <view wx:if="{{showFirstModal}}" class="modal-overlay">
+    <view class="first-modal">
+      <view class="fm-icon">🎉</view>
+      <view class="fm-title">第一晚记录完成！</view>
+      <view class="fm-scene">你的初始梦境世界已解锁 🌙</view>
+      <view class="fm-score-row">
+        <view class="fm-score-big">{{firstRecord.score}}</view>
+        <view class="fm-score-label">分</view>
+      </view>
+      <view class="fm-breakdown">
+        <text wx:if="{{firstRecord.score >= 80}}">比想象中好，继续保持！</text>
+        <text wx:elif="{{firstRecord.score >= 60}}">不错的开始，一起慢慢改善</text>
+        <text wx:else>没关系，记录本身就是进步的第一步</text>
+      </view>
+      <view class="fm-actions">
+        <button class="btn btn-primary" bindtap="closeFirstModal">查看完整分析</button>
+        <button class="btn btn-secondary" bindtap="closeFirstModal">好的</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== History ==================== -->
+  <view class="card" style="margin-top:24rpx">
+    <view class="section-title">历史记录</view>
+    <view wx:if="{{records.length===0}}" class="empty-state">暂无记录</view>
+    <view wx:for="{{records}}" wx:key="id" class="rec-item">
+      <view class="rec-left">
+        <text class="rec-date">{{item.diary_date}}</text>
+        <text class="rec-dur">{{item.duration_hours}}h</text>
+        <text class="rec-score" style="color:{{item.score>=80?'#2ecc71':item.score>=60?'#f39c12':'#e74c3c'}}">{{item.score}}分</text>
+      </view>
+      <button class="btn btn-danger" style="font-size:22rpx;padding:8rpx 16rpx" data-id="{{item.id}}" bindtap="deleteRecord">删除</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="top-bar">
+    <view class="page-title">睡眠排行</view>
+  </view>
+
+  <!-- ==================== Leaderboard ==================== -->
+  <view class="lb-period-row">
+    <view class="lb-ps-btn {{lbPeriod==='weekly'?'on':''}}" data-period="weekly" bindtap="setPeriod">本周</view>
+    <view class="lb-ps-btn {{lbPeriod==='monthly'?'on':''}}" data-period="monthly" bindtap="setPeriod">本月</view>
+  </view>
+  <view wx:if="{{leaderboard.length===0}}" class="empty-state">
+    <view class="empty-icon">📊</view>
+    <view class="empty-text">暂无排行数据，快去记录睡眠吧！</view>
+  </view>
+  <view wx:for="{{leaderboard}}" wx:key="user_id" class="lb-row">
+    <view class="lb-rank {{item.rank <= 3 ? 'lb-top' + item.rank : ''}}">
+      {{item.rank <= 3 ? ['','🥇','🥈','🥉'][item.rank] : item.rank}}
+    </view>
+    <view class="lb-avatar" style="background:{{avatarColor(item.nickname)}}">{{item.nickname ? item.nickname[0] : '?'}}</view>
+    <view class="lb-name">{{item.nickname}}</view>
+    <view class="lb-score">{{item.avg_score}}分</view>
+  </view>
+</view>

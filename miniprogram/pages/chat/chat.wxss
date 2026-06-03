@@ -1,0 +1,13 @@
+.msg-area { height: calc(100vh - 280rpx); padding: 16rpx; }
+.msg { display: flex; margin-bottom: 20rpx; }
+.msg.user { justify-content: flex-end; }
+.msg.assistant { justify-content: flex-start; }
+.msg-bubble { max-width: 80%; padding: 20rpx 28rpx; border-radius: 24rpx; font-size: 28rpx; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.msg.user .msg-bubble { background: var(--ac); color: #fff; border-bottom-right-radius: 8rpx; }
+.msg.assistant .msg-bubble { background: var(--hover); border-bottom-left-radius: 8rpx; }
+.typing { animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.input-area { display: flex; gap: 16rpx; padding: 20rpx 0; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); padding: 20rpx 24rpx; }
+.input-area input { flex: 1; }
+.quick-qs { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; justify-content: center; }
+.qq { padding: 16rpx 24rpx; background: var(--hover); border-radius: 32rpx; font-size: 24rpx; color: var(--tx2); }

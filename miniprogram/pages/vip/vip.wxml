@@ -1,0 +1,105 @@
+<view class="container">
+  <view class="page-title">💎 会员中心</view>
+
+  <!-- Status bar -->
+  <view class="vip-status {{premium.tier==='free'?'vs-free':'vs-premium'}}">
+    <view class="vs-icon">{{premium.tier==='premium'?'👑':premium.tier==='pro'?'⭐':'🌱'}}</view>
+    <view class="vs-info">
+      <view class="vs-name">{{premium.tier_info?premium.tier_info.name:'免费版'}}会员</view>
+      <view class="vs-sub" wx:if="{{premium.tier!=='free'}}">已解锁全部功能 · 剩余 {{vipDaysLeft}} 天</view>
+      <view class="vs-sub" wx:else>升级解锁全部高级功能</view>
+    </view>
+  </view>
+
+  <!-- Billing toggle -->
+  <view class="bill-switch {{billingFeedback?'bs-pop':''}}" id="plans">
+    <view class="bs-label {{vipBilling==='monthly'?'bs-on':''}}" hover-class="bs-hover" data-type="monthly" bindtap="setBilling">月付</view>
+    <view class="bs-label {{vipBilling==='yearly'?'bs-on':''}}" hover-class="bs-hover" data-type="yearly" bindtap="setBilling">年付 <text class="bs-save">省35%</text></view>
+  </view>
+
+  <!-- Pricing cards -->
+  <view class="vp-cards">
+    <!-- Free -->
+    <view class="vp-card {{premium.tier==='free'?'vp-current':''}}">
+      <view class="vp-tier">🌱</view>
+      <view class="vp-name">免费版</view>
+      <view class="vp-price"><text class="vp-num">¥0</text><text class="vp-dur">/永久</text></view>
+      <view class="vp-feats">
+        <view wx:for="{{tierFeatures.free}}" wx:key="*this" class="vp-feat">✓ {{item}}</view>
+        <view wx:for="{{tierFeatures.freeMissing}}" wx:key="*this" class="vp-feat vp-na">✗ {{item}}</view>
+      </view>
+      <view class="vp-btn-wrap"><view class="vp-btn vp-btn-curr">当前方案</view></view>
+    </view>
+
+    <!-- Pro -->
+    <view class="vp-card vp-recommend {{premium.tier==='pro'?'vp-current':''}}" wx:if="{{premium.tier!=='premium'}}">
+      <view class="vp-badge">🔥 推荐</view>
+      <view class="vp-tier">⭐</view>
+      <view class="vp-name">专业版</view>
+      <view class="vp-price"><text class="vp-num">¥{{vipBilling==='yearly'?proYrPrice:proMoPrice}}</text><text class="vp-dur">/月</text></view>
+      <view class="vp-feats">
+        <view wx:for="{{tierFeatures.pro}}" wx:key="*this" class="vp-feat">✓ {{item}}</view>
+        <view class="vp-feat vp-na">✗ 家庭共享</view>
+      </view>
+      <view class="vp-btn-wrap">
+        <button class="vp-btn vp-btn-up" data-plan="{{vipBilling==='yearly'?'pro_yearly':'pro_monthly'}}" bindtap="createPayOrder" loading="{{payLoading}}" disabled="{{payLoading}}">{{premium.tier==='pro'?'续费':'立即升级'}}</button>
+      </view>
+    </view>
+
+    <!-- Premium -->
+    <view class="vp-card {{premium.tier==='premium'?'vp-current':''}}">
+      <view class="vp-tier">👑</view>
+      <view class="vp-name">尊享版</view>
+      <view class="vp-price"><text class="vp-num">¥{{vipBilling==='yearly'?premYrPrice:premMoPrice}}</text><text class="vp-dur">/月</text></view>
+      <view class="vp-feats">
+        <view wx:for="{{tierFeatures.premium}}" wx:key="*this" class="vp-feat">✓ {{item}}</view>
+      </view>
+      <view class="vp-btn-wrap">
+        <button class="vp-btn vp-btn-up" data-plan="{{vipBilling==='yearly'?'premium_yearly':'premium_monthly'}}" bindtap="createPayOrder" loading="{{payLoading}}" disabled="{{payLoading}}">{{premium.tier==='premium'?'续费':'立即升级'}}</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Feature Compare (collapsible) -->
+  <view class="card" style="margin-top:24rpx">
+    <view class="vcmp-hd" bindtap="toggleCompare">
+      <text>📋 完整功能对比</text>
+      <text class="vcmp-arrow">{{showCompare?'▲':'▼'}}</text>
+    </view>
+    <view wx:if="{{showCompare}}" class="vcmp-body">
+      <view class="vcmp-row vcmp-row-hd">
+        <text class="vcmp-cell vcmp-name">功能</text><text class="vcmp-cell">免费</text><text class="vcmp-cell">专业</text><text class="vcmp-cell">尊享</text>
+      </view>
+      <view class="vcmp-row" wx:for="{{vipCompareRows}}" wx:key="name">
+        <text class="vcmp-cell vcmp-name">{{item.name}}</text><text class="vcmp-cell">{{item.free}}</text><text class="vcmp-cell {{item.highlight?'vcmp-hl':''}}">{{item.pro}}</text><text class="vcmp-cell {{item.highlight?'vcmp-hl':''}}">{{item.premium}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Orders -->
+  <view class="card" style="margin-top:24rpx">
+    <view class="vcmp-hd" bindtap="toggleOrders">
+      <text>📄 订单记录</text>
+      <text class="vcmp-arrow">{{showOrders?'▲':'▼'}}</text>
+    </view>
+    <view wx:if="{{showOrders}}">
+      <view wx:if="{{payOrders.length===0}}" style="text-align:center;color:var(--tx3);padding:20rpx">暂无订单</view>
+      <view wx:for="{{payOrders}}" wx:key="id" class="vp-order">
+        <text>{{item.order_no}} · {{item.tier}}</text>
+        <text>¥{{item.amount_yuan}} <text class="vp-order-status order-{{item.status}}">{{item.status==='paid'?'已付':item.status==='refunded'?'退款':'待付'}}</text></text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- Payment Modal -->
+<view class="modal-pay" wx:if="{{payOrder}}" catchtap="closePayModal">
+  <view class="modal-pay-card" catchtap="noop">
+    <view class="pay-modal-icon">💳</view>
+    <view class="pay-modal-title">{{payOrder.plan_name}}</view>
+    <view class="pay-modal-price">¥{{payOrder.amount_yuan}}</view>
+    <view class="pay-modal-no">订单号: {{payOrder.order_no}}</view>
+    <view class="btn btn-primary pay-confirm-btn" bindtap="confirmPay" loading="{{payLoading}}" disabled="{{payLoading}}">确认支付 ¥{{payOrder.amount_yuan}}</view>
+    <view class="btn btn-secondary btn-sm pay-cancel" bindtap="closePayModal">取消</view>
+  </view>
+</view>

@@ -1,0 +1,77 @@
+<view class="login-page">
+  <!-- Animated stars bg -->
+  <view class="login-stars">
+    <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}}" wx:key="*this" class="star star-{{item}}" style="left:{{item*7%100}}%;top:{{item*11%90+5}}%;animation-delay:{{item*0.4}}s"></view>
+  </view>
+
+  <!-- Main content -->
+  <view class="login-body">
+    <!-- Dream scene -->
+    <view class="dream-scene-login">
+      <view class="moon-glow"></view>
+      <view class="moon-icon">🌙</view>
+      <view class="dream-text">
+        <view class="app-name">梦 眠</view>
+        <view class="app-desc">梦境守护者</view>
+      </view>
+    </view>
+
+    <!-- Returning hint -->
+    <view wx:if="{{returning}}" class="returning-bar">
+      <view class="returning-dot"></view>
+      <text>欢迎回来，正在进入梦境...</text>
+    </view>
+
+    <!-- Login actions -->
+    <view class="login-actions" wx:else>
+      <!-- WeChat login -->
+      <button class="btn-wx" bindtap="handleWxLogin" loading="{{loading}}" disabled="{{loading}}">
+        <text wx:if="{{!loading}}" class="btn-wx-icon">💬</text>
+        <text>{{loading ? '登录中...' : '微信一键登录'}}</text>
+      </button>
+
+      <!-- Divider -->
+      <view class="divider-row">
+        <view class="divider-line"></view>
+        <text class="divider-text">其他方式</text>
+        <view class="divider-line"></view>
+      </view>
+
+      <!-- Legacy toggle -->
+      <view wx:if="{{!showLegacy}}" class="legacy-link" bindtap="toggleLegacy">
+        <text>🔑 账号密码登录</text>
+      </view>
+
+      <!-- Legacy form -->
+      <view wx:if="{{showLegacy}}" class="legacy-card">
+        <input class="legacy-input" placeholder="用户名" value="{{username}}" bindinput="setUsername" focus="{{showLegacy}}"/>
+        <input class="legacy-input" type="password" placeholder="密码" value="{{password}}" bindinput="setPassword"/>
+        <view wx:if="{{legacyError}}" class="legacy-err">{{legacyError}}</view>
+        <button class="btn-legacy" bindtap="handleLegacyLogin" loading="{{legacyLoading}}">进入梦境</button>
+        <view class="legacy-back" bindtap="toggleLegacy">← 返回</view>
+      </view>
+
+      <!-- Register toggle -->
+      <view wx:if="{{!showRegister}}" class="legacy-link" bindtap="toggleRegister">
+        <text>✨ 注册新账号</text>
+      </view>
+
+      <!-- Register form -->
+      <view wx:if="{{showRegister}}" class="legacy-card">
+        <input class="legacy-input" placeholder="用户名 (2-20字符)" value="{{regUsername}}" bindinput="setRegUser" focus="{{showRegister}}"/>
+        <input class="legacy-input" placeholder="邮箱" value="{{regEmail}}" bindinput="setRegEmail"/>
+        <input class="legacy-input" type="number" placeholder="手机号 (必填)" value="{{regPhone}}" bindinput="setRegPhone" maxlength="11"/>
+        <input class="legacy-input" type="password" placeholder="密码 (6位以上)" value="{{regPassword}}" bindinput="setRegPwd"/>
+        <input class="legacy-input" type="password" placeholder="确认密码" value="{{regPassword2}}" bindinput="setRegPwd2"/>
+        <view wx:if="{{regError}}" class="legacy-err">{{regError}}</view>
+        <button class="btn-legacy" bindtap="handleRegister" loading="{{regLoading}}">✨ 创建账号</button>
+        <view class="legacy-back" bindtap="toggleRegister">← 返回</view>
+      </view>
+
+      <!-- Footer -->
+      <view class="login-footer">
+        <text>登录即同意《用户协议》和《隐私政策》</text>
+      </view>
+    </view>
+  </view>
+</view>

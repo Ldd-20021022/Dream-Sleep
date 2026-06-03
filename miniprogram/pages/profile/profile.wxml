@@ -1,0 +1,238 @@
+<view class="container">
+  <!-- Guardian Archive -->
+  <view wx:if="{{guardian}}" class="card" style="text-align:center;margin-bottom:20rpx">
+    <view style="font-size:48rpx;font-weight:700;margin-bottom:4rpx">{{summary.user.level_name||'梦境守护者'}}
+      <text wx:if="{{premium.tier!='free'}}" style="font-size:28rpx;margin-left:8rpx">{{premium.tier==='premium'?'👑':'⭐'}}</text>
+    </view>
+    <view style="font-size:24rpx;color:var(--tx3);margin-bottom:16rpx">Lv.{{summary.level.level||1}} · {{summary.level.total_xp||0}} XP
+      <text wx:if="{{premium.tier!='free'}}" style="color:var(--warn);margin-left:8rpx">{{premium.tier_info.name}}会员</text>
+    </view>
+    <view style="display:flex;justify-content:space-around;margin-bottom:16rpx">
+      <view wx:for="{{attrRows}}" wx:key="key" wx:for-item="row" style="text-align:center">
+        <view style="font-size:28rpx">{{row.icon}}</view>
+        <view style="font-size:18rpx;color:var(--tx3)">{{row.name}}</view>
+        <view style="font-size:22rpx">{{row.dots}}</view>
+      </view>
+    </view>
+    <view style="display:flex;gap:12rpx;justify-content:center;flex-wrap:wrap;font-size:20rpx;color:var(--tx3)">
+      <text>🪴{{guardian.garden.plants}}株</text><text>🌸{{guardian.garden.flowers}}朵</text><text>🌳{{guardian.garden.trees}}棵</text><text>连续{{guardian.garden.streak}}天</text>
+    </view>
+    <view wx:if="{{recentFragments.length>0}}" style="display:flex;gap:6rpx;flex-wrap:wrap;margin-top:12rpx;justify-content:center">
+      <text wx:for="{{recentFragments}}" wx:key="id" style="font-size:18rpx;padding:4rpx 10rpx;border-radius:10rpx;background:var(--hover)">{{item.quality==='legendary'?'🌟':item.quality==='epic'?'💎':item.quality==='rare'?'🔷':'✨'}} {{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- Discoveries -->
+  <view wx:if="{{recentDiscoveries.length>0}}" class="card" style="margin-bottom:20rpx">
+    <view class="section-title">💡 个人睡眠发现</view>
+    <view wx:for="{{recentDiscoveries}}" wx:key="id" style="padding:8rpx 0;font-size:24rpx;color:var(--tx2);border-bottom:1rpx solid var(--bd)">✨ {{item.text}}<text style="font-size:18rpx;color:var(--tx3);margin-left:12rpx">{{item.date}}</text></view>
+  </view>
+
+  <!-- Postcards -->
+  <view wx:if="{{recentPostcards.length>0}}" class="card" style="margin-bottom:20rpx">
+    <view class="section-title">📮 梦境明信片 ({{guardian.postcards.length}}张)</view>
+    <view style="display:flex;gap:8rpx;flex-wrap:wrap">
+      <view wx:for="{{recentPostcards}}" wx:key="id" style="padding:12rpx 16rpx;background:var(--hover);border-radius:12rpx;font-size:20rpx;max-width:200rpx">
+        <view style="color:var(--tx2)">「{{item.sceneShort}}」</view>
+        <view style="color:var(--tx3);font-size:16rpx">{{item.date}} · {{item.score}}分</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Header -->
+  <view class="profile-header">
+    <view class="ph-avatar" bindtap="openEdit">
+      <image wx:if="{{summary && summary.user.avatar}}" src="{{summary.user.avatar}}" class="ph-avatar-img"/>
+      <text wx:else class="ph-avatar-text">☺</text>
+      <view class="ph-edit-badge">✏️</view>
+    </view>
+    <view class="ph-info">
+      <view class="ph-name">{{summary ? (summary.user.nickname || summary.user.username) : '加载中...'}}</view>
+      <view class="ph-level" wx:if="{{summary}}">
+        <text class="ph-level-badge">Lv.{{summary.level.level}}</text>
+        <text>{{summary.level.level_name}}</text>
+      </view>
+    </view>
+    <view class="ph-xp-bar" wx:if="{{summary}}">
+      <view class="ph-xp-fill" style="width:{{summary.level.total_xp % 100}}%"></view>
+    </view>
+    <view class="ph-xp-text" wx:if="{{summary}}">{{summary.level.total_xp}} XP</view>
+    <!-- Account age -->
+    <view wx:if="{{summary && summary.user.days_since_join > 0}}" class="ph-age">已陪伴 {{summary.user.days_since_join}} 天</view>
+  </view>
+
+  <!-- Sleep Goal Ring + Quick Mood -->
+  <view class="goal-mood-row" wx:if="{{summary}}">
+    <view class="goal-card">
+      <view class="goal-ring">
+        <view class="goal-ring-bg">
+          <view class="goal-ring-fill" style="background:conic-gradient(var(--primary) {{summary.sleep_goal.last_duration / summary.sleep_goal.target_hours * 360}}deg, transparent 0deg)"></view>
+        </view>
+        <view class="goal-ring-inner">
+          <view class="goal-val">{{summary.sleep_goal.last_duration || '--'}}h</view>
+          <view class="goal-target">目标 {{summary.sleep_goal.target_hours}}h</view>
+        </view>
+      </view>
+      <view class="goal-label">昨晚睡眠</view>
+    </view>
+    <view class="mood-card">
+      <view class="mood-title">😊 今日心情</view>
+      <view class="mood-emojis" wx:if="{{!moodAnimating}}">
+        <view wx:for="{{moodList}}" wx:key="name" class="mood-item {{item.selected?'mood-picked':''}}" data-mood="{{item.emoji}}" bindtap="setMood">
+          <view class="mood-emoji">{{item.emoji}}</view>
+          <view class="mood-label">{{item.name}}</view>
+        </view>
+      </view>
+      <view wx:if="{{moodAnimating}}" class="mood-result">
+        <view class="mood-big-emoji">{{moodPicked}}</view>
+        <view class="mood-msg">{{moodMsg}}</view>
+      </view>
+      <view class="mood-hint" wx:if="{{!todayMood}}">点击记录今日心情</view>
+    </view>
+  </view>
+
+  <!-- Sleep Calendar -->
+  <view class="card" wx:if="{{heatmapWeeks.length > 0}}">
+    <view class="section-title">📅 睡眠日历 · 近4周</view>
+    <view class="sc-week" wx:for="{{heatmapWeeks}}" wx:key="*this" wx:for-item="week">
+      <view class="sc-cell {{item.score>=80?'sc-great':item.score>=60?'sc-ok':item.score>0?'sc-bad':'sc-empty'}}" wx:for="{{week}}" wx:key="date" wx:for-item="item">
+        <view class="sc-emoji">{{item.emoji}}</view>
+        <view class="sc-score" wx:if="{{item.score>0}}">{{item.score}}</view>
+        <view class="sc-date">{{item.label}}</view>
+      </view>
+    </view>
+    <view class="sc-legend">
+      <text>🌟优秀(80+)</text><text>☁️一般(60+)</text><text>🌧待改善</text>
+    </view>
+  </view>
+
+  <!-- Stats Grid -->
+  <view class="stats-grid" wx:if="{{summary}}">
+    <view class="stat-item" bindtap="goAnalysis">
+      <view class="stat-num score">{{summary.sleep_stats.avg_score || '--'}}</view>
+      <view class="stat-label">周均评分</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-num">{{summary.sleep_stats.total_records}}</view>
+      <view class="stat-label">总记录</view>
+    </view>
+    <view class="stat-item" bindtap="goBadges">
+      <view class="stat-num streak">🔥 {{summary.sleep_stats.streak_days}}</view>
+      <view class="stat-label">连续达标</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-num">{{summary.sleep_stats.avg_duration || '--'}}h</view>
+      <view class="stat-label">周均时长</view>
+    </view>
+  </view>
+
+  <!-- Community Stats -->
+  <view class="mini-stats" wx:if="{{summary}}">
+    <view class="ms-item" bindtap="goCommunity">
+      <view class="ms-num">{{summary.community.posts}}</view><view class="ms-label">帖子</view>
+    </view>
+    <view class="ms-item">
+      <view class="ms-num">{{summary.community.followers}}</view><view class="ms-label">粉丝</view>
+    </view>
+    <view class="ms-item">
+      <view class="ms-num">{{summary.community.following}}</view><view class="ms-label">关注</view>
+    </view>
+    <view class="ms-item" bindtap="goBadges">
+      <view class="ms-num">{{summary.badges.unlocked}}/{{summary.badges.total}}</view><view class="ms-label">勋章</view>
+    </view>
+    <view class="ms-item" bindtap="goMessages">
+      <view class="ms-num" style="color:{{summary.unread.messages > 0 ? '#E74C3C' : '#fff'}}">{{summary.unread.messages}}</view>
+      <view class="ms-label">未读消息</view>
+    </view>
+  </view>
+
+
+  <!-- Functions Menu — simplified MVP: 5 items -->
+  <view class="card menu-card">
+    <view class="menu-simple">
+      <view class="ms-item" bindtap="goAnalysis"><view class="msi-left"><text class="msi-icon">📊</text><text>睡眠分析</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="goTasks"><view class="msi-left"><text class="msi-icon">🎯</text><text>每日任务</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="goCourses"><view class="msi-left"><text class="msi-icon">📚</text><text>改善课程</text></view><text class="msi-arrow">→</text></view>
+      <view class="ms-item" bindtap="openSettings"><view class="msi-left"><text class="msi-icon">⚙️</text><text>设置</text></view><text class="msi-arrow">→</text></view>
+    </view>
+  </view>
+
+  <!-- Push notification -->
+  <view class="card">
+    <view class="section-title">🔔 睡眠提醒</view>
+    <view style="display:flex;gap:12rpx">
+      <button class="btn btn-primary btn-sm" style="flex:1" bindtap="subscribePush">📬 开启</button>
+      <button class="btn btn-secondary btn-sm" style="flex:1" bindtap="unsubscribePush">关闭</button>
+    </view>
+  </view>
+
+  <button class="btn" style="margin-top:32rpx;width:100%;background:transparent;color:var(--danger);border:1rpx solid var(--danger)" bindtap="logout">退出登录</button>
+</view>
+
+<!-- Edit Profile Modal -->
+<view wx:if="{{showEdit}}" class="modal-overlay" catchtap="closeEdit">
+  <view class="modal-sheet" catchtap="noop">
+    <view class="modal-title">✏️ 编辑资料</view>
+    <view class="edit-avatar-row">
+      <image wx:if="{{editAvatar}}" src="{{editAvatar}}" class="edit-avatar-img"/>
+      <text wx:else class="edit-avatar-text">☺</text>
+      <button class="btn btn-secondary btn-sm" bindtap="chooseAvatar" style="margin-top:12rpx">更换头像</button>
+    </view>
+    <view class="form-group">
+      <view class="form-label">昵称 <text class="req">*</text> <text style="font-size:20rpx;color:var(--tx3)">{{editNickname.length}}/20</text></view>
+      <input class="form-input" value="{{editNickname}}" bindinput="onNickInput" maxlength="20" placeholder="输入昵称（2-20字符）"/>
+    </view>
+    <view wx:if="{{editErr}}" class="ob-err-msg">{{editErr}}</view>
+    <view class="modal-btns">
+      <button class="btn btn-secondary" bindtap="closeEdit">取消</button>
+      <button class="btn btn-primary" bindtap="saveProfile">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- Settings Modal -->
+<view wx:if="{{showSettings}}" class="modal-overlay" catchtap="closeSettings">
+  <view class="modal-sheet" catchtap="noop">
+    <view class="modal-title">⚙️ 设置</view>
+
+    <view class="settings-list">
+      <view class="setting-item" bindtap="openPassword">
+        <text>🔒 修改密码</text>
+        <text class="setting-arrow">→</text>
+      </view>
+      <view class="setting-item" bindtap="exportData">
+        <text>📥 导出睡眠数据</text>
+        <text class="setting-arrow">→</text>
+      </view>
+      <view class="setting-item" bindtap="goOnboarding">
+        <text>🔄 重新评估问卷</text>
+        <text class="setting-arrow">→</text>
+      </view>
+      <view class="setting-item" bindtap="deleteAccount">
+        <text style="color:#E74C3C">🗑 删除账号</text>
+        <text class="setting-arrow" style="color:#E74C3C">→</text>
+      </view>
+    </view>
+
+    <button class="btn btn-secondary" style="margin-top:16rpx;width:100%" bindtap="closeSettings">关闭</button>
+  </view>
+</view>
+
+<!-- Password Modal -->
+<view wx:if="{{showPassword}}" class="modal-overlay" catchtap="closePassword">
+  <view class="modal-sheet" catchtap="noop">
+    <view class="modal-title">🔒 修改密码</view>
+    <view class="form-group">
+      <view class="form-label">原密码</view>
+      <input class="form-input" type="password" password value="{{oldPwd}}" bindinput="onOldPwdInput" placeholder="输入原密码"/>
+    </view>
+    <view class="form-group">
+      <view class="form-label">新密码</view>
+      <input class="form-input" type="password" password value="{{newPwd}}" bindinput="onNewPwdInput" placeholder="6位以上，含字母+数字"/>
+    </view>
+    <view class="modal-btns">
+      <button class="btn btn-secondary" bindtap="closePassword">取消</button>
+      <button class="btn btn-primary" bindtap="changePassword" loading="{{pwdLoading}}">确认修改</button>
+    </view>
+  </view>
+</view>

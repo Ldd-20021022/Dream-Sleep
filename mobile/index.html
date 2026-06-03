@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>梦眠阁</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh;padding-bottom:65px;-webkit-tap-highlight-color:transparent}
+.topbar{background:#111827;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #1f2937}
+.topbar h1{font-size:1rem;color:#a5b4fc}
+.topbar .r{display:flex;gap:8px}
+.btn-xs{padding:6px 12px;border-radius:8px;font-size:0.7rem;border:none;cursor:pointer;font-weight:600}
+.btn-mp{background:#07c160;color:#fff}
+.btn-login{background:transparent;color:#a5b4fc;border:1px solid #818cf8}
+.container{max-width:460px;margin:0 auto;padding:12px}
+.card{background:#111827;border-radius:14px;padding:18px;margin-bottom:12px;border:1px solid #1f2937}
+.card h3{font-size:0.95rem;color:#a5b4fc;margin-bottom:12px}
+.inp{width:100%;padding:11px 14px;background:#0a0e1a;border:1px solid #1f2937;border-radius:10px;color:#e2e8f0;font-size:0.9rem;margin-bottom:10px;outline:none}
+.inp:focus{border-color:#818cf8}
+textarea.inp{resize:vertical;min-height:60px}
+.btn{width:100%;padding:11px;border-radius:10px;border:none;font-size:0.9rem;cursor:pointer;font-weight:600}
+.btn-p{background:#818cf8;color:#fff}
+.btn-o{background:transparent;border:1px solid #1f2937;color:#e2e8f0}
+.btn-sm{padding:7px 14px;font-size:0.75rem;width:auto;border-radius:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#0a0e1a;border-radius:10px;padding:14px;text-align:center}
+.stat .n{font-size:1.5rem;font-weight:700;color:#a5b4fc}
+.stat .l{font-size:0.7rem;color:#9ca3af;margin-top:2px}
+.li{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1f2937;font-size:0.85rem}
+.li:last-child{border:none}
+.li .v{color:#9ca3af}
+.li .t{flex:1}
+.msg{text-align:center;padding:8px;font-size:0.8rem;border-radius:8px;margin-bottom:8px}
+.msg-e{background:rgba(248,113,113,0.1);color:#f87171}
+.msg-s{background:rgba(74,222,128,0.1);color:#4ade80}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:460px;width:100%;display:flex;background:#111827;border-top:1px solid #1f2937;padding:6px 0;z-index:20}
+.nav-i{flex:1;text-align:center;font-size:0.65rem;color:#9ca3af;cursor:pointer;padding:4px 0}
+.nav-i.on{color:#a5b4fc}
+.nav-i span{display:block;font-size:1.3rem;margin-bottom:1px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-c{background:#111827;border-radius:16px;padding:24px;width:90%;max-width:380px;border:1px solid #1f2937;max-height:80vh;overflow-y:auto;text-align:center}
+.modal-c h3{margin-bottom:16px;color:#a5b4fc}
+.chat-area{max-height:400px;overflow-y:auto;margin-bottom:12px}
+.chat-m{padding:10px 14px;border-radius:14px;max-width:85%;margin-bottom:8px;font-size:0.85rem;line-height:1.4;word-break:break-word}
+.chat-u{background:#818cf8;margin-left:auto;color:#fff;border-bottom-right-radius:4px}
+.chat-a{background:#1e293b;border:1px solid #2a2d4a;border-bottom-left-radius:4px}
+.chat-row{display:flex;gap:8px}
+.chat-row input{flex:1;margin-bottom:0;border-radius:20px}
+.chat-row button{width:auto;border-radius:20px;padding:10px 18px}
+.dot{text-align:center;padding:8px}.dot span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9ca3af;animation:dot 1.4s infinite;margin:0 2px}.dot span:nth-child(2){animation-delay:.2s}.dot span:nth-child(3){animation-delay:.4s}@keyframes dot{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.post{margin-bottom:12px;padding:14px;background:#0a0e1a;border-radius:12px}
+.post .ph{display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.75rem;color:#9ca3af}
+.post .pb{font-size:0.85rem;line-height:1.5;margin-bottom:8px}
+.post .pa{display:flex;gap:16px;font-size:0.75rem;color:#9ca3af}
+.post .pa span{cursor:pointer;display:flex;align-items:center;gap:3px}
+.mood-row{display:flex;justify-content:space-around;padding:10px 0}
+.mood-e{font-size:2.2rem;cursor:pointer;padding:4px;border-radius:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var S={token:localStorage.getItem('dst')||'',user:null,page:'home',showLogin:false};
+function $(id){return document.getElementById(id)}
+function api(m,u,d){var h={'Content-Type':'application/json'};if(S.token)h['Authorization']='Bearer '+S.token;var o={method:m,headers:h};if(d&&m!=='GET')o.body=JSON.stringify(d);var url=u;if(d&&m==='GET')url+='?'+new URLSearchParams(d);return fetch(url,o).then(function(r){return r.json().then(function(j){return{ok:r.ok,d:j}})}).catch(function(){return{ok:false,d:{detail:'网络错误'}}});}
+function E(t,a){var e=document.createElement(t),c=[].slice.call(arguments,2);for(var k in a||{}){if(k[0]==='o'&&k[1]==='n')e.addEventListener(k.slice(2),a[k]);else if(k==='c')e.className=a[k];else if(k==='s')for(var sk in a[k])e.style[sk]=a[k][sk];else e.setAttribute(k,a[k]);}c.forEach(function(x){if(Array.isArray(x)){x.forEach(function(y){if(y||y===0)e.appendChild('string'==typeof y||'number'==typeof y?document.createTextNode(''+y):y);});}else if(x||x===0)e.appendChild('string'==typeof x||'number'==typeof x?document.createTextNode(''+x):x);});return e;}
+function er(d){if(!d)return'错误';if('string'==typeof d)return d;if(Array.isArray(d))return d.map(function(e){return e.msg||''}).filter(Boolean).join(', ');if(d.detail)return er(d.detail);return JSON.stringify(d);}
+function msg(id,t,c){var e=$(id);if(e){e.textContent=t;e.className='msg msg-'+c;}}
+function dt(n){return n?Number(n).toFixed(1):'0'}
+function stars(n){var s='';n=parseInt(n)||0;for(var i=0;i<Math.min(n,5);i++)s+='⭐';return s||'—';}
+
+function topbar(){
+  var btns=[E('button',{c:'btn-xs btn-mp',onclick:function(){alert('微信搜索小程序「梦眠阁」')}},'💚 小程序')];
+  if(!S.token)btns.push(E('button',{c:'btn-xs btn-login',onclick:function(){S.showLogin='login';render();}},'登录'));
+  else btns.push(E('span',{s:{fontSize:'0.75rem',color:'#9ca3af'}},S.user?(S.user.nickname||S.user.username):''));
+  return E('div',{c:'topbar'},E('h1',{},'🌙 梦眠阁'),E('div',{c:'r'},btns));
+}
+
+function loginModal(){
+  var isLogin=S.showLogin==='login';
+  var items=[E('h3',{},isLogin?'🔐 登录':'📝 注册'),E('div',{id:'lmsg'}),E('input',{c:'inp',placeholder:'用户名',id:'luser'}),E('input',{c:'inp',placeholder:'密码',id:'lpass',type:'password'})];
+  if(!isLogin){items.push(E('input',{c:'inp',placeholder:'邮箱',id:'lemail',type:'email'}));}
+  items.push(E('button',{c:'btn btn-p',onclick:isLogin?doLogin:doRegister},isLogin?'登 录':'注 册'));
+  items.push(E('button',{c:'btn btn-o',s:{marginTop:8},onclick:function(){S.showLogin=false;render();}},'先不登录，随便看看'));
+  if(isLogin){items.push(E('p',{s:{textAlign:'center',marginTop:12,fontSize:'0.8rem',color:'#9ca3af',cursor:'pointer'},onclick:function(){S.showLogin='register';render();}},'没有账号？去注册 →'));}
+  else{items.push(E('p',{s:{textAlign:'center',marginTop:12,fontSize:'0.8rem',color:'#9ca3af',cursor:'pointer'},onclick:function(){S.showLogin='login';render();}},'已有账号？去登录 →'));}
+  $('app').appendChild(E('div',{c:'modal',onclick:function(e){if(e.target===this){S.showLogin=false;render();}}},E('div',{c:'modal-c'},items)));
+}
+function doLogin(){var u=$('luser').value.trim(),p=$('lpass').value.trim();if(!u||!p)return msg('lmsg','请填写用户名和密码','e');api('POST','/api/v1/auth/login',{username:u,password:p}).then(function(r){if(!r.ok)return msg('lmsg',er(r.d),'e');S.token=r.d.access_token;localStorage.setItem('dst',S.token);loadUser();});}
+function doRegister(){var u=$('luser').value.trim(),p=$('lpass').value.trim(),e=$('lemail').value.trim();if(!u||!p||!e)return msg('lmsg','请填写用户名、邮箱、密码','e');if(p.length<8)return msg('lmsg','密码至少8位','e');api('POST','/api/v1/auth/register',{username:u,email:e,password:p}).then(function(r){if(!r.ok)return msg('lmsg',er(r.d),'e');msg('lmsg','✅ 注册成功，请登录','s');setTimeout(function(){S.showLogin='login';render();},1000);});}
+function loadUser(){api('GET','/api/v1/auth/me').then(function(r){if(r.ok){S.user=r.d;S.showLogin=false;render();}else{S.token='';msg('lmsg','登录失败','e');}});}
+
+function render(){
+  var a=$('app');a.innerHTML='';a.appendChild(topbar());
+  if(S.page==='sleep')renderSleep();else if(S.page==='chat')renderChat();else if(S.page==='community')renderCommunity();else if(S.page==='mine')renderMine();else renderHome();
+  var nv=E('div',{c:'nav'});
+  var tabs=[{p:'home',i:'🏠',n:'首页'},{p:'sleep',i:'😴',n:'记录'},{p:'chat',i:'💬',n:'AI'},{p:'community',i:'👥',n:'社区'},{p:'mine',i:'👤',n:'我的'}];
+  tabs.forEach(function(x){
+    nv.appendChild(E('div',{c:'nav-i'+(S.page===x.p?' on':''),onclick:function(){
+      if(!S.token&&x.p!=='home'&&x.p!=='community'){S.showLogin='login';render();return;}
+      S.page=x.p;render();
+    }},E('span',{},x.i),x.n));
+  });
+  a.appendChild(nv);
+  if(S.showLogin)loginModal();
+}
+
+// HOME
+function renderHome(){
+  var a=$('app'),c=E('div',{c:'container'});
+  var moods=['😊','😌','😴','😢','😤'];
+  var moodEls=moods.map(function(m){
+    return E('span',{c:'mood-e',onclick:function(){
+      if(!S.token){S.showLogin='login';render();return;}
+      api('POST','/api/v1/mood/records',{mood_emoji:m}).then(function(){renderHome();});
+    }},m);
+  });
+  c.appendChild(E('div',{c:'card'},E('h3',{},'😊 今日心情'),E('div',{c:'mood-row'},moodEls)));
+  if(S.token){
+    api('GET','/api/v1/sleep-records/stats/summary').then(function(r){
+      if(r.ok&&r.d&&r.d.total_records>0){
+        var d=r.d;
+        var sc=E('div',{c:'card'},E('h3',{},'📊 睡眠数据'),
+          E('div',{c:'stats'},
+            E('div',{c:'stat'},E('div',{c:'n'},dt(d.avg_score)),E('div',{c:'l'},'平均评分')),
+            E('div',{c:'stat'},E('div',{c:'n'},dt(d.avg_duration)+'h'),E('div',{c:'l'},'平均时长')),
+            E('div',{c:'stat'},E('div',{c:'n'},d.total_records),E('div',{c:'l'},'总记录')),
+            E('div',{c:'stat'},E('div',{c:'n'},d.streak_days||0),E('div',{c:'l'},'连续天'))
+          )
+        );
+        c.insertBefore(sc,c.children[1]);
+      }
+    });
+  }
+  c.appendChild(E('div',{c:'card'},E('h3',{},'🎯 每日任务'),
+    E('button',{c:'btn btn-p',onclick:function(){
+      if(!S.token){S.showLogin='login';render();return;}
+      api('POST','/api/v1/game/checkin').then(function(r){
+        if(r.ok)alert('✅ 签到成功！+'+r.d.points+'分\n连续签到：'+r.d.streak+'天');
+        else alert(er(r.d));
+      });
+    }},'📅 签到领积分')
+  ));
+  a.appendChild(c);
+}
+
+// SLEEP
+function renderSleep(){
+  if(!S.token){S.showLogin='login';render();return;}
+  var today=new Date().toISOString().slice(0,10),a=$('app'),c=E('div',{c:'container'});
+  c.appendChild(E('div',{c:'card'},E('h3',{},'😴 记录睡眠'),
+    E('input',{c:'inp',type:'date',id:'sDate',value:today}),
+    E('div',{s:{display:'flex',gap:8}},E('input',{c:'inp',type:'time',id:'sBed',value:'22:30',s:{flex:1}}),E('input',{c:'inp',type:'time',id:'sWake',value:'07:00',s:{flex:1}})),
+    E('label',{s:{color:'#9ca3af',fontSize:'0.8rem',marginBottom:4,display:'block'}},'质量'),
+    E('input',{c:'inp',type:'range',id:'sQual',min:1,max:5,value:3}),
+    E('div',{id:'sQlbl',s:{textAlign:'center',color:'#a5b4fc',marginBottom:10}},'⭐⭐⭐'),
+    E('input',{c:'inp',placeholder:'备注(可选)',id:'sNote'}),
+    E('button',{c:'btn btn-p',onclick:saveSleep},'💾 保存'),E('div',{id:'sMsg'})
+  ));
+  setTimeout(function(){var q=$('sQual');if(q)q.oninput=function(){var ss=['','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'];var l=$('sQlbl');if(l)l.textContent=ss[parseInt(this.value)];};},100);
+  api('GET','/api/v1/sleep-records?limit=10').then(function(r){
+    if(r.ok&&Array.isArray(r.d)&&r.d.length){
+      var rc=E('div',{c:'card'},E('h3',{},'📋 历史记录'));
+      r.d.forEach(function(x){
+        rc.appendChild(E('div',{c:'li'},E('span',{c:'t'},x.diary_date),E('span',{c:'v'},dt(x.duration_hours)+'h '+stars(x.quality)+' '+(x.score||'?')+'分')));
+      });
+      c.appendChild(rc);
+    }
+  });
+  a.appendChild(c);
+}
+function saveSleep(){
+  var d=$('sDate').value,b=$('sBed').value,w=$('sWake').value,q=parseInt($('sQual').value),n=$('sNote').value;
+  api('POST','/api/v1/sleep-records',{diary_date:d,bedtime:d+'T'+b+':00',wake_time:d+'T'+w+':00',quality:q,notes:n}).then(function(r){
+    var e=$('sMsg');
+    if(r.ok){e.textContent='✅ 保存成功';e.className='msg msg-s';setTimeout(function(){render();},800);}
+    else{e.textContent=er(r.d);e.className='msg msg-e';}
+  });
+}
+
+// CHAT
+function renderChat(){
+  if(!S.token){S.showLogin='login';render();return;}
+  var a=$('app'),c=E('div',{c:'container'});
+  var box=E('div',{c:'chat-area',id:'chatBox'});
+  box.appendChild(E('div',{c:'chat-m chat-a'},'👋 我是梦眠阁AI顾问，可以帮你分析睡眠问题、提供改善建议。试试问我👇'));
+  var row=E('div',{c:'chat-row'},E('input',{c:'inp',id:'cInp',placeholder:'问任何睡眠问题...',s:{marginBottom:0},onkeydown:function(e){if(e.key==='Enter')sendChat();}}),E('button',{c:'btn btn-p',onclick:sendChat,s:{padding:'10px 14px',width:'auto'}},'发送'));
+  c.appendChild(E('div',{c:'card'},E('h3',{},'💬 AI 睡眠顾问'),box,row));
+  a.appendChild(c);
+  setTimeout(function(){$('cInp').focus();},300);
+}
+function sendChat(){
+  var i=$('cInp'),msg=i.value.trim();if(!msg)return;i.value='';
+  var box=$('chatBox');box.appendChild(E('div',{c:'chat-m chat-u'},msg));
+  var ld=E('div',{c:'chat-m chat-a dot'},E('span'),E('span'),E('span'));box.appendChild(ld);box.scrollTop=box.scrollHeight;
+  api('POST','/api/v1/chat/send',{message:msg}).then(function(r){ld.remove();
+    if(r.ok)box.appendChild(E('div',{c:'chat-m chat-a'},r.d.reply||r.d.response||'收到你的消息了'));
+    else box.appendChild(E('div',{c:'chat-m chat-a',s:{color:'#f87171'}},er(r.d)));
+    box.scrollTop=box.scrollHeight;
+  });
+}
+
+// COMMUNITY (FIXED - no long lines)
+function renderCommunity(){
+  var a=$('app'),c=E('div',{c:'container'});
+  var hdrCard=E('div',{c:'card'});
+  var hdrRow=E('div',{s:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}});
+  hdrRow.appendChild(E('h3',{s:{marginBottom:0}},'👥 社区动态'));
+  if(S.token){hdrRow.appendChild(E('button',{c:'btn btn-sm btn-p',onclick:newPost},'+ 发帖'));}
+  hdrCard.appendChild(hdrRow);
+  c.appendChild(hdrCard);
+
+  var pf=E('div',{id:'postForm',s:{display:'none'}});
+  pf.appendChild(E('textarea',{c:'inp',id:'pContent',placeholder:'分享你的睡眠心得...'}));
+  var pfBtns=E('div',{s:{display:'flex',gap:8}});
+  pfBtns.appendChild(E('button',{c:'btn btn-sm btn-p',s:{flex:1},onclick:submitPost},'发布'));
+  pfBtns.appendChild(E('button',{c:'btn btn-sm btn-o',s:{flex:1},onclick:function(){$('postForm').style.display='none';}},'取消'));
+  pf.appendChild(pfBtns);
+  c.appendChild(pf);
+
+  api('GET','/api/v1/community/posts?limit=10').then(function(r){
+    if(r.ok&&Array.isArray(r.d)&&r.d.length){
+      r.d.forEach(function(p){
+        var likes=p.like_count||0;
+        var cmts=p.comment_count||0;
+        var postDiv=E('div',{c:'post'});
+        var ph=E('div',{c:'ph'});
+        ph.appendChild(E('span',{},p.nickname||p.username||'用户'));
+        ph.appendChild(E('span',{},(p.created_at||'').slice(0,10)));
+        postDiv.appendChild(ph);
+        postDiv.appendChild(E('div',{c:'pb'},p.content||''));
+        var pa=E('div',{c:'pa'});
+        var likeBtn=E('span',{onclick:function(){
+          if(!S.token){S.showLogin='login';render();return;}
+          api('POST','/api/v1/community/posts/'+p.id+'/like').then(function(){renderCommunity();});
+        }},'👍 '+likes);
+        pa.appendChild(likeBtn);
+        pa.appendChild(E('span',{},'💬 '+cmts));
+        postDiv.appendChild(pa);
+        c.appendChild(postDiv);
+      });
+    }else{
+      c.appendChild(E('div',{c:'card'},E('p',{s:{textAlign:'center',color:'#9ca3af',padding:20}},'暂无帖子，登录后来发第一帖！')));
+    }
+  });
+  a.appendChild(c);
+}
+function newPost(){if(!S.token){S.showLogin='login';render();return;}$('postForm').style.display='block';}
+function submitPost(){
+  var ct=$('pContent').value.trim();if(!ct)return;
+  api('POST','/api/v1/community/posts',{content:ct}).then(function(r){
+    if(r.ok){$('pContent').value='';$('postForm').style.display='none';renderCommunity();}
+    else alert(er(r.d));
+  });
+}
+
+// MINE
+function renderMine(){
+  if(!S.token){S.showLogin='login';render();return;}
+  var a=$('app'),c=E('div',{c:'container'});
+  c.appendChild(E('div',{c:'card'},E('h3',{},'👤 个人中心'),
+    E('div',{c:'li'},E('span',{},'昵称'),E('span',{c:'v'},S.user?S.user.nickname||S.user.username:'')),
+    E('div',{c:'li'},E('span',{},'邮箱'),E('span',{c:'v'},S.user?S.user.email||'—':'—'))
+  ));
+  c.appendChild(E('div',{c:'card'},E('h3',{},'⚙️ 设置'),E('button',{c:'btn btn-o',onclick:logout},'🚪 退出登录')));
+  a.appendChild(c);
+}
+function logout(){S.token='';S.user=null;localStorage.removeItem('dst');S.showLogin=false;S.page='home';render();}
+
+render();
+</script>
+</body>
+</html>

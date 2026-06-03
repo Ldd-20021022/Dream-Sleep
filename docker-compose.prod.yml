@@ -1,0 +1,104 @@
+version: "3.8"
+
+# ============================================================
+# 梦眠阁 生产环境 Docker Compose
+# ============================================================
+#
+# 密钥注入方式 (任选其一):
+#
+#   A) .env 文件 (简单，适合单机部署):
+#      cp .env.example .env && vim .env   # 填入生产密钥
+#      docker compose -f docker-compose.prod.yml up -d
+#
+#   B) 环境变量 (CI/CD 注入，密钥不落盘):
+#      export DB_ROOT_PASSWORD="..."
+#      export SECRET_KEY="..."
+#      export DEEPSEEK_API_KEY="..."
+#      docker compose -f docker-compose.prod.yml --env-file /dev/null up -d
+#
+#   C) Docker Secrets (Swarm 模式，企业级):
+#      docker swarm init
+#      echo "your-secret" | docker secret create deepseek_api_key -
+#      docker stack deploy -c docker-compose.prod.yml mengmian
+#
+# 启动: docker compose -f docker-compose.prod.yml up -d
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mengmian-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme}
+      MYSQL_DATABASE: sleep_manager
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "127.0.0.1:3307:3306"  # 仅本地访问，不暴露到公网
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./deploy/my.cnf:/etc/mysql/conf.d/my.cnf:ro  # 数据库调优配置
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-changeme}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mengmian-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mengmian-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql+pymysql://root:${DB_ROOT_PASSWORD:-changeme}@db:3306/sleep_manager
+      SECRET_KEY: ${SECRET_KEY:-changeme}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_SECRET: ${WECHAT_SECRET:-}
+      PRODUCTION: "true"
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      REFRESH_TOKEN_EXPIRE_MINUTES: "10080"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://p1.ansycare.com}
+    ports:
+      - "127.0.0.1:8000:8000"  # 仅本地回环，由 nginx 反向代理
+    depends_on:
+      - db
+        
+    volumes:
+      - ./backend/static:/app/static
+    networks:
+      - mengmian-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nginx:
+    image: nginx:alpine
+    container_name: mengmian-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend/static:/usr/share/nginx/html/static:ro
+      - ./ssl:/etc/nginx/ssl:ro  # SSL 证书目录
+    depends_on:
+      - backend
+    networks:
+      - mengmian-net
+
+volumes:
+  mysql_data:
+
+networks:
+  mengmian-net:
+    driver: bridge

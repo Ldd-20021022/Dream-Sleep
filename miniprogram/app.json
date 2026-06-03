@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/record/record",
+    "pages/noise/noise",
+    "pages/chat/chat",
+    "pages/tasks/tasks",
+    "pages/analysis/analysis",
+    "pages/community/community",
+    "pages/knowledge/knowledge",
+    "pages/courses/courses",
+    "pages/game/game",
+    "pages/game/adventure/adventure",
+    "pages/game/breathing/breathing",
+    "pages/game/garden/garden",
+    "pages/game/quiz/quiz",
+    "pages/game/runner/runner",
+    "pages/game/sound/sound",
+    "pages/game/worry/worry",
+    "pages/assessment/assessment",
+    "pages/alarm/alarm",
+    "pages/vip/vip",
+    "pages/profile/profile",
+    "pages/onboarding/onboarding",
+    "pages/report/report",
+    "pages/referral/referral"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#161625",
+    "navigationBarTitleText": "梦眠阁",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a0a12",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#585870",
+    "selectedColor": "#5b6abf",
+    "backgroundColor": "#1c1c30",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "概览" },
+      { "pagePath": "pages/analysis/analysis", "text": "分析" },
+      { "pagePath": "pages/record/record", "text": "记录" },
+      { "pagePath": "pages/profile/profile", "text": "我的" }
+    ]
+  },
+  "requiredBackgroundModes": ["audio"],
+  "sitemapLocation": "sitemap.json"
+}

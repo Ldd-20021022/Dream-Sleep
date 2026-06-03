@@ -1,0 +1,114 @@
+/* Login hint */
+.login-hint-card { text-align:center;padding:60rpx 32rpx;background:var(--card-bg);border-radius:20rpx }
+.lh-icon { font-size:64rpx;margin-bottom:16rpx }
+.lh-text { font-size:26rpx;color:var(--tx3);margin-bottom:8rpx }
+
+/* Tabs */
+.tab-row { display:flex;background:var(--bg2,#1a1a2e);border-radius:16rpx;padding:6rpx;margin-bottom:20rpx }
+.tab-btn { flex:1;text-align:center;padding:16rpx;border-radius:12rpx;font-size:26rpx;color:var(--tx3,#999) }
+.tab-on { background:var(--primary,#6C63FF);color:#fff;font-weight:600 }
+
+/* Hall Header */
+.hall-header { text-align:center;padding:40rpx 20rpx;margin-bottom:20rpx }
+.hall-title { font-size:40rpx;font-weight:800;color:#fff }
+.hall-sub { font-size:24rpx;color:var(--tx3,#999);margin-top:8rpx }
+
+/* Game Entry Card */
+.game-entry {
+  display:flex;align-items:center;gap:20rpx;
+  border-radius:20rpx;padding:24rpx 20rpx;margin-bottom:16rpx;
+  transition:all 0.2s
+}
+.game-entry:active { transform:scale(0.98);opacity:0.9 }
+.ge-left { width:80rpx;text-align:center }
+.ge-icon { font-size:52rpx }
+.ge-body { flex:1 }
+.ge-header { display:flex;align-items:center;gap:10rpx;flex-wrap:wrap;margin-bottom:8rpx }
+.ge-name { font-size:30rpx;font-weight:700;color:#fff }
+.ge-badge { font-size:18rpx;padding:2rpx 12rpx;border-radius:20rpx;font-weight:600 }
+.ge-soon { background:rgba(255,255,255,0.1)!important;color:var(--tx3,#999)!important;border:1rpx solid rgba(255,255,255,0.15) }
+.ge-desc { font-size:22rpx;color:var(--tx2,#aaa);line-height:1.5;margin-bottom:10rpx }
+.ge-tags { display:flex;gap:8rpx;flex-wrap:wrap }
+.ge-tag { font-size:18rpx;color:var(--tx3,#999);background:rgba(255,255,255,0.06);padding:2rpx 10rpx;border-radius:8rpx }
+.ge-arrow { font-size:32rpx;color:var(--tx3,#666) }
+
+/* Hero Card (status tab) */
+.hero-card { background:linear-gradient(135deg,#1a1a4e,#0f0f3e 50%,#16213e);border-radius:24rpx;padding:36rpx 28rpx 24rpx;margin-bottom:24rpx;text-align:center;position:relative;overflow:hidden;border:1rpx solid rgba(108,99,255,.3) }
+.hero-bg-glow { position:absolute;top:-60rpx;left:50%;transform:translateX(-50%);width:300rpx;height:300rpx;background:radial-gradient(circle,rgba(108,99,255,.15),transparent);border-radius:50% }
+.hero-level-badge { display:inline-block;background:rgba(108,99,255,.2);color:var(--primary,#6C63FF);padding:4rpx 24rpx;border-radius:24rpx;font-size:26rpx;font-weight:700;margin-bottom:8rpx;position:relative }
+.hero-level-name { font-size:48rpx;font-weight:800;color:#fff;position:relative }
+.xp-bar-wrap { position:relative;margin:16rpx 0 }
+.xp-bar-bg { height:12rpx;background:rgba(255,255,255,.1);border-radius:6rpx;overflow:hidden }
+.xp-bar-fill { height:100%;background:linear-gradient(90deg,#6C63FF,#9B59B6,#0EC9A6);border-radius:6rpx;transition:width .8s;position:relative }
+.xp-bar-glow { position:absolute;right:0;top:0;width:40rpx;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4)) }
+.xp-bar-label { font-size:22rpx;color:var(--tx3,#999);margin-top:6rpx }
+.next-perk { font-size:22rpx;color:#F39C12;background:rgba(243,156,18,.1);padding:8rpx 20rpx;border-radius:20rpx;display:inline-block;margin-bottom:20rpx }
+.streak-row { display:flex;justify-content:center;gap:40rpx;margin:24rpx 0 }
+.streak-item { text-align:center }
+.streak-icon { font-size:36rpx }
+.streak-num { font-size:40rpx;font-weight:800;color:#fff }
+.streak-label { font-size:20rpx;color:var(--tx3,#999) }
+
+/* Missions */
+.mission-item { display:flex;align-items:center;gap:16rpx;padding:16rpx;border-radius:12rpx;margin-bottom:8rpx;background:rgba(255,255,255,.02) }
+.mission-done { opacity:.5;background:rgba(14,201,166,.04) }
+.mission-icon { font-size:32rpx;width:48rpx;text-align:center }
+.mission-info { flex:1 }
+.mission-title { font-size:26rpx;color:var(--tx1,#eee) }
+.mission-desc { font-size:22rpx;color:var(--tx3,#999) }
+.mission-xp { font-size:24rpx;font-weight:600;color:var(--success,#0EC9A6) }
+
+/* Challenge */
+.challenge-card { background:linear-gradient(135deg,rgba(243,156,18,.08),rgba(243,156,18,.02));border:1rpx solid rgba(243,156,18,.2) }
+.challenge-badge { display:inline-block;font-size:22rpx;color:#F39C12;background:rgba(243,156,18,.15);padding:4rpx 16rpx;border-radius:20rpx;margin-bottom:10rpx }
+.challenge-title { font-size:30rpx;font-weight:700;color:#fff;margin-bottom:4rpx }
+.challenge-desc { font-size:24rpx;color:var(--tx2,#aaa);margin-bottom:16rpx }
+.challenge-bar-bg { height:10rpx;background:rgba(255,255,255,.1);border-radius:5rpx;overflow:hidden }
+.challenge-bar-fill { height:100%;background:linear-gradient(90deg,#F39C12,#E74C3C);border-radius:5rpx }
+.challenge-progress-text { font-size:22rpx;color:var(--tx3,#999);margin-top:4rpx;text-align:right }
+
+/* Achievements */
+.ach-grid { display:flex;flex-wrap:wrap;gap:12rpx }
+.ach-item { width:calc(25% - 9rpx);text-align:center;padding:20rpx 8rpx;border:1rpx solid var(--bd,#333);border-radius:16rpx;opacity:.35 }
+.ach-on { opacity:1;border-color:var(--accent,#6C63FF);background:rgba(108,99,255,.06) }
+.ach-icon { font-size:44rpx }
+.ach-name { font-size:20rpx;margin-top:6rpx;color:var(--tx2,#aaa) }
+
+/* Leaderboard */
+.lb-row { display:flex;align-items:center;gap:16rpx;padding:14rpx 0;border-bottom:1rpx solid rgba(255,255,255,.04) }
+.lb-rank { font-size:24rpx;font-weight:700;width:40rpx;text-align:center }
+.lb-rank-1,.lb-rank-2,.lb-rank-3 { font-size:36rpx;width:50rpx }
+.lb-avatar { width:56rpx;height:56rpx;border-radius:50%;background:var(--primary,#6C63FF);display:flex;align-items:center;justify-content:center;font-size:26rpx;color:#fff;font-weight:700 }
+.lb-name { flex:1;font-size:26rpx;color:var(--tx1,#eee) }
+.lb-level { font-size:22rpx;color:var(--tx3,#999) }
+.lb-val { font-size:24rpx;font-weight:600;color:var(--success,#0EC9A6) }
+
+.section-title { font-size:28rpx;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:16rpx }
+.count-badge { font-size:22rpx;color:var(--tx3,#999);background:rgba(255,255,255,.05);padding:2rpx 16rpx;border-radius:20rpx }
+.empty-hint { text-align:center;color:var(--tx3,#999);padding:40rpx;font-size:24rpx }
+.card { background:var(--bg2,#1a1a2e);border-radius:20rpx;padding:24rpx;margin-bottom:20rpx;border:1rpx solid var(--bd,#333) }
+
+/* Ritual */
+.ritual-wrap { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:24rpx }
+.ritual-card { background:var(--card-bg);border-radius:32rpx;padding:36rpx 28rpx;width:100%;max-width:640rpx;max-height:90vh;overflow-y:auto;border:1rpx solid var(--bd);display:flex;flex-direction:column; }
+.ritual-card .btn { flex-shrink: 0; margin-top: 20rpx; }
+.ritual-card .input { flex-shrink: 0; }
+.ritual-mode-btn { flex:1;text-align:center;padding:24rpx 16rpx;border:1rpx solid var(--bd);border-radius:20rpx;font-size:26rpx;font-weight:500;color:var(--tx) }
+
+/* Training */
+.train-card { cursor:pointer;transition:all 0.2s }
+.train-card:active { opacity:0.8;transform:scale(0.98) }
+
+/* Coming soon */
+.coming-tag { padding:12rpx 20rpx;border-radius:16rpx;background:var(--hover);font-size:22rpx;color:var(--tx3);display:flex;align-items:center;gap:8rpx }
+
+/* Ritual entry card */
+.ritual-entry { background: linear-gradient(135deg, rgba(139,156,247,0.08), rgba(94,234,212,0.06)); border-color: rgba(139,156,247,0.15); }
+.ritual-moon { font-size: 56rpx; animation: ritualFloat 3s ease-in-out infinite; }
+@keyframes ritualFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12rpx)} }
+.ritual-modes { display: flex; gap: 12rpx; }
+.ritual-mode { flex: 1; text-align: center; padding: 20rpx 12rpx; border: 1rpx solid rgba(255,255,255,0.08); border-radius: 16rpx; transition: all 0.2s; }
+.ritual-mode-hover { border-color: var(--primary); background: rgba(139,156,247,0.08); transform: scale(0.96); }
+.rm-icon { font-size: 36rpx; margin-bottom: 6rpx; }
+.rm-name { font-size: 24rpx; font-weight: 600; color: var(--tx); margin-bottom: 2rpx; }
+.rm-time { font-size: 20rpx; color: var(--tx3); }

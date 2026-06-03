@@ -1,0 +1,94 @@
+<view class="container">
+  <view class="page-title">睡眠分析</view>
+
+  <!-- Score Breakdown -->
+  <view wx:if="{{lastRecord && lastRecord.score_breakdown}}" class="card" style="padding:20rpx">
+    <view class="section-title">📊 昨晚评分怎么来的</view>
+    <view class="br-row"><text class="br-label">⏱️ 时长 {{lastRecord.duration_hours}}h</text><text>{{lastRecord.score_breakdown.duration.score}}/{{lastRecord.score_breakdown.duration.max}}</text></view>
+    <view class="br-row"><text class="br-label">⭐ 质量 {{lastRecord.score_breakdown.quality.label}}</text><text>{{lastRecord.score_breakdown.quality.score}}/{{lastRecord.score_breakdown.quality.max}}</text></view>
+    <view class="br-row"><text class="br-label">🏷️ 标签 {{lastRecord.score_breakdown.tags.positive.length > 0 ? lastRecord.score_breakdown.tags.positive.join(' ') : '无'}} {{lastRecord.score_breakdown.tags.negative.length > 0 ? '· ' + lastRecord.score_breakdown.tags.negative.join(' ') : ''}}</text><text>{{lastRecord.score_breakdown.tags.score}}/{{lastRecord.score_breakdown.tags.max}}</text></view>
+    <view class="br-row" style="font-weight:700;color:var(--teal);border:none;padding-top:12rpx"><text>总分</text><text>{{lastRecord.score}} 分</text></view>
+  </view>
+
+  <!-- Period -->
+  <view class="period-row" style="margin-bottom:16rpx">
+    <view class="p-btn {{period===7?'p-on':''}}" data-days="7" bindtap="changePeriod">7天</view>
+    <view class="p-btn {{period===14?'p-on':''}}" data-days="14" bindtap="changePeriod">14天</view>
+    <view class="p-btn {{period===30?'p-on':''}}" data-days="30" bindtap="changePeriod">30天</view>
+  </view>
+
+  <view wx:if="{{!trends || !trends.has_data}}" class="empty-hint">
+    <view class="empty-icon">📊</view>
+    <view>{{trends ? trends.message : '加载中...'}}</view>
+  </view>
+
+  <!-- Overview Tab -->
+  <view wx:if="{{trends && trends.has_data && activeTab==='overview'}}">
+    <view class="metrics-row">
+      <view class="metric-card accent"><view class="m-val">{{trends.overview.avg_score}}</view><view class="m-label">平均评分</view></view>
+      <view class="metric-card teal"><view class="m-val">{{trends.overview.avg_duration}}h</view><view class="m-label">平均时长</view></view>
+      <view class="metric-card warn"><view class="m-val">{{trends.overview.consistency_label=='regular'?'规律':trends.overview.consistency_label=='moderate'?'一般':'不规律'}}</view><view class="m-label">作息规律</view></view>
+      <view class="metric-card"><view class="m-val">{{trends.overview.streak_days}}天</view><view class="m-label">连续达标</view></view>
+    </view>
+
+    <!-- Score Distribution -->
+    <view class="card">
+      <view class="section-title">📊 评分分布 ({{trends.record_count}}天)</view>
+      <view wx:for="{{[['优秀','excellent','#2ECC71'],['良好','good','#3498DB'],['一般','fair','#F39C12'],['较差','poor','#E74C3C']]}}" wx:key="*this" wx:for-item="d" class="dist-row">
+        <view class="dist-label">{{d[0]}}</view>
+        <view class="dist-bar-bg"><view class="dist-bar" style="width:{{trends.distribution[d[1]]/trends.record_count*100}}%;background:{{d[2]}}"></view></view>
+        <view class="dist-count">{{trends.distribution[d[1]]}}天</view>
+      </view>
+    </view>
+
+    <!-- Weekly Comparison -->
+    <view class="card" wx:if="{{trends.weekly.length > 0}}">
+      <view class="section-title">📅 周度对比</view>
+      <view class="week-header">
+        <view class="wh-week">周期</view><view class="wh-score">均分</view><view class="wh-dur">时长</view><view class="wh-days">天数</view>
+      </view>
+      <view wx:for="{{trends.weekly}}" wx:key="week" class="week-row">
+        <view class="wh-week">{{item.week}}</view>
+        <view class="wh-score" style="color:{{barColor(item.avg_score)}}">{{item.avg_score}}分</view>
+        <view class="wh-dur">{{item.avg_duration}}h</view>
+        <view class="wh-days">{{item.record_count}}天</view>
+      </view>
+    </view>
+
+    <view class="card" style="text-align:center" bindtap="goReport">
+      <view style="color:var(--primary);font-size:26rpx">📋 查看完整睡眠报告 →</view>
+    </view>
+  </view>
+
+  <!-- Daily Trend Tab -->
+  <view wx:if="{{trends && trends.has_data && activeTab==='daily'}}">
+    <view class="card">
+      <view class="section-title">📈 每日评分趋势</view>
+      <canvas type="2d" id="trendCanvas" style="width:100%;height:280rpx"></canvas>
+    </view>
+
+    <!-- Scrollable daily list -->
+    <view class="card">
+      <view class="section-title">📋 每日明细</view>
+      <scroll-view scroll-y style="max-height:500rpx">
+        <view wx:for="{{trends.daily}}" wx:key="date" wx:for-item="d" class="daily-row">
+          <view class="dr-date">{{d.date}}</view>
+          <view class="dr-score" style="color:{{barColor(d.score)}}">{{d.score > 0 ? d.score + '分' : '--'}}</view>
+          <view class="dr-dur">{{d.duration > 0 ? d.duration + 'h' : '--'}}</view>
+          <view class="dr-bar"><view class="dr-fill" style="width:{{d.score}}%;background:{{barColor(d.score)}}"></view></view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- Suggestions Tab -->
+  <view wx:if="{{trends && trends.has_data && activeTab==='suggestions'}}">
+    <view wx:for="{{trends.suggestions}}" wx:key="text" class="card sug-card" style="border-left:5rpx solid {{item.priority==='high'?'#E74C3C':item.priority==='medium'?'#F39C12':item.priority==='positive'?'#2ECC71':'#95A5A6'}}">
+      <view class="sug-priority {{item.priority}}">
+        {{item.priority==='high'?'🔴 优先改善':item.priority==='medium'?'🟡 建议关注':item.priority==='positive'?'🟢 继续保持':'ℹ️ 提示'}}
+      </view>
+      <view class="sug-text">{{item.text}}</view>
+    </view>
+    <view wx:if="{{!trends.suggestions || trends.suggestions.length===0}}" class="empty-hint">持续记录更多睡眠数据以获取建议</view>
+  </view>
+</view>

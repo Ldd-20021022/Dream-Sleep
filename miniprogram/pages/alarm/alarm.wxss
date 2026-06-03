@@ -1,0 +1,1 @@
+.method-row{display:flex;gap:12rpx}.method-btn{padding:12rpx 24rpx;border:1rpx solid var(--bd);border-radius:12rpx;font-size:24rpx}.method-btn.on{border-color:var(--ac);background:rgba(108,99,255,0.1)}.sug-item{display:flex;justify-content:space-between;align-items:center;padding:12rpx 0;border-bottom:1rpx solid var(--bd)}

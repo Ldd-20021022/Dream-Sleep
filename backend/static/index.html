@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>梦眠阁 - AI智能睡眠管理平台 | 科学改善每一夜</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:#080b1a;color:#e0e0f0;line-height:1.6}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,11,26,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);padding:16px 0}
+nav .container{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.3rem;font-weight:600;color:#c4b5fd;letter-spacing:3px;text-decoration:none}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:#8b8fca;text-decoration:none;font-size:0.9rem;transition:color 0.2s}
+.nav-links a:hover{color:#c4b5fd}
+.btn-nav{background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:0.9rem;cursor:pointer;font-weight:600;transition:transform 0.2s,box-shadow 0.2s}
+.btn-nav:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,102,241,0.3)}
+
+/* Hero */
+.hero{padding:180px 0 100px;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none}
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,0.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%)}
+.hero-glow2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(165,180,252,0.08) 0%,transparent 70%);top:30%;right:10%}
+.moon-hero{font-size:100px;display:block;margin-bottom:20px;position:relative;z-index:1;animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+h1{font-size:3.5rem;font-weight:300;letter-spacing:12px;background:linear-gradient(135deg,#ddd6fe,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;position:relative;z-index:1}
+.hero-desc{font-size:1.2rem;color:#8b8fca;max-width:600px;margin:0 auto 30px;position:relative;z-index:1;line-height:1.8}
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.btn-lg{padding:16px 36px;border-radius:14px;font-size:1.05rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.25s}
+.btn-primary{background:linear-gradient(135deg,#818cf8,#6366f1);color:#fff;border:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(99,102,241,0.35)}
+.btn-ghost{background:rgba(255,255,255,0.04);color:#c4b5fd;border:1px solid rgba(255,255,255,0.1)}
+.btn-ghost:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px)}
+.hero-stats{display:flex;justify-content:center;gap:60px;margin-top:60px;position:relative;z-index:1}
+.hstat{text-align:center}
+.hstat-num{font-size:2.4rem;font-weight:700;color:#c4b5fd}
+.hstat-lbl{font-size:0.85rem;color:#6b6f9a;margin-top:4px}
+
+/* Section */
+section{padding:100px 0}
+.section-label{text-align:center;font-size:0.85rem;color:#818cf8;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px}
+.section-title{text-align:center;font-size:2.2rem;color:#e0e0f0;margin-bottom:16px;font-weight:400}
+.section-sub{text-align:center;color:#6b6f9a;font-size:1rem;max-width:550px;margin:0 auto 60px}
+
+/* Features Grid */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.fcard{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:40px 30px;transition:all 0.3s;position:relative;overflow:hidden}
+.fcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(129,140,248,0.4),transparent);opacity:0;transition:opacity 0.3s}
+.fcard:hover::before{opacity:1}
+.fcard:hover{transform:translateY(-6px);background:rgba(255,255,255,0.04);border-color:rgba(129,140,248,0.15);box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.fcard .icon-wrap{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:20px}
+.fcard h3{font-size:1.15rem;color:#c4b5fd;margin-bottom:10px}
+.fcard p{font-size:0.9rem;color:#6b6f9a;line-height:1.7}
+
+/* AI Section */
+.ai-section{background:rgba(129,140,248,0.03);border-top:1px solid rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.03)}
+.ai-showcase{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.ai-text h2{font-size:2rem;color:#c4b5fd;margin-bottom:20px;font-weight:400}
+.ai-text p{color:#8b8fca;font-size:1.05rem;line-height:1.8;margin-bottom:20px}
+.ai-capabilities{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ai-capabilities li{display:flex;align-items:center;gap:10px;font-size:0.9rem;color:#a5b4fc}
+.ai-capabilities .dot{width:8px;height:8px;border-radius:50%;background:#818cf8;flex-shrink:0}
+.ai-mock{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:30px;text-align:left;font-family:monospace;font-size:0.85rem;line-height:1.8;max-height:400px;overflow-y:auto}
+.ai-msg{margin-bottom:16px;padding:12px 16px;border-radius:12px}
+.ai-msg.user{background:rgba(129,140,248,0.2);color:#c4b5fd;margin-left:20px}
+.ai-msg.bot{background:rgba(255,255,255,0.04);color:#8b8fca;margin-right:20px}
+.ai-msg.bot .highlight{color:#a5b4fc}
+
+/* How It Works */
+.steps-h{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step-card{text-align:center;position:relative}
+.step-num{width:64px;height:64px;border-radius:50%;background:rgba(129,140,248,0.1);border:2px solid rgba(129,140,248,0.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#a5b4fc;margin:0 auto 20px}
+.step-card h4{color:#e0e0f0;margin-bottom:8px;font-size:1rem}
+.step-card p{color:#6b6f9a;font-size:0.85rem;line-height:1.6}
+.step-card:not(:last-child)::after{content:'→';position:absolute;top:25px;right:-28px;font-size:1.5rem;color:#2a2d4a}
+
+/* Platform Cards */
+.platforms{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.plat-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:40px 30px;text-align:center;transition:all 0.3s}
+.plat-card:hover{transform:translateY(-4px);border-color:rgba(129,140,248,0.2)}
+.plat-card .plat-icon{font-size:3rem;margin-bottom:16px}
+.plat-card h3{font-size:1.15rem;color:#e0e0f0;margin-bottom:8px}
+.plat-card p{font-size:0.85rem;color:#6b6f9a;margin-bottom:20px;line-height:1.6}
+.plat-card .btn-sm{display:inline-block;padding:10px 28px;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;text-decoration:none;color:#c4b5fd;border:1px solid rgba(129,140,248,0.3);transition:all 0.2s}
+.plat-card .btn-sm:hover{background:rgba(129,140,248,0.1)}
+
+/* Testimonials */
+.testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.tcard{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:30px 24px}
+.tcard .stars-c{color:#fbbf24;font-size:0.9rem;margin-bottom:12px}
+.tcard .text{color:#8b8fca;font-size:0.9rem;line-height:1.7;margin-bottom:16px;font-style:italic}
+.tcard .author{color:#a5b4fc;font-size:0.85rem}
+.tcard .role{color:#6b6f9a;font-size:0.75rem}
+
+/* FAQ */
+.faq{max-width:800px;margin:0 auto}
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.05);padding:24px 0;cursor:pointer}
+.faq-q{display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;color:#c4b5fd}
+.faq-arrow{transition:transform 0.3s;font-size:0.8rem;color:#6b6f9a}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s;color:#8b8fca;font-size:0.95rem;line-height:1.7;padding-right:40px}
+.faq-item.open .faq-a{max-height:200px;padding-top:12px}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+
+/* Footer */
+footer{padding:60px 0 40px;border-top:1px solid rgba(255,255,255,0.05);text-align:center}
+.footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:left;margin-bottom:40px}
+.footer-col h4{color:#c4b5fd;margin-bottom:16px;font-size:0.95rem}
+.footer-col a,.footer-col p{display:block;color:#6b6f9a;font-size:0.85rem;text-decoration:none;margin-bottom:8px;line-height:1.8}
+.footer-col a:hover{color:#a5b4fc}
+.footer-bottom{color:#4a4d6e;font-size:0.8rem;padding-top:24px;border-top:1px solid rgba(255,255,255,0.03)}
+
+@media(max-width:768px){
+  h1{font-size:2.2rem}
+  .features-grid,.steps-h,.testimonials{grid-template-columns:1fr}
+  .ai-showcase,.platforms{grid-template-columns:1fr}
+  .hero-stats{gap:30px}
+  .nav-links{display:none}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="#" class="logo">🌙 梦眠阁</a>
+    <ul class="nav-links">
+      <li><a href="#features">功能</a></li>
+      <li><a href="#ai">AI 能力</a></li>
+      <li><a href="#how">流程</a></li>
+      <li><a href="#download">下载</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#download" class="btn-nav">立即体验</a>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+  </div>
+  <div class="container">
+    <span class="moon-hero">🌙</span>
+    <h1>梦 眠 阁</h1>
+    <p class="hero-desc">基于 DeepSeek 大模型的 AI 智能睡眠管理平台<br>科学监测 · 深度分析 · 个性化改善方案</p>
+    <div class="hero-cta">
+      <a href="#download" class="btn-lg btn-primary">🚀 开始改善睡眠</a>
+      <a href="#features" class="btn-lg btn-ghost">了解更多 →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num">2,400+</div><div class="hstat-lbl">注册用户</div></div>
+      <div class="hstat"><div class="hstat-num">4.9</div><div class="hstat-lbl">用户评分</div></div>
+      <div class="hstat"><div class="hstat-num">94%</div><div class="hstat-lbl">睡眠改善率</div></div>
+      <div class="hstat"><div class="hstat-num">50K+</div><div class="hstat-lbl">睡眠记录</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="container">
+    <div class="section-label">Core Features</div>
+    <h2 class="section-title">全方位睡眠健康管理</h2>
+    <p class="section-sub">从睡眠追踪到 AI 分析，从习惯养成到社区互助，一站式覆盖睡眠改善全链路</p>
+    <div class="features-grid">
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(99,102,241,0.15);color:#818cf8">📊</div>
+        <h3>智能睡眠监测</h3>
+        <p>精准记录入睡/醒来时间、各睡眠阶段分布、睡眠效率评分。支持手动记录与可穿戴设备数据同步，自动生成可视化睡眠趋势图。</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(16,185,129,0.15);color:#10b981">🤖</div>
+        <h3>AI 深度分析引擎</h3>
+        <p>DeepSeek 大模型驱动的深度睡眠报告，支持风险预测、异常检测、趋势分析。AI 自动识别失眠、睡眠呼吸暂停等潜在问题并给出就医建议。</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(245,158,11,0.15);color:#f59e0b">🎮</div>
+        <h3>游戏化习惯养成</h3>
+        <p>每日签到打卡、睡眠知识问答竞赛、睡眠花园种植系统。完成任务解锁成就徽章，用趣味机制帮你建立规律作息。</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(236,72,153,0.15);color:#ec4899">👥</div>
+        <h3>社区互助系统</h3>
+        <p>睡眠心得分享、助眠技巧讨论、睡眠挑战赛组队。点赞评论机制 + 关注系统，和千万睡眠改善者一起进步。</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(14,165,233,0.15);color:#0ea5e9">🧘</div>
+        <h3>放松与助眠工具</h3>
+        <p>腹式呼吸引导、正念冥想课程、白噪音音景定制（雨声/篝火/海浪）、放松空间沉浸式体验，帮助快速入眠。</p>
+      </div>
+      <div class="fcard">
+        <div class="icon-wrap" style="background:rgba(168,85,247,0.15);color:#a855f7">📚</div>
+        <h3>CBT-I 专业课程</h3>
+        <p>基于认知行为疗法的 21 天失眠改善计划，每日一课 + 实践任务。AI 教练一对一指导，90% 学员睡眠质量显著提升。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ai-section" id="ai">
+  <div class="container">
+    <div class="section-label">AI Powered</div>
+    <h2 class="section-title">DeepSeek 驱动的睡眠 AI</h2>
+    <p class="section-sub">不仅记录数据，更理解你的睡眠模式，提供专业级分析和个性化改善方案</p>
+    <div class="ai-showcase">
+      <div class="ai-text">
+        <h2>你的 24/7<br>私人睡眠顾问</h2>
+        <p>梦眠阁集成了 DeepSeek 大语言模型，能够深入分析你的睡眠数据，生成专业级别的深度睡眠报告、风险预测和个性化改善方案。就像拥有一位随时在线的睡眠专家。</p>
+        <ul class="ai-capabilities">
+          <li><span class="dot"></span>深度睡眠报告自动生成</li>
+          <li><span class="dot"></span>异常指标智能检测告警</li>
+          <li><span class="dot"></span>PDCA 改进计划自动生成</li>
+          <li><span class="dot"></span>睡眠知识智能问答</li>
+          <li><span class="dot"></span>个性化音景 AI 定制</li>
+          <li><span class="dot"></span>情感分析 + 心情追踪</li>
+          <li><span class="dot"></span>会议纪要智能总结</li>
+          <li><span class="dot"></span>整改案例智能推荐</li>
+        </ul>
+      </div>
+      <div class="ai-mock">
+        <div class="ai-msg user">最近一周我入睡需要1小时，怎么办？</div>
+        <div class="ai-msg bot">根据你的睡眠记录分析：<br><br>📊 <span class="highlight">平均入睡时间：58分钟</span>（超过正常30分钟）<br>📈 <span class="highlight">趋势：逐步恶化</span>（7天前42分钟）<br><br>🎯 <span class="highlight">建议方案：</span><br>1. 睡前1小时停止使用电子设备<br>2. 尝试4-7-8呼吸法（吸气4秒→屏息7秒→呼气8秒）<br>3. 固定22:30上床，即使睡不着也保持规律<br>4. 连续3天记录后我会生成详细改善计划<br><br>需要我开始21天CBT-I课程吗？</div>
+        <div class="ai-msg user">好，开始吧！</div>
+        <div class="ai-msg bot">✅ 已为你制定21天CBT-I改善计划！<br><br>📅 <span class="highlight">第1天任务：</span><br>• 固定22:30上床，6:30起床<br>• 记录睡前放松活动<br>• 完成刺激控制疗法入门<br><br>我会每天提醒并跟踪你的进展 🌙</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">四步开启好睡眠</h2>
+    <div class="steps-h">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h4>注册账号</h4>
+        <p>微信小程序搜索「梦眠阁」或下载 App，30秒快速注册</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h4>记录睡眠</h4>
+        <p>睡前打开 App，起床后确认时长与质量，或连接可穿戴设备自动同步</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h4>AI 分析</h4>
+        <p>连续记录 3-7 天后，AI 自动生成深度报告和个性化改善方案</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h4>持续改善</h4>
+        <p>跟随 AI 指导完成每日任务，参与社区挑战，养成终身受益的好习惯</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download" style="background:rgba(129,140,248,0.02)">
+  <div class="container">
+    <div class="section-label">Download</div>
+    <h2 class="section-title">选择你的平台</h2>
+    <p class="section-sub">全平台覆盖，随时随地关注睡眠健康</p>
+    <div class="platforms">
+      <div class="plat-card">
+        <div class="plat-icon">📱</div>
+        <h3>iOS / Android</h3>
+        <p>原生 Flutter 应用，流畅体验<br>支持 Apple Health / Google Fit</p>
+        <a href="#" class="btn-sm" onclick="alert('即将上线，敬请期待！')">App Store / Google Play</a>
+      </div>
+      <div class="plat-card">
+        <div class="plat-icon">💚</div>
+        <h3>微信小程序</h3>
+        <p>无需安装，即开即用<br>微信搜一搜「梦眠阁」</p>
+        <a href="#" class="btn-sm" onclick="alert('请在微信中搜索小程序「梦眠阁」')">打开小程序</a>
+      </div>
+      <div class="plat-card">
+        <div class="plat-icon">🔗</div>
+        <h3>Open API</h3>
+        <p>RESTful API 接口<br>支持第三方集成与定制开发</p>
+        <a href="https://api1.ansycare.com/docs" class="btn-sm">查看 API 文档</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="testimonials">
+  <div class="container">
+    <div class="section-label">User Stories</div>
+    <h2 class="section-title">用户怎么说</h2>
+    <div class="testimonials">
+      <div class="tcard">
+        <div class="stars-c">⭐⭐⭐⭐⭐</div>
+        <p class="text">"CBT-I课程太有用了！21天后我的入睡时间从90分钟降到25分钟。AI 教练的每日提醒和鼓励让我坚持下来了。"</p>
+        <div class="author">张先生</div>
+        <div class="role">互联网从业者 · 使用 3 个月</div>
+      </div>
+      <div class="tcard">
+        <div class="stars-c">⭐⭐⭐⭐⭐</div>
+        <p class="text">"睡眠花园的设计太可爱了！为了种满花园我每天坚持23点前睡。现在精神好多了，工作效率也提高了。"</p>
+        <div class="author">李女士</div>
+        <div class="role">设计师 · 使用 2 个月</div>
+      </div>
+      <div class="tcard">
+        <div class="stars-c">⭐⭐⭐⭐⭐</div>
+        <p class="text">"作为医生，我推荐给很多失眠患者。AI 分析报告的准确度出乎意料，PDCA 方案也很专业。"</p>
+        <div class="author">王医生</div>
+        <div class="role">神经内科医生 · 使用 1 个月</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">常见问题</h2>
+    <div class="faq">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">梦眠阁是免费的吗？<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">基础功能（睡眠记录、AI分析、社区互动）完全免费。高级功能（深度报告、VIP课程、专属顾问）提供付费会员服务。</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">AI 分析的准确性如何？<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">梦眠阁使用 DeepSeek 最新模型，经过百万级睡眠数据训练。分析报告由 AI 生成后经过医学专家审核框架，可作为参考但不能替代专业医疗诊断。</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">数据安全吗？<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">所有数据采用银行级加密传输和存储。我们严格遵守数据隐私法规，绝不会未经授权分享你的个人健康数据。可以随时导出或删除所有数据。</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">支持哪些设备？<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">支持 iOS、Android 手机，微信小程序，以及鸿蒙系统。未来将支持 Apple Watch、小米手环等可穿戴设备自动同步。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>🌙 梦眠阁</h4>
+        <p>AI 智能睡眠管理平台<br>让每一夜都成为深度修复之旅</p>
+      </div>
+      <div class="footer-col">
+        <h4>产品</h4>
+        <a href="#features">功能介绍</a>
+        <a href="#ai">AI 能力</a>
+        <a href="#download">下载</a>
+        <a href="https://api1.ansycare.com/docs">API 文档</a>
+      </div>
+      <div class="footer-col">
+        <h4>支持</h4>
+        <a href="#faq">常见问题</a>
+        <a href="#">用户协议</a>
+        <a href="#">隐私政策</a>
+        <a href="#">联系我们</a>
+      </div>
+      <div class="footer-col">
+        <h4>相关项目</h4>
+        <a href="https://p2.ansycare.com">智评通 - 三甲评审</a>
+        <a href="https://p1.asycare.cn">慢病健康管理</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 梦眠阁 Dream Sleep Pavilion · All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- Star background -->
+<script>
+var s=document.createElement('div');s.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0';document.body.prepend(s);
+for(var i=0;i<80;i++){var d=document.createElement('div');d.style.cssText='position:absolute;border-radius:50%;background:#fff;width:'+(Math.random()*3+1)+'px;height='+(Math.random()*3+1)+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;opacity:'+(Math.random()*0.4+0.1)+';animation:twinkle '+(Math.random()*3+2)+'s ease-in-out infinite;animation-delay:'+Math.random()*3+'s';s.appendChild(d);}
+var style=document.createElement('style');style.textContent='@keyframes twinkle{0%,100%{opacity:0.2}50%{opacity:0.7}}';document.head.appendChild(style);
+</script>
+</body>
+</html>

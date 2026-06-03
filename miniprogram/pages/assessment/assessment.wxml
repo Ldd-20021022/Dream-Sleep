@@ -1,0 +1,53 @@
+<view class="container">
+  <view class="page-title">📋 睡眠评估</view>
+
+  <!-- Scale Selection -->
+  <view wx:if="{{!selected}}">
+    <view wx:if="{{scales.length===0}}" class="empty">暂无可用评估量表</view>
+    <view wx:for="{{scales}}" wx:key="id" class="card scale-card" data-id="{{item.id}}" bindtap="selectScale">
+      <view class="scale-icon">{{item.name === 'PSQI' ? '📋' : item.name === 'ISI' ? '🔍' : '📝'}}</view>
+      <view class="scale-info">
+        <view class="scale-name">{{item.name}}</view>
+        <view class="scale-desc">{{item.desc}}</view>
+        <view class="scale-meta">{{item.question_count}} 题</view>
+      </view>
+      <view class="scale-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- Result -->
+  <view wx:elif="{{result}}" class="card result-card">
+    <view class="section-title">📊 评估结果</view>
+    <view class="result-score-ring">
+      <view class="rsr-score">{{result.score}}</view>
+      <view class="rsr-max">/ {{result.max_score}}</view>
+    </view>
+    <view class="result-severity {{result.severity}}">
+      {{result.severity==='normal'?'✅ 正常':result.severity==='mild'?'⚠️ 轻度':result.severity==='moderate'?'🔶 中度':'🔴 重度'}}
+    </view>
+    <view wx:if="{{result.ai_analysis}}" class="result-analysis">🤖 {{result.ai_analysis}}</view>
+    <view class="result-disclaimer">⚠️ 本评估不构成医学诊断，如有疑虑请咨询医生</view>
+    <button class="btn btn-primary" style="margin-top:24rpx" bindtap="goBack">🔄 重新评估</button>
+  </view>
+
+  <!-- Questions -->
+  <view wx:elif="{{totalCount>0}}" class="card">
+    <view class="progress-bar"><view class="progress-fill" style="width:{{answeredCount/totalCount*100}}%"></view></view>
+    <view class="progress-text">{{answeredCount}}/{{totalCount}} 已答</view>
+    <view wx:for="{{questions}}" wx:key="id" wx:for-index="idx" class="q-item">
+      <view class="q-num">{{idx+1}}</view>
+      <view class="q-body">
+        <view class="q-text">{{item.text}}</view>
+        <view wx:if="{{item.type==='scale'}}" class="q-opts">
+          <view wx:for="{{item.options}}" wx:key="*this" wx:for-index="oi"
+                class="q-opt {{answers[item.id]===oi?'on':''}}"
+                data-qid="{{item.id}}" data-val="{{oi}}" bindtap="setAnswer">{{item}}</view>
+        </view>
+        <input wx:elif="{{item.type==='number'}}" class="q-input" type="number" data-qid="{{item.id}}" bindinput="setAnswer" placeholder="请输入数字"/>
+      </view>
+    </view>
+    <button class="btn btn-primary btn-full" bindtap="submit" loading="{{loading}}" disabled="{{answeredCount < totalCount}}">
+      {{answeredCount < totalCount ? '请回答所有问题' : '✓ 提交评估'}}
+    </button>
+  </view>
+</view>

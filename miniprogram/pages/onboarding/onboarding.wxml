@@ -1,0 +1,141 @@
+<view class="container">
+  <!-- Progress -->
+  <view class="ob-progress">
+    <view wx:for="{{steps}}" wx:key="key" class="ob-dot {{step > index ? 'done' : ''}} {{step === index ? 'current' : ''}}">
+      <view class="ob-dot-inner">{{step > index ? '✓' : index + 1}}</view>
+    </view>
+    <view wx:for="{{steps}}" wx:key="key" wx:if="{{index < steps.length - 1}}" class="ob-line {{step > index ? 'done' : ''}}"></view>
+  </view>
+
+  <!-- Step header -->
+  <view class="ob-header">
+    <view class="ob-icon">{{steps[step].icon}}</view>
+    <view class="ob-title">{{steps[step].title}}</view>
+    <view class="ob-sub">{{steps[step].subtitle}}</view>
+    <view class="ob-required">* 所有字段均为必填</view>
+  </view>
+
+  <!-- Step 1: Basics -->
+  <view wx:if="{{step === 0}}" class="ob-body">
+    <view class="form-group">
+      <view class="form-label">年龄 <text class="req">*</text></view>
+      <input class="ob-input" type="number" placeholder="请输入年龄 (12-100)" value="{{age}}" bindinput="setAge"/>
+    </view>
+    <view class="form-group">
+      <view class="form-label">性别 <text class="req">*</text></view>
+      <view class="ob-chip-row">
+        <view class="ob-chip {{gender==='男'?'on':''}}" data-v="男" bindtap="setGender">👨 男</view>
+        <view class="ob-chip {{gender==='女'?'on':''}}" data-v="女" bindtap="setGender">👩 女</view>
+        <view class="ob-chip {{gender==='其他'?'on':''}}" data-v="其他" bindtap="setGender">🌈 其他</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Step 2: Goals -->
+  <view wx:if="{{step === 1}}" class="ob-body">
+    <view class="form-group">
+      <view class="form-label">目标睡眠时长：{{sleepGoalHours}} 小时 <text class="req">*</text></view>
+      <slider min="5" max="10" step="0.5" value="{{sleepGoalHours}}" bindchange="setGoalHours" show-value block-size="22" activeColor="#8b9cf7"/>
+    </view>
+    <view class="ob-row">
+      <view class="form-group" style="flex:1">
+        <view class="form-label">🌙 入睡时间 <text class="req">*</text></view>
+        <picker mode="time" value="{{bedtimeTarget}}" bindchange="setBedtime">
+          <view class="ob-input ob-picker">{{bedtimeTarget}}</view>
+        </picker>
+      </view>
+      <view class="form-group" style="flex:1;margin-left:16rpx">
+        <view class="form-label">☀️ 起床时间 <text class="req">*</text></view>
+        <picker mode="time" value="{{wakeupTarget}}" bindchange="setWakeup">
+          <view class="ob-input ob-picker">{{wakeupTarget}}</view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <!-- Step 3: Issues (foldable + required duration) -->
+  <view wx:if="{{step === 2}}" class="ob-body">
+    <view class="form-label">睡眠问题 <text class="req">*</text>（至少选1项）</view>
+    <view class="ob-fold {{issuesOpen?'open':''}}">
+      <view class="ob-fold-hd" bindtap="toggleIssuesOpen">
+        <text class="ob-fold-label">{{issuesLabel}}</text>
+        <text class="ob-fold-arrow">{{issuesOpen?'▲':'▼'}}</text>
+      </view>
+      <view class="ob-fold-bd" wx:if="{{issuesOpen}}">
+        <view wx:for="{{issueOptionsRich}}" wx:key="name" class="ob-fold-chip {{item.checked?'on':''}}" data-v="{{item.name}}" bindtap="toggleIssue">{{item.name}}</view>
+      </view>
+    </view>
+    <view class="form-group" style="margin-top:28rpx">
+      <view class="form-label">问题持续多久了？ <text class="req">*</text></view>
+      <view class="ob-chip-row">
+        <view class="ob-chip {{sleepIssueDuration==='少于1周'?'on':''}}" data-v="少于1周" bindtap="setIssueDuration">少于1周</view>
+        <view class="ob-chip {{sleepIssueDuration==='1-4周'?'on':''}}" data-v="1-4周" bindtap="setIssueDuration">1-4周</view>
+        <view class="ob-chip {{sleepIssueDuration==='1-6个月'?'on':''}}" data-v="1-6个月" bindtap="setIssueDuration">1-6个月</view>
+        <view class="ob-chip {{sleepIssueDuration==='6个月以上'?'on':''}}" data-v="6个月以上" bindtap="setIssueDuration">6个月以上</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Step 4: Habits -->
+  <view wx:if="{{step === 3}}" class="ob-body">
+    <view class="form-group">
+      <view class="form-label">☕ 咖啡因摄入 <text class="req">*</text></view>
+      <view class="ob-chip-row">
+        <view class="ob-chip {{caffeineIntake==='不喝'?'on':''}}" data-v="不喝" bindtap="setCaffeine">不喝</view>
+        <view class="ob-chip {{caffeineIntake==='偶尔'?'on':''}}" data-v="偶尔" bindtap="setCaffeine">偶尔</view>
+        <view class="ob-chip {{caffeineIntake==='每天1-2杯'?'on':''}}" data-v="每天1-2杯" bindtap="setCaffeine">每天1-2杯</view>
+        <view class="ob-chip {{caffeineIntake==='每天3杯以上'?'on':''}}" data-v="每天3杯以上" bindtap="setCaffeine">每天3杯以上</view>
+      </view>
+    </view>
+    <view class="form-group">
+      <view class="form-label">🏃 运动频率 <text class="req">*</text></view>
+      <view class="ob-chip-row">
+        <view class="ob-chip {{exerciseFrequency==='几乎不运动'?'on':''}}" data-v="几乎不运动" bindtap="setExercise">几乎不运动</view>
+        <view class="ob-chip {{exerciseFrequency==='每周1-2次'?'on':''}}" data-v="每周1-2次" bindtap="setExercise">每周1-2次</view>
+        <view class="ob-chip {{exerciseFrequency==='每周3-5次'?'on':''}}" data-v="每周3-5次" bindtap="setExercise">每周3-5次</view>
+        <view class="ob-chip {{exerciseFrequency==='每天运动'?'on':''}}" data-v="每天运动" bindtap="setExercise">每天运动</view>
+      </view>
+    </view>
+    <view class="form-group">
+      <view class="form-label">😰 压力水平 <text class="req">*</text></view>
+      <view class="ob-chip-row">
+        <view class="ob-chip {{stressLevel==='低'?'on':''}}" data-v="低" bindtap="setStress">😌 低</view>
+        <view class="ob-chip {{stressLevel==='中'?'on':''}}" data-v="中" bindtap="setStress">😐 中</view>
+        <view class="ob-chip {{stressLevel==='高'?'on':''}}" data-v="高" bindtap="setStress">😰 高</view>
+        <view class="ob-chip {{stressLevel==='极高'?'on':''}}" data-v="极高" bindtap="setStress">😵 极高</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Step 5: Priority (foldable + required goal) -->
+  <view wx:if="{{step === 4}}" class="ob-body">
+    <view class="form-label">改善方向 <text class="req">*</text>（至少选1项，最多3项）</view>
+    <view class="ob-fold {{priorsOpen?'open':''}}">
+      <view class="ob-fold-hd" bindtap="togglePriorsOpen">
+        <text class="ob-fold-label">{{priorsLabel}}</text>
+        <text class="ob-fold-arrow">{{priorsOpen?'▲':'▼'}}</text>
+      </view>
+      <view class="ob-fold-bd" wx:if="{{priorsOpen}}">
+        <view wx:for="{{priorityOptionsRich}}" wx:key="name" class="ob-fold-chip {{item.checked?'on':''}}" data-v="{{item.name}}" bindtap="togglePriority">{{item.icon}} {{item.name}}</view>
+      </view>
+    </view>
+    <view class="form-group" style="margin-top:28rpx">
+      <view class="form-label">主要目标 <text class="req">*</text></view>
+      <textarea class="ob-textarea" placeholder="描述你的睡眠改善目标，例如：希望每晚11点前入睡，一觉睡到天亮..." value="{{primaryGoal}}" bindinput="setPrimaryGoal" maxlength="200"/>
+      <view style="font-size:20rpx;color:var(--tx3);margin-top:8rpx">{{primaryGoal.length||0}}/200</view>
+    </view>
+  </view>
+
+  <!-- Error -->
+  <view wx:if="{{errMsg}}" class="ob-err">⚠️ {{errMsg}}</view>
+
+  <!-- Bottom -->
+  <view class="ob-bottom">
+    <view class="ob-bottom-left">
+      <view wx:if="{{step > 0}}" class="ob-btn-back" bindtap="prevStep">← 上一步</view>
+    </view>
+    <view class="ob-btn-next" bindtap="nextStep">
+      {{step === 4 ? (submitting ? '保存中...' : '✓ 完成设置') : '下一步 →'}}
+    </view>
+  </view>
+</view>

@@ -1,0 +1,23 @@
+.cat-bar { display: flex; white-space: nowrap; padding: 8rpx 0; margin-bottom: 24rpx; }
+.article-card { margin-bottom: 16rpx; }
+.article-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8rpx; }
+.article-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12rpx; margin-bottom: 12rpx; }
+.article-bookmark { font-size: 22rpx; color: var(--tx3); padding: 6rpx 14rpx; border-radius: 14rpx; background: rgba(255,255,255,.04); white-space: nowrap; }
+.article-bookmark.bmed { color: #F39C12; background: rgba(243,156,18,.1); }
+.article-title { font-size: 30rpx; font-weight: 600; margin-bottom: 8rpx; flex: 1; }
+.article-summary { font-size: 26rpx; color: var(--tx3); margin-bottom: 12rpx; }
+.article-meta { display: flex; align-items: center; gap: 8rpx; flex-wrap: wrap; }
+.article-content { font-size: 28rpx; line-height: 1.8; white-space: pre-line; margin-top: 16rpx; padding-top: 16rpx; border-top: 1rpx solid var(--bd); }
+.article-tags { display: flex; gap: 8rpx; margin-top: 16rpx; flex-wrap: wrap; }
+.tag { font-size: 22rpx; color: var(--tx3); background: var(--hover); padding: 4rpx 16rpx; border-radius: 16rpx; }
+.bm-icon { font-size: 24rpx; padding: 4rpx; }
+.bm-icon.bmed { color: #F39C12; }
+.search-bar { display: flex; gap: 10rpx; margin-bottom: 20rpx; }
+.search-input { flex: 1; padding: 14rpx 18rpx; background: var(--bg2); border: 1rpx solid var(--bd); border-radius: 24rpx; font-size: 26rpx; color: #fff; }
+.search-btn { padding: 14rpx 24rpx; background: var(--primary); color: #fff; border-radius: 24rpx; font-size: 24rpx; }
+.search-hint { font-size: 24rpx; color: var(--tx3); margin-bottom: 12rpx; }
+.section-title { font-size: 26rpx; font-weight: 700; color: #fff; margin-bottom: 10rpx; }
+.related-item { display: flex; justify-content: space-between; align-items: center; padding: 12rpx 0; border-bottom: 1rpx solid rgba(255,255,255,.03); font-size: 24rpx; color: var(--tx2); }
+.related-cat { font-size: 20rpx; color: var(--tx3); }
+.history-item { padding: 10rpx 0; border-bottom: 1rpx solid rgba(255,255,255,.03); font-size: 24rpx; color: var(--tx2); }
+.empty-state { text-align: center; color: var(--tx3); padding: 40rpx; }

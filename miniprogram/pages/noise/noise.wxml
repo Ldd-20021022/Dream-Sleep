@@ -1,0 +1,60 @@
+<view class="container">
+  <view class="page-title">🎵 白噪音</view>
+
+  <!-- Presets -->
+  <view class="preset-bar">
+    <view class="preset-toggle" bindtap="togglePresets">{{showPresets ? '收起预设' : '📋 预设场景'}}</view>
+    <view wx:if="{{timerActive}}" class="timer-badge">⏱ {{timerMin}}分钟</view>
+  </view>
+
+  <view wx:if="{{showPresets}}" class="preset-grid">
+    <view wx:for="{{presets}}" wx:key="id" class="preset-card" data-id="{{item.id}}" bindtap="loadPreset">
+      <view class="preset-name">{{item.name}}</view>
+      <view class="preset-desc">{{item.description}}</view>
+    </view>
+  </view>
+
+  <!-- Sound Channels -->
+  <view class="sound-grid">
+    <view wx:for="{{sounds}}" wx:key="id" class="sound-card {{item.active ? 'active' : ''}}" style="border-color:{{item.active ? item.color : 'var(--bd)'}}">
+      <view class="sound-header">
+        <view class="sound-icon" style="background:{{item.active ? item.color : 'rgba(255,255,255,.06)'}}">{{item.icon}}</view>
+        <view class="sound-info">
+          <view class="sound-name">{{item.name}}</view>
+          <view class="sound-status">{{item.active ? '播放中...' : '已停止'}}</view>
+        </view>
+        <view class="sound-toggle {{item.active ? 'on' : ''}}" data-id="{{item.id}}" bindtap="toggleSound">
+          {{item.active ? '⏸' : '▶️'}}
+        </view>
+      </view>
+      <view wx:if="{{item.active}}" class="sound-vol">
+        <text class="vol-icon">🔈</text>
+        <slider min="0" max="100" value="{{item.vol}}" data-id="{{item.id}}" bindchange="onSoundVolChange" activeColor="{{item.color}}" block-size="14" style="flex:1;margin:0 12rpx"/>
+        <text class="vol-icon">🔊</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Master Controls -->
+  <view class="master-card">
+    <view class="ctrl-row">
+      <view class="ctrl-label">主音量</view>
+      <slider min="0" max="100" value="{{masterVol}}" bindchange="onMasterVolChange" activeColor="#6C63FF" block-size="18" style="flex:1;margin:0 16rpx"/>
+      <view class="ctrl-val">{{masterVol}}</view>
+    </view>
+    <view class="ctrl-row" style="margin-top:20rpx">
+      <view class="ctrl-label">定时关闭</view>
+      <picker mode="selector" range="{{[15,30,60,90,0]}}" bindchange="onTimerChange">
+        <view class="timer-picker">{{timerMin === 0 ? '不限时' : timerMin + '分钟'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- Action Buttons -->
+  <view class="action-row">
+    <button wx:if="{{playing}}" class="btn-stop" bindtap="stopAll">⏹ 全部停止</button>
+    <button class="btn-timer {{timerActive ? 'active' : ''}}" bindtap="toggleTimer">
+      {{timerActive ? '取消定时' : '⏱ 定时' + timerMin + '分钟'}}
+    </button>
+  </view>
+</view>

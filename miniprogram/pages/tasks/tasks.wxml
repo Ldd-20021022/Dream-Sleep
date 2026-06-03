@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="page-title">每日任务</view>
+  <view wx:if="{{goalTags.length>0}}" style="display:flex;gap:8rpx;flex-wrap:wrap;margin-bottom:20rpx;align-items:center">
+    <text style="font-size:22rpx;color:var(--tx3)">🎯 今日任务已为你定制：</text>
+    <text wx:for="{{goalTags}}" wx:key="*this" class="badge">{{item}}</text>
+  </view>
+
+  <!-- Streak Fire Dots -->
+  <view class="card streak-card" wx:if="{{!loading}}">
+    <view class="streak-label">本周连续打卡</view>
+    <view class="streak-dots">
+      <view wx:for="{{streakWeek}}" wx:key="index" class="streak-dot {{item ? 'on' : 'off'}}">
+        <text wx:if="{{item}}">🔥</text>
+        <text wx:else>·</text>
+      </view>
+    </view>
+    <view class="streak-sub">
+      {{streakCount}}/7 天
+      <text wx:if="{{streakCount >= 7}}"> 🎉 满勤！</text>
+    </view>
+  </view>
+
+  <!-- Progress Bar -->
+  <view class="card prog-card" wx:if="{{!loading && groups.length > 0}}">
+    <view class="prog-bar">
+      <view class="prog-fill" style="width:{{progressPct}}%"></view>
+    </view>
+    <view class="prog-info">
+      <text>{{doneCount}}/{{totalCount}} 已完成</text>
+      <text>🏆 {{points}} 积分</text>
+    </view>
+  </view>
+
+  <!-- Empty state -->
+  <view wx:if="{{groups.length===0 && !loading}}" class="card">
+    <view class="empty-state">暂无今日任务，请完善健康档案获取个性化推荐</view>
+  </view>
+
+  <!-- Time-grouped Task Sections -->
+  <view wx:for="{{groups}}" wx:key="key" class="task-group">
+    <view class="group-header">{{item.label}}</view>
+    <view wx:for="{{item.tasks}}" wx:key="id" wx:for-item="t" class="card task-card {{t.done ? 'done' : ''}} {{animTaskId === t.id ? 'anim-pop' : ''}}">
+      <view class="task-row">
+        <view class="task-chk {{t.done ? 'checked' : ''}}" data-id="{{t.id}}" data-group="{{item.key}}" bindtap="toggleTask">
+          <text wx:if="{{t.done}}">✓</text>
+        </view>
+        <view class="task-body">
+          <view class="task-title">{{t.title}}</view>
+          <view class="task-desc">{{t.desc}}</view>
+          <text class="badge">{{t.category}}</text>
+        </view>
+        <view class="task-pts-done" wx:if="{{t.done}}">✓</view>
+        <view class="task-pts" wx:else>
+          <text>+{{t.points}}分</text>
+          <view wx:if="{{animTaskId === t.id}}" class="xp-float">+{{animXP}}XP</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Badges Section -->
+  <view class="card" wx:if="{{badges.length>0}}">
+    <view class="section-title">成就徽章</view>
+    <view class="badge-grid">
+      <view wx:for="{{badges}}" wx:key="badge_id" class="badge-item {{item.unlocked ? 'on' : ''}}">
+        <view class="badge-icon">{{item.icon}}</view>
+        <view class="badge-name">{{item.unlocked ? item.name : '??'}}</view>
+        <view wx:if="{{item.unlocked}}" class="badge-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- Badge Celebration Overlay -->
+<view wx:if="{{showBadgeCelebration && newBadge}}" class="celebration-overlay" bindtap="dismissCelebration">
+  <view class="celebration-card">
+    <view class="celebration-confetti">🎉✨🎊✨🎉</view>
+    <view class="celebration-icon">{{newBadge.icon}}</view>
+    <view class="celebration-title">🏅 新徽章解锁！</view>
+    <view class="celebration-name">{{newBadge.name}}</view>
+    <view class="celebration-desc">{{newBadge.desc}}</view>
+    <view class="celebration-btn">点击继续 →</view>
+  </view>
+</view>

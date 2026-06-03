@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Environment — never commit real secrets
+.env
+*.env.local
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite3
+*.db
+
+# SSL certificates (sensitive)
+ssl/*.pem
+ssl/*.key
+
+# Logs
+*.log
+
+# Docker
+# (keep docker-compose files, ignore volumes)

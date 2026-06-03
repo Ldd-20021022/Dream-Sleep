@@ -1,0 +1,94 @@
+/* Dream Login Page */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a0a1a 0%, #0f1028 30%, #141535 60%, #0d1025 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stars */
+.login-stars { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+.star { position: absolute; width: 4rpx; height: 4rpx; background: rgba(200,210,255,0.5); border-radius: 50%; animation: starPulse 3s ease-in-out infinite; }
+.star:nth-child(3n) { width: 3rpx; height: 3rpx; opacity: 0.6; animation-duration: 4s; }
+.star:nth-child(5n+2) { width: 5rpx; height: 5rpx; opacity: 0.8; animation-duration: 2.5s; }
+@keyframes starPulse { 0%,100%{opacity:0.2} 50%{opacity:0.9} }
+
+/* Body */
+.login-body { position: relative; z-index: 1; width: 100%; max-width: 600rpx; }
+
+/* Dream Scene */
+.dream-scene-login { text-align: center; margin-bottom: 80rpx; }
+.moon-glow {
+  width: 320rpx; height: 320rpx;
+  background: radial-gradient(circle, rgba(139,156,247,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  position: absolute; left: 50%; top: 20rpx; transform: translateX(-50%);
+}
+.moon-icon { font-size: 140rpx; display: block; margin-bottom: 24rpx; position: relative; filter: drop-shadow(0 0 40rpx rgba(139,156,247,0.3)); }
+.dream-text { position: relative; }
+.app-name { font-size: 64rpx; font-weight: 800; letter-spacing: 16rpx; color: #fff; margin-bottom: 12rpx; }
+.app-desc { font-size: 28rpx; color: rgba(255,255,255,0.4); letter-spacing: 8rpx; font-weight: 300; }
+
+/* Returning */
+.returning-bar { display: flex; align-items: center; justify-content: center; gap: 16rpx; padding: 32rpx; }
+.returning-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: var(--primary); animation: starPulse 1s ease-in-out infinite; }
+.returning-bar text { font-size: 28rpx; color: var(--tx3); }
+
+/* Actions */
+.login-actions { width: 100%; }
+
+/* WeChat Button */
+.btn-wx {
+  width: 100%; height: 100rpx;
+  background: linear-gradient(135deg, #07C160, #06AD56);
+  color: #fff; font-size: 32rpx; font-weight: 600;
+  border-radius: 50rpx; border: none;
+  display: flex; align-items: center; justify-content: center; gap: 16rpx;
+  box-shadow: 0 8rpx 30rpx rgba(7,193,96,0.3);
+  transition: all 0.2s;
+}
+.btn-wx:active { transform: scale(0.97); opacity: 0.9; }
+.btn-wx-icon { font-size: 36rpx; }
+
+/* Divider */
+.divider-row { display: flex; align-items: center; gap: 20rpx; margin: 40rpx 0; }
+.divider-line { flex: 1; height: 2rpx; background: rgba(255,255,255,0.08); }
+.divider-text { font-size: 22rpx; color: rgba(255,255,255,0.25); flex-shrink: 0; }
+
+/* Legacy */
+.legacy-link { text-align: center; padding: 16rpx; }
+.legacy-link text { font-size: 24rpx; color: rgba(255,255,255,0.35); }
+
+.legacy-card {
+  background: rgba(255,255,255,0.04);
+  border-radius: 24rpx; padding: 32rpx;
+  border: 1rpx solid rgba(255,255,255,0.06);
+}
+.legacy-input {
+  width: 100%; height: 80rpx;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16rpx; padding: 0 24rpx;
+  font-size: 28rpx; color: #fff;
+  margin-bottom: 16rpx; box-sizing: border-box;
+}
+.legacy-input:focus { background: rgba(255,255,255,0.08); }
+.legacy-err { color: #f06070; font-size: 24rpx; padding: 12rpx 16rpx; background: rgba(240,96,112,0.1); border-radius: 12rpx; margin-bottom: 16rpx; }
+.btn-legacy {
+  width: 100%; height: 84rpx;
+  background: linear-gradient(135deg, var(--primary), #7a8ae0);
+  color: #fff; font-size: 30rpx; font-weight: 600;
+  border-radius: 42rpx; border: none;
+  box-shadow: 0 6rpx 24rpx rgba(139,156,247,0.25);
+  margin-top: 8rpx;
+}
+.btn-legacy:active { opacity: 0.85; }
+.legacy-back { text-align: center; padding: 24rpx 0 0; font-size: 24rpx; color: rgba(255,255,255,0.3); }
+
+/* Footer */
+.login-footer { text-align: center; margin-top: 48rpx; }
+.login-footer text { font-size: 20rpx; color: rgba(255,255,255,0.2); }

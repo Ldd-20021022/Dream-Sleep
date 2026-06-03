@@ -1,0 +1,33 @@
+.container { padding: 24rpx; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+.page-title { font-size: 36rpx; font-weight: 600; color: #fff; margin-bottom: 24rpx; }
+
+/* Start Screen */
+.start-card { text-align: center; padding: 60rpx 32rpx; }
+.start-icon { font-size: 100rpx; margin-bottom: 16rpx; animation: bounce 1.2s ease-in-out infinite; }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16rpx); } }
+.start-title { font-size: 36rpx; font-weight: 700; color: #fff; margin-bottom: 12rpx; }
+.start-desc { font-size: 24rpx; color: var(--tx2); line-height: 1.6; white-space: pre-line; margin-bottom: 8rpx; }
+.start-hs { font-size: 22rpx; color: var(--warn); }
+
+/* Game Screen */
+.game-screen { width: 100%; display: flex; flex-direction: column; flex: 1; }
+.game-hud { display: flex; justify-content: space-between; font-size: 28rpx; font-weight: 600; color: #fff; margin-bottom: 16rpx; padding: 0 8rpx; }
+.game-track { position: relative; flex: 1; background: rgba(255,255,255,.02); border-radius: 16rpx; overflow: hidden; min-height: 500rpx; margin-bottom: 16rpx; }
+.player { position: absolute; bottom: 12%; font-size: 52rpx; transition: left 0.15s ease; transform: translateX(-50%); z-index: 10; }
+.obstacle { position: absolute; font-size: 44rpx; transform: translateX(-50%); transition: top 0.15s linear; z-index: 5; }
+
+.game-controls { display: flex; gap: 12rpx; padding: 12rpx 0; }
+.ctrl-btn { flex: 1; padding: 32rpx; text-align: center; background: var(--card-bg); border-radius: 16rpx; font-size: 40rpx; color: #fff; user-select: none; -webkit-user-select: none; }
+.ctrl-btn:active { background: var(--primary-soft); }
+
+/* Result */
+.result-card { text-align: center; padding: 60rpx 32rpx; }
+.result-icon { font-size: 80rpx; margin-bottom: 12rpx; }
+.result-score { font-size: 72rpx; font-weight: 800; color: var(--warn); }
+.result-label { font-size: 24rpx; color: var(--tx3); margin-top: 4rpx; }
+.result-hs { font-size: 22rpx; color: var(--tx3); margin-top: 16rpx; }
+
+/* Buttons */
+.btn { display: block; margin: 0 auto; text-align: center; padding: 22rpx 48rpx; border-radius: 20rpx; font-size: 28rpx; font-weight: 600; border: none; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn:active { opacity: 0.8; }
